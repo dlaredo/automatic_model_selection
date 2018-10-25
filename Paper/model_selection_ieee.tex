@@ -510,13 +510,13 @@ In this section we introduce and formally describe the model selection problem, 
 
 \subsection{Model selection}
 
-Given a set of learning algorithms $\mathcal{A}$ and a limited amount of training data $\mathcal{D} = \{ (\mathbf{x_1}, \mathbf{y_1}, \ldots \mathbf{x_n}, \mathbf{y_n}) \}$, the goal of model selection is to determine the algorithm $A^* \in \mathcal{A}$ with optimal generalization performance. Generalization performance is estimated by splitting $\mathcal{D}$ into disjoint training and validation sets $\mathcal{D}^{i}_{t}$ and $\mathcal{D}^{i}_{v}$, learning functions $f_i$ by applying $A^*$ to $\mathcal{D}^{i}_{t}$, and evaluating the predictive performance of these functions $\mathcal{D}^{i}_{v}$. This allows for the model selection to be written as:
+Given a set of learning algorithms $\mathcal{A}$ and a limited amount of training data $\mathcal{D} = \{ (\mathbf{x_1}, \mathbf{y_1}, \ldots \mathbf{x_n}, \mathbf{y_n}) \}$, the goal of model selection is to determine the algorithm $A^* \in \mathcal{A}$ with optimal generalization performance. Generalization performance is estimated by splitting $\mathcal{D}$ into disjoint training and validation sets $\mathcal{D}_{t}$ and $\mathcal{D}_{v}$ respectively, learning function $f$ by applying $A^*$ to $\mathcal{D}_{t}$, and evaluating the predictive performance of this function on $\mathcal{D}_{v}$. Using $k$-fold validation, which splits the data into $k$ equal sized partitions $ \mathcal{D}^{1}_{v}, \ldots,  \mathcal{D}^{k}_{v}$ and sets $ \mathcal{D}^{i}_{t} =  D \backslash D^{i}_{v}$ for $i = 1, \ldots, k$ the model selection problem is written as:
 
 \begin{equation}
 A^* \in \underset{A \in \mathcal{A}}{\operatorname{argmin}} \frac{1}{k} \sum_{i=1}^{k} \mathcal{L} \left( A, \mathcal{D}^{i}_{t},  \mathcal{D}^{i}_{v} \right),
 \end{equation}
 
-where $ \mathcal{L} \left( A, \mathcal{D}^{i}_{t},  \mathcal{D}^{i}_{v} \right) $ is the loss achieved by $A$ when trained on $\mathcal{D}^{i}_{t}$ and evaluated on $\mathcal{D}^{i}_{v}$. We use $k$-fold validation, which splits the training data into $k$ equal sized partitions $ \mathcal{D}^{1}_{v}, \ldots,  \mathcal{D}^{k}_{v}$ and sets $ \mathcal{D}^{i}_{t} =  D \backslash D^{i}_{v}$ for $i = 1, \ldots, k$
+where $ \mathcal{L} \left( A, \mathcal{D}^{i}_{t},  \mathcal{D}^{i}_{v} \right) $ is the loss achieved by $A$ when trained on $\mathcal{D}^{i}_{t}$ and evaluated on $\mathcal{D}^{i}_{v}$. 
 
 \subsection{Hyperparameter optimization}
 
@@ -576,6 +576,28 @@ We say that a neural network architecture is \textit{valid} if it complies with 
 \item The last layer is always a fully connected layer with either a softmax activation function for classification or a linear activation function for regression problems
 \end{itemize}
 
+\subsection{The fitness function}
+
+In order to steer the search in the most promising search directions, a carefully designed fitness function is required. The framework's goals are to generate a neural network architecture with good predictive power for the class of problem at hand while keeping the complexity of the network as low as possible. Measuring the predictive power of the network is straightforward; having a valid neural network we can assess its predictive power by training it on the set $\mathcal{D}_{t}$ and then evaluating the predictions using the set $\mathcal{D}_{v}$. A more robust approach would be performing a $k$-fold cross-validation which splits the data into $k$ equal sized partitions $ \mathcal{D}^{1}_{v}, \ldots,  \mathcal{D}^{k}_{v}$ and sets $ \mathcal{D}^{i}_{t} =  D \backslash D^{i}_{v}$ for $i = 1, \ldots, k$.
+
+Let $A \in \mathcal{A}$ be a certain neural network architecture trained on set $\mathcal{D}_{t}$, let also $\mathcal{P}_{A}(\mathcal{D}_{v})$ represent the performance of the neural network $A$ when tested using validation set $\mathcal{D}_{v}$ and the user-defined performance indicator $p$, where $p$ is usually any of the metrics listed in Table \ref{table:performance_metrics} . Using $k$-fold cross-validation the average performance of the algorithm can be written as
+
+\begin{equation}
+p = \frac{1}{k} \sum_{i=1}^{k}  \mathcal{P}_{A}(\mathcal{D}^{i}_{v})
+\label{eq:performance_crossval}
+\end{equation}
+
+For measuring the complexity of the architecture we consider the number of trainable weights $w$ of the neural network which is a good indicator of how complex the architecture is.
+
+Using $p$ and $w$ we propose the following fitness function
+
+\begin{equation}
+f = p + \lambda w, 
+\label{eq:fitness_function}
+\end{equation}
+
+where $\lambda \in [0,1]$ is a scaling factor that indicates how much does the number of trainable weights $w$ affects the overall fitness of the neural network. By setting $\lambda = 1$ the preference is given to very compact architectures, while $\lambda = 0$ will only care about architectures that find the best possible value for $p$ regardless of their complexity.
+
 \subsection{Evolutionary algorithms}
 
 The main part of the framework consists of an evolutionary algorithm, evolutionary algorithms (EAs) are a family of methods for optimization problems. The methods do not make any assumptions about the problem, treating it as a black box that merely provides a measure of quality given a candidate solution. Furthermore, EAs do not require the gradient when searching for optimal solutions, making them very suitable for applications such as neural networks.
@@ -627,6 +649,14 @@ type & number & function & filter size & kernel size & stride\\
 \end{table}
 
 Encoding the neural network as a list of arrays presents two big advantages over other representations. First, the number of layers that can be stacked is in principle arbitrary. Second, the validity of an architecture can be verified, in constant time, every time a new layer is to be stacked to the model, this is due to the fact that in order to stack a layer in between the model one just needs to verify the previous layer and the layer ahead to check for compatibility.
+
+\subsection{The evolutionary operators}
+
+Since the encoding chosen for this task is rather peculiar, no specific operators exist for it. Instead of trying to create new operators for this task we take common evolutionary operators and adapt them to our encoding, in the following we describe the operators and their adaptations.
+
+\subsubsection{Mutation operator}
+
+\subsubsection{Crossover operator}
 
 
 \begin{comment}
@@ -707,6 +737,23 @@ The authors would like to thank...
 
 
 \onecolumn%
+\begin{table}[!htb]
+\begin{center}
+\begin{tabular}{| c | c |}
+\hline
+Metric name & Definition\\
+\hline
+Root Mean Squared Error & Regression \\
+Accuracy & Classification \\
+Precision & Classification \\
+Recall & Classification \\
+F1 & Classification \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Common performance metrics for neural networks}
+\label{table:performance_metrics}
+\end{table}
 
 \begin{table}[!htb]
 \begin{center}

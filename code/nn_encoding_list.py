@@ -1,15 +1,20 @@
-from anytree import Node, RenderTree
-from anytree.exporter import DotExporter
 import random
 
 import keras
 import keras.layers
 from keras.models import Sequential, Model
 #from keras.layers import Dense, Input, Dropout, Reshape, Conv2D, Flatten, MaxPooling2D, LSTM
-#from keras.optimizers import Adam, SGD
-#from keras.callbacks import LearningRateScheduler
-#from keras import backend as K
-#from keras import regularizers
+from keras.optimizers import Adam, SGD
+from keras.callbacks import LearningRateScheduler
+from keras import backend as K
+from keras import regularizers
+
+from data_handler_MNIST import MNISTDataHandler
+
+from tunable_model import SequenceTunableModelRegression
+
+import CMAPSAuxFunctions
+from CMAPSAuxFunctions import TrainValTensorBoard
 
 """Layer types
 
@@ -114,6 +119,7 @@ def generate_layer(layer_type):
 
 	return layer
 
+
 def decode_genotype(model_genotype, problem_type, input_shape, output_dim):
 	"""From a model genotype, generate the keras model"""
 
@@ -174,8 +180,9 @@ def decode_genotype(model_genotype, problem_type, input_shape, output_dim):
 				model.add(keras.layers.Flatten())
 
 	#Fetch last layer
+	"""
 	curr_layer = model_genotype[-1]
-	#print(curr_layer)
+	print(curr_layer)
 	klayer = array_to_layer(curr_layer, problem_type=problem_type, output_dim=output_dim, last_layer=True)
 	#print(klayer)
 
@@ -185,7 +192,7 @@ def decode_genotype(model_genotype, problem_type, input_shape, output_dim):
 		print("Model could not be fetched")
 		return None
 
-	model.add(klayer)
+	model.add(klayer)"""
 
 	return model
 
@@ -216,16 +223,6 @@ def array_to_layer(array, problem_type=0, input_shape=(0,), output_dim=0, first_
 		else:
 			print("Layer not valid for the first layer")
 			klayer = None
-
-	elif last_layer == True:
-
-		if problem_type == 1: #Classification
-			klayer = keras.layers.Dense(1, activation='linear', kernel_initializer='glorot_normal', name='out')
-		elif problem_type == 2: #Regression
-			klayer = keras.layers.Dense(output_dim, activation='softmax', kernel_initializer='glorot_normal', name='out')
-		else:
-			print("Layer not valid for the last layer")
-			klayer = None
 	else:
 
 		if array[0] == 1:
@@ -246,24 +243,80 @@ def array_to_layer(array, problem_type=0, input_shape=(0,), output_dim=0, first_
 	return klayer
 
 
+def get_compiled_model(model, problem_type, optimizer_params=[]):
+	"""Obtain a keras compiled model"""
+	
+	#To test the model without randomness
 
-"""Input can be of 3 types, ANN (1), CNN (2) or RNN (3)"""
+	
+	#Shared parameters for the models
+	optimizer = Adam(lr=0, beta_1=0.5)
+	
+	if problem_type == 1:
+		lossFunction = "mean_squared_error"
+		metrics = ["mse"]
+	elif problem_type == 2:
+		lossFunction = "categorical_crossentropy"
+		metrics = ["accuracy"]
+	else:
+		print("Problem type not defined")
+		model = None
+		return 	
+
+	#Create and compile the models
+	model.compile(optimizer = optimizer, loss = lossFunction, metrics = metrics)
+
+	return model
+
+
+def partial_run(model, problem_type, data_handler, cross_validation_ratio, run_number):
+	"""This should be run in Ray"""
+
+	lrate = LearningRateScheduler(CMAPSAuxFunctions.step_decay)
+
+	"""How to keep the data in a way such that it doesnt create too much overhead"""
+	model = get_compiled_model(model, problem_type, optimizer_params=[])
+	tModel = SequenceTunableModelRegression('ModelMNIST_SN_'+str(run_number), model, lib_type='keras', data_handler=data_handler)
+	tModel.load_data(verbose=1, cross_validation_ratio=0.2)
+	tModel.print_data()
+
+	tModel.epochs = 20
+	tModel.train_model(learningRate_scheduler=lrate, verbose=1)
+
+	tModel.evaluate_model(cross_validation=True)
+
+	cScores = tModel.scores
+	print(cScores)
+
+	tModel.evaluate_model(cross_validation=False)
+
+	cScores = tModel.scores
+	print(cScores)
+
+
+
 def main():
+	"""Input can be of 3 types, ANN (1), CNN (2) or RNN (3)"""
 
 	architecture_type = 1
-	problem_type = 1  #1 for regression, 2 for classification
-	number_classes = 8 #If regression applies, number of classes
+	problem_type = 2  #1 for regression, 2 for classification
+	number_classes = 10 #If regression applies, number of classes
+	input_shape = (784,)
+	cross_val = 0.2
 
-	model, success = generate_model(more_layers_prob=0.9, prev_component=architecture_type)
+
+	K.clear_session()  #Clear the previous tensorflow graph
+
+	model, success = generate_model(more_layers_prob=0.5, prev_component=architecture_type)
 
 	#Generate first layer
 	layer_first = generate_layer(architecture_type)
 
 	#Last layer is always FC
 	if problem_type == 1:
-		layer_last = [1, 1, 3, 0, 0, 0, 0, 0]
+		layer_last = [1, 1, 4, 0, 0, 0, 0, 0]
 	else:
-		layer_last = [1, number_classes, 4, 0, 0, 0, 0, 0]
+		layer_last = [1, number_classes, 3, 0, 0, 0, 0, 0]
 
 	#print(model)
 
@@ -271,10 +324,15 @@ def main():
 	model_full = [layer_first] + model
 
 	print(model_full)
-	model = decode_genotype(model_full, problem_type, (16,), 1)
+	model = decode_genotype(model_full, problem_type, input_shape, 1)
 
 	if model != None:
 		model.summary()
+
+
+	#Test using mnist
+	dHandler_mnist = MNISTDataHandler()
+	partial_run(model, problem_type, dHandler_mnist, cross_val, 1)
 
 
 

@@ -1,4 +1,5 @@
 import random
+import CMAPSAuxFunctions
 
 import keras
 import keras.layers
@@ -9,7 +10,38 @@ from keras import regularizers
 
 from ann_encoding_rules import Layers, ann_building_rules, activations
 
+from tunable_model import SequenceTunableModelRegression
 
+
+def create_tunable_model(model_genotype, problem_type, input_shape, data_handler, model_number):
+
+	#K.clear_session()  #Clear the previous tensorflow graph
+	model = decode_genotype(model_genotype, problem_type, input_shape, 1)
+
+	"""
+	if model != None:
+		model.summary()
+	"""
+
+	lrate = LearningRateScheduler(CMAPSAuxFunctions.step_decay)
+
+	model = get_compiled_model(model, problem_type, optimizer_params=[])
+	tModel = SequenceTunableModelRegression('ModelMNIST_SN_'+str(model_number), model, lib_type='keras', data_handler=data_handler)
+
+	return tModel
+
+
+def population_to_keras(population, input_shape, data_handler):
+
+	for i in range(len(population)):
+
+		individual = population[i]
+
+		tModel = create_tunable_model(individual.stringModel, individual.problem_type, input_shape, data_handler, i+1)
+
+		#Create the individual
+		individual.tModel = tModel
+		#individual = Individual(i, problem_type, model_genotype)
 
 
 def decode_genotype(model_genotype, problem_type, input_shape, output_dim):

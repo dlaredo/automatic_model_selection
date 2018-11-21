@@ -242,25 +242,28 @@ def initial_population(pop_size, problem_type, architecture_type, number_classes
 
 def mutation(offsprings, mutation_ratio):
 
+	print("mutation ratio " + str(mutation_ratio))
+
 	for individual in offsprings:
 
 		mutation_probability = random.random()
-		#print("mutation_probability")
-		#print(mutation_probability)
+		print("mutation_probability " + str(mutation_probability))
 		if mutation_probability < mutation_ratio:
 
 			 #pick a layer randomly
 			 len_model = len(individual.stringModel)
 			 random_layer_index = np.random.randint(len_model-1)  #Last layer can not be modified
-			 layer = individual.stringModel[random_layer_index]
-			 #print("Inidividual before mutation")
-			 #print(individual)
-			 #print("layer number")
-			 #print(random_layer_index)
-			 #print(layer)
-			 #print("Inidividual after mutation")
-			 #print(individual)
-			 #print()
+			 print()
+			 print("Inidividual before mutation")
+			 print(individual)
+			 print()
+			 print("layer number " + str(random_layer_index))
+			 print(individual.stringModel[random_layer_index])
+			 print()
+			 individual.stringModel = layer_based_mutation(individual.stringModel, random_layer_index)
+			 print("Inidividual after mutation")
+			 print(individual)
+			 print()
 
 
 def layer_based_mutation(stringModel, layer_index):
@@ -275,30 +278,49 @@ def layer_based_mutation(stringModel, layer_index):
 
 	#Randomly select a characteristic from the layer that effectively affects the layer
 
+	"""
+	print("inside mutation")
+	print(characteristic)
+	print([LayerCharacteristics.NeuronsNumber.value, LayerCharacteristics.ActivationType.value, LayerCharacteristics.DropoutRate.value])
+	print(layer_type)
+	"""
+	#print(characteristic)
+
 	if layer_type == Layers.FullyConnected:
-		characteristic = np.random.sample([LayerCharacteristics.NeuronsNumber, LayerCharacteristics.ActivationType, LayerCharacteristics.DropoutRate])
+		characteristic = random.choice([LayerCharacteristics.NeuronsNumber.value, LayerCharacteristics.ActivationType.value, LayerCharacteristics.DropoutRate.value])
+		#print("after sample")
+		#print(characteristic)
 
 	elif layer_type == Layers.Convolutional:
-		characteristic = np.random.sample([LayerCharacteristics.ActivationType, LayerCharacteristics.FilterSizeCNN, LayerCharacteristics.KernelSizeCNN, 
-			LayerCharacteristics.StrideCNN, LayerCharacteristics.DropoutRate])
+		characteristic = random.choice([LayerCharacteristics.ActivationType.value, LayerCharacteristics.FilterSizeCNN.value, LayerCharacteristics.KernelSizeCNN.value, 
+			LayerCharacteristics.StrideCNN.value, LayerCharacteristics.DropoutRate.value])
 
 	elif layer_type == Layers.Pooling:
-		characteristic = LayerCharacteristics.PoolingSize
+		characteristic = LayerCharacteristics.PoolingSize.value
 
 	elif layer_type == Layers.Recurrent:
-		characteristic = np.random.sample([LayerCharacteristics.NeuronsNumber, LayerCharacteristics.ActivationType, LayerCharacteristics.DropoutRate])
+		characteristic = random.choice([LayerCharacteristics.NeuronsNumber.value, LayerCharacteristics.ActivationType.value, LayerCharacteristics.DropoutRate.value])
 
 	elif layer_type == Layers.Dropout:
-		characteristic = LayerCharacteristics.DropoutRate
+		characteristic = LayerCharacteristics.DropoutRate.value
 
 	else:
 		characteristic = -1
 
-	value = generate_characteristic(layer, characteristic)
+	"""
+	print("choosen characteristic")
+	print(characteristic)
+	characteristic = LayerCharacteristics(characteristic)
+	print(characteristic)
+	"""
+
+	characteristic = LayerCharacteristics(characteristic)
+	value = ann_encoding_rules.generate_characteristic(layer, characteristic)
+	#print("Selected value " + str(value))
 
 	#If valid layer, the generate 
-	if characteristic != -1 and characteristic != LayerCharacteristics.DropoutRate and value != -1:
-		layer[characteristic] = value
+	if characteristic != LayerCharacteristics.DropoutRate and value != -1:
+		layer[characteristic.value] = value
 
 		if characteristic == LayerCharacteristics.ActivationType: #For layer type, rectify entire model with the new activation for layer of type layer_type
 			activation = value
@@ -308,17 +330,25 @@ def layer_based_mutation(stringModel, layer_index):
 		if layer_type != Layers.Dropout:
 
 			if layer_type_next == Layers.Dropout:
-				layer_next[LayerCharacteristics.DropoutRate] = = value
+				layer_next[LayerCharacteristics.DropoutRate.value] = value
 			else:
 				#Insert dropout layer
+				#print("insert dropout layer")
 				stringModelCopy = stringModel[:layer_index+1]
+				#print(stringModelCopy)
 				dropOutLayer = [Layers.Dropout, 0, 0, 0, 0, 0, 0, 0]
-				dropOutLayer[LayerCharacteristics.DropoutRate] = value
+				dropOutLayer[LayerCharacteristics.DropoutRate.value] = value
 				stringModelCopy.append(dropOutLayer)
-				stringModelCopy = stringModelCopy.extend(stringModel[layer_index+1:])
-				
+				#print(stringModelCopy)
+				stringModelCopy.extend(stringModel[layer_index+1:])
+				#print("string model copy")
+				#print(stringModelCopy)
+				stringModel = copy.deepcopy(stringModelCopy)
+				#print(stringModel)
 		else:
-			layer[LayerCharacteristics.DropoutRate] = value
+			layer[LayerCharacteristics.DropoutRate.value] = value
+
+	return stringModel
 
 
 def tournament_selection(subpopulation):
@@ -396,8 +426,10 @@ def population_crossover(parent_pool, max_layers=3):
 		parent1 = parent_pool[index*2]
 		parent2 = parent_pool[index*2+1]
 
+		"""
 		print()
 		print("crossover")
+		"""
 		point11, point12, point21, point22, success = two_point_crossover(parent1, parent2, max_layers)
 
 		print("parents")
@@ -426,13 +458,15 @@ def population_crossover(parent_pool, max_layers=3):
 			#Perform deep copy to avoid cross references
 			offspring_stringModel = copy.deepcopy(offspring_stringModel)
 
-			used_activations = rectify_offspring(offspring_stringModel)
+			used_activations = rectify_activations_offspring(offspring_stringModel)
 
+			"""
 			print("offspring model")
 			print(offspring_stringModel)
 			print()
 			print("used activations")
 			print(used_activations)
+			"""
 
 			offspring = Individual(pop_size+i, problem_type, offspring_stringModel, used_activations)
 			offsprings.append(offspring)
@@ -520,7 +554,7 @@ def two_point_crossover(parent1, parent2, max_layers, max_attempts=5):
 					if j-i < max_layers and j-i >= 0:
 						compatible_substructures.append((i,j)) 
 
-			print(compatible_substructures)
+			#print(compatible_substructures)
 			if compatible_substructures != []:
 
 				k = np.random.randint(len(compatible_substructures))
@@ -548,13 +582,23 @@ def find_match(parent, layer_prev, layer_next, first_layer, max_layers):
 	compatible_previuos = []
 	compatible_next = []
 
+	"""
+	print("Is first layer " + str(first_layer))
+	print("layer")
+	print(layer_prev)
+	"""
+
 	for i in range(len_model-1):  #Dismiss last layer
 
 		layer = stringModel[i]
+		#print(layer)
 
 		#Check forward compatibility
-		if first_layer == True and layer[0] == layer_prev[0]:
-			compatible_previuos.append(i)
+		if first_layer == True: 
+			if layer[0] == layer_prev[0]:
+				#print(layer[0])
+				#print(layer_prev[0])
+				compatible_previuos.append(i)
 		else:
 			compatible_layers = ann_building_rules[layer_prev[0]]
 
@@ -569,10 +613,12 @@ def find_match(parent, layer_prev, layer_next, first_layer, max_layers):
 
 
 	#Randomly select from the compatible layers
-	#print("Compatible with point11 ")
-	#print(compatible_previuos)
-	#print("Compatible with point12 ")
-	#print(compatible_next)
+	"""
+	print("Compatible with point11 ")
+	print(compatible_previuos)
+	print("Compatible with point12 ")
+	print(compatible_next)
+	"""
 
 	return compatible_previuos, compatible_next
 

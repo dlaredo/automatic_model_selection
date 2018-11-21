@@ -1,6 +1,8 @@
 import nn_evolutionary
 import fetch_to_keras
 import random
+import datetime
+import logging
 
 from data_handler_MNIST import MNISTDataHandler
 from tunable_model import SequenceTunableModelRegression
@@ -43,7 +45,7 @@ def partial_run(model_genotype, problem_type, input_shape, data_handler, cross_v
 	print(cScores)
 
 
-def print_parent_pool(parent_pool):
+def print_pop(parent_pool):
 
 	for ind in parent_pool:
 		print(ind)
@@ -58,13 +60,23 @@ def main():
 	number_classes = 10 #If regression applies, number of classes
 	input_shape = (784,)
 	cross_val = 0.2
-	generations = 1
+	generations = 0
 	pop_size = 5
 	tournament_size = 4
 	binary_selection = True
 	mutation_ratio = 0.8
 
+	t = datetime.datetime.now()
+
+	parent_pop = []
 	elite_archive = []
+
+	best_model = nn_evolutionary.Individual(pop_size*2, problem_type, [], [], fitness=10**8)  #Big score for the first comparisson
+	worst_model = nn_evolutionary.Individual(pop_size*2+1, problem_type, [], [], fitness=0)  #Big score for the first comparisson
+	worst_index = 0
+
+	logging.basicConfig(filename='logs/nn_evolution_' + t.strftime('%m%d%Y%H%M%S') + '.log', level=logging.INFO, 
+		format='%(levelname)s:%(threadName)s:%(asctime)s:%(filename)s:%(funcName)s:%(message)s', datefmt='%m/%d/%Y %H:%M:%S')
 
 
 	#Test using mnist
@@ -77,14 +89,17 @@ def main():
 	for i in range(generations):
 		
 		count = 0
+		worst_index = 0
 		parent_pool = []
-		min_score = 10**8 #Big score for the first comparisson
-		best_model = None
+		#min_score = 10**8 #Big score for the first comparisson
 		offsprings = []
 
 		indices = list(range(pop_size))
 
 		fetch_to_keras.population_to_keras(population, input_shape, dHandler_mnist)
+
+		print("Empty best model")
+		print(best_model)
 
 		#Evaluate population
 		for individual in population:
@@ -92,17 +107,46 @@ def main():
 			individual.compute_fitness(size_scaler=1)
 			print(individual)
 
-			if individual.fitness < min_score:
+			#Get generation best
+			if individual.fitness < best_model.fitness:
 				best_model = individual
 
+			#Replace worst with previous best
+			if individual.fitness > worst_model.fitness:
+				worst_model = individual
+				worst_index = count
+
+			count = count+1
+
+
+		print("Generation Best model")
+		print(best_model)
+
+		print("Generation worst model")
+		print(worst_model)
+
+		print_pop(population)
+
+		if i > 0: #At least one generation so to have one best model
+
+			previous_best = elite_archive[-1]
+			if previous_best.fitness < worst_model.fitness:
+				population[worst_index] = previous_best
+				print("Worst replaced")
+
+
+		print_pop(population)
 		elite_archive.append(best_model)
 
 		offsprings_complete = False
+		print("offsprings")
+		print(offsprings)
 
 		#select 2*(n-1) individuals for crossover, elitism implemented
 		offspring_pop_size = 0
 		while pop_size-offspring_pop_size > 0:
 
+			count = 0
 			parents_pool_required = 2*(pop_size-offspring_pop_size)
 
 			while count < parents_pool_required:
@@ -126,7 +170,7 @@ def main():
 					count = len(parent_pool)
 
 			print(len(parent_pool))
-			print_parent_pool(parent_pool)
+			print_pop(parent_pool)
 			#print(parent_pool)
 			offsprings = nn_evolutionary.population_crossover(parent_pool)
 			offspring_pop_size = len(offsprings)
@@ -135,6 +179,16 @@ def main():
 		print()
 		print("mutation")
 		nn_evolutionary.mutation(offsprings, mutation_ratio)
+		print("mutated offsprings")
+		print_pop(offsprings)
+		#print("population")
+		parent_pop = population
+		population = []
+		#print(offsprings)
+		population = offsprings
+		offsprings = []
+		#print(parent_pop)
+		#print(population)
 
 
 

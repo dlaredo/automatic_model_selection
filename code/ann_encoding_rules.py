@@ -63,10 +63,25 @@ activations_by_layer_type = {
 
 }
 
+def rectify_dropout_ratio(dropout_ratio):
+	#Dropout is of the form 0.1, 0.15, 0.2, 0.25, ....
+
+	dropout_ratio1 =(dropout_ratio*100)//10
+	dropout_ratio2 = (dropout_ratio*100)%10
+
+	dropout_ratio2 = 5 if dropout_ratio2 <= 5 else 0
+
+	dropout_ratio = dropout_ratio1/10 + dropout_ratio2/100	
+
+	return dropout_ratio
+
 def generate_characteristic(layer, characteristic):
 	"""Given a desired characteristic, generate a layer that effectively affects the layer"""
 
 	value = -1
+	layer_type = layer[0]
+	print("inside generate_characteristic")
+	print(characteristic)
 
 	if characteristic == LayerCharacteristics.NeuronsNumber:
 		value = 8*random.randint(1, max_filter_size_multiplier) #Generate a random number of neurons which is a multiple of 8 up to 1024 neurons
@@ -87,11 +102,12 @@ def generate_characteristic(layer, characteristic):
 		value = 2**random.randint(1, max_pooling_exponent)
 
 	elif characteristic == LayerCharacteristics.DropoutRate:
-		#Dropout is of the form 0.1, 0.15, 0.2, 0.25, ....
-		dropout_ratio = round(random.uniform(0, max_dropout), 2)
-		dropout_ratio1 =(dropout_ratio*100)/10
-		dropout_ratio2 = (dropout_ratio*100)%10
-		value = dropout_ratio1/10 + dropout_ratio2/100
+		
+		value = random.uniform(0.1, max_dropout)
+		value = round(rectify_dropout_ratio(value),2)
+
+	else:
+		pass
 
 	return value
 
@@ -127,10 +143,10 @@ def generate_layer(layer_type, used_activations={}):
 	layer[6] = 2**random.randint(1, max_pooling_exponent)
 
 	#Dropout is of the form 0.1, 0.15, 0.2, 0.25, ....
-	dropout_ratio = round(random.uniform(0, max_dropout), 2)
-	dropout_ratio1 =(dropout_ratio*100)/10
-	dropout_ratio2 = (dropout_ratio*100)%10
-	layer[7] = dropout_ratio1/10 + dropout_ratio2/100
+	dropout_ratio = random.uniform(0.1, max_dropout)
+	dropout_ratio = round(rectify_dropout_ratio(dropout_ratio),2)
+
+	layer[7] = dropout_ratio
 
 	return layer
 

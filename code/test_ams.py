@@ -45,10 +45,14 @@ def partial_run(model_genotype, problem_type, input_shape, data_handler, cross_v
 	print(cScores)
 
 
-def print_pop(parent_pool):
+def print_pop(parent_pool, logger=False):
 
 	for ind in parent_pool:
-		print(ind)
+		if logger == False:
+			print(ind)
+		else:
+			logging.info(str(ind))
+
 
 
 
@@ -60,7 +64,7 @@ def main():
 	number_classes = 10 #If regression applies, number of classes
 	input_shape = (784,)
 	cross_val = 0.2
-	generations = 0
+	generations = 2
 	pop_size = 5
 	tournament_size = 4
 	binary_selection = True
@@ -76,7 +80,12 @@ def main():
 	worst_index = 0
 
 	logging.basicConfig(filename='logs/nn_evolution_' + t.strftime('%m%d%Y%H%M%S') + '.log', level=logging.INFO, 
-		format='%(levelname)s:%(threadName)s:%(asctime)s:%(filename)s:%(funcName)s:%(message)s', datefmt='%m/%d/%Y %H:%M:%S')
+		format='%(levelname)s:%(threadName)s:%(message)s', datefmt='%m/%d/%Y %H:%M:%S')
+
+	logging.info("Starting model optimization: Problem type {}, Architecture type {}".format(problem_type, architecture_type))
+	logging.info("Parameters:")
+	logging.info("Input shape: {}, Output shape: {}, cross_val ratio: {}, Generations: {}, Population size: {}, Tournament size: {}, Binary selection: {}, Mutation ratio: {}".format(
+		input_shape, number_classes, cross_val, generations, pop_size, tournament_size, binary_selection, mutation_ratio))
 
 
 	#Test using mnist
@@ -91,21 +100,23 @@ def main():
 		count = 0
 		worst_index = 0
 		parent_pool = []
-		#min_score = 10**8 #Big score for the first comparisson
 		offsprings = []
 
 		indices = list(range(pop_size))
 
+		print("\nGeneration " + str(i+1))
+		logging.info("\n\nGeneration " + str(i+1))
+
+		print("Fetching to keras")
 		fetch_to_keras.population_to_keras(population, input_shape, dHandler_mnist)
 
-		print("Empty best model")
-		print(best_model)
+
+		print("Evaluating population")
 
 		#Evaluate population
 		for individual in population:
 			individual.tModel.model.summary()
 			individual.compute_fitness(size_scaler=1)
-			print(individual)
 
 			#Get generation best
 			if individual.fitness < best_model.fitness:
@@ -116,31 +127,34 @@ def main():
 				worst_model = individual
 				worst_index = count
 
+			individual.individual_label = count
+
 			count = count+1
 
 
-		print("Generation Best model")
-		print(best_model)
+		logging.info("\nPopulation at generation " + str(i+1))
+		print_pop(population, logger=True)
 
-		print("Generation worst model")
-		print(worst_model)
+		logging.info("\nGeneration Best model")
+		logging.info(best_model)
 
-		print_pop(population)
+		logging.info("\nGeneration worst model")
+		logging.info(worst_model)
 
 		if i > 0: #At least one generation so to have one best model
 
 			previous_best = elite_archive[-1]
 			if previous_best.fitness < worst_model.fitness:
 				population[worst_index] = previous_best
-				print("Worst replaced")
+				logging.info("\nWorst individual replaced")
+				logging.info("Poulation after replacing worst with best")
+				print_pop(population, logger=True)
 
-
-		print_pop(population)
 		elite_archive.append(best_model)
 
 		offsprings_complete = False
-		print("offsprings")
-		print(offsprings)
+		print("\nGenerating offsprings")
+		logging.info("\n\nCrossover\n\n")
 
 		#select 2*(n-1) individuals for crossover, elitism implemented
 		offspring_pop_size = 0
@@ -149,15 +163,17 @@ def main():
 			count = 0
 			parents_pool_required = 2*(pop_size-offspring_pop_size)
 
-			while count < parents_pool_required:
+			logging.info("\nGetting offpsrings with selection: " + 'binary tournament' if binary_selection == True else 'tournament')
 
-				print("binary selection? " + str(binary_selection))
+			while count < parents_pool_required:
 
 				if binary_selection == True:
 					random.shuffle(indices)
-					print(indices)
 					indices_tournament = indices[:tournament_size]
-					print(indices_tournament)
+
+					logging.info(indices)
+					logging.info(indices_tournament)
+					
 					subpopulation = [population[index] for index in indices_tournament]
 					selected_individuals = nn_evolutionary.binary_tournament_selection(subpopulation)
 					parent_pool.extend(selected_individuals)
@@ -169,26 +185,21 @@ def main():
 					parent_pool.append(selected_individuals)
 					count = len(parent_pool)
 
-			print(len(parent_pool))
-			print_pop(parent_pool)
-			#print(parent_pool)
-			offsprings = nn_evolutionary.population_crossover(parent_pool)
+			logging.info("\nParent pool. Parent number {}\n".format(len(parent_pool)))
+			print_pop(parent_pool, logger=True)
+
+			offsprings = nn_evolutionary.population_crossover(parent_pool, logger=True)
 			offspring_pop_size = len(offsprings)
 
-		print(offsprings)
-		print()
-		print("mutation")
+		print("Applying Mutation")
+		logging.info("\n\nMutation\n\n")
 		nn_evolutionary.mutation(offsprings, mutation_ratio)
-		print("mutated offsprings")
-		print_pop(offsprings)
-		#print("population")
+
 		parent_pop = population
 		population = []
-		#print(offsprings)
+
 		population = offsprings
 		offsprings = []
-		#print(parent_pop)
-		#print(population)
 
 
 

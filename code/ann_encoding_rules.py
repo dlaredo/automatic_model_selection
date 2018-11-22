@@ -80,8 +80,6 @@ def generate_characteristic(layer, characteristic):
 
 	value = -1
 	layer_type = layer[0]
-	print("inside generate_characteristic")
-	print(characteristic)
 
 	if characteristic == LayerCharacteristics.NeuronsNumber:
 		value = 8*random.randint(1, max_filter_size_multiplier) #Generate a random number of neurons which is a multiple of 8 up to 1024 neurons

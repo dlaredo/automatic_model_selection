@@ -1,6 +1,7 @@
 import random
 import math
 import copy
+import logging
 
 import numpy as np
 
@@ -82,16 +83,19 @@ class Individual():
 
 	def __str__(self):
 
-		print()
+		str_repr1 = "\n\nString Model\n" + str(self._stringModel) + "\n"
+		str_repr2 = "<Individual(label = '%s' fitness = '%s', raw_score = '%s', raw_size = '%s)>" % (self._individual_label, self._fitness, self._raw_score, self._raw_size)
 
 		#self._tModel.model.summary()
-		print("String model")
-		print(self._stringModel)
+		#print("String model")
+		#print(self._stringModel)
 
-		print("Used activations")
-		print(self._used_activations)
+		#print("Used activations")
+		#print(self._used_activations)
 
-		return "<Individual(label = '%s' fitness = '%s', raw_score = '%s', raw_size = '%s)>" % (self._individual_label, self._fitness, self._raw_score, self._raw_size)
+		str_repr =  str_repr1 + str_repr2
+
+		return str_repr
 
 	#property definition
 
@@ -242,31 +246,28 @@ def initial_population(pop_size, problem_type, architecture_type, number_classes
 
 def mutation(offsprings, mutation_ratio):
 
-	print("mutation ratio " + str(mutation_ratio))
-
 	for individual in offsprings:
 
 		mutation_probability = random.random()
-		print("mutation_probability " + str(mutation_probability))
+		logging.info("Mutation probability " + str(mutation_probability))
 		if mutation_probability < mutation_ratio:
 
 			 #pick a layer randomly
 			 len_model = len(individual.stringModel)
 			 random_layer_index = np.random.randint(len_model-1)  #Last layer can not be modified
-			 print()
-			 print("Inidividual before mutation")
-			 print(individual)
-			 print()
-			 print("layer number " + str(random_layer_index))
-			 print(individual.stringModel[random_layer_index])
-			 print()
+			 
+			 logging.info("\nInidividual before mutation")
+			 logging.info(individual)
+			 logging.info("\nLayer number " + str(random_layer_index))
+			 logging.info(individual.stringModel[random_layer_index])
+			 
 			 individual.stringModel = layer_based_mutation(individual.stringModel, random_layer_index)
-			 print("Inidividual after mutation")
-			 print(individual)
-			 print()
+			 
+			 logging.info("\nInidividual after mutation")
+			 logging.info(individual)
 
 
-def layer_based_mutation(stringModel, layer_index):
+def layer_based_mutation(stringModel, layer_index, logger=True):
 	"""For a given layer, perform a mutation that will effectively affect the layer"""
 
 	layer = stringModel[layer_index]
@@ -278,18 +279,8 @@ def layer_based_mutation(stringModel, layer_index):
 
 	#Randomly select a characteristic from the layer that effectively affects the layer
 
-	"""
-	print("inside mutation")
-	print(characteristic)
-	print([LayerCharacteristics.NeuronsNumber.value, LayerCharacteristics.ActivationType.value, LayerCharacteristics.DropoutRate.value])
-	print(layer_type)
-	"""
-	#print(characteristic)
-
 	if layer_type == Layers.FullyConnected:
 		characteristic = random.choice([LayerCharacteristics.NeuronsNumber.value, LayerCharacteristics.ActivationType.value, LayerCharacteristics.DropoutRate.value])
-		#print("after sample")
-		#print(characteristic)
 
 	elif layer_type == Layers.Convolutional:
 		characteristic = random.choice([LayerCharacteristics.ActivationType.value, LayerCharacteristics.FilterSizeCNN.value, LayerCharacteristics.KernelSizeCNN.value, 
@@ -307,16 +298,12 @@ def layer_based_mutation(stringModel, layer_index):
 	else:
 		characteristic = -1
 
-	"""
-	print("choosen characteristic")
-	print(characteristic)
-	characteristic = LayerCharacteristics(characteristic)
-	print(characteristic)
-	"""
-
 	characteristic = LayerCharacteristics(characteristic)
 	value = ann_encoding_rules.generate_characteristic(layer, characteristic)
-	#print("Selected value " + str(value))
+
+	if logger == True:
+		logging.info("Choosen characteristic " + str(characteristic))
+		logging.info("Selected value " + str(value))
 
 	#If valid layer, the generate 
 	if characteristic != LayerCharacteristics.DropoutRate and value != -1:
@@ -332,19 +319,15 @@ def layer_based_mutation(stringModel, layer_index):
 			if layer_type_next == Layers.Dropout:
 				layer_next[LayerCharacteristics.DropoutRate.value] = value
 			else:
-				#Insert dropout layer
-				#print("insert dropout layer")
 				stringModelCopy = stringModel[:layer_index+1]
-				#print(stringModelCopy)
+
 				dropOutLayer = [Layers.Dropout, 0, 0, 0, 0, 0, 0, 0]
 				dropOutLayer[LayerCharacteristics.DropoutRate.value] = value
+
 				stringModelCopy.append(dropOutLayer)
-				#print(stringModelCopy)
 				stringModelCopy.extend(stringModel[layer_index+1:])
-				#print("string model copy")
-				#print(stringModelCopy)
+
 				stringModel = copy.deepcopy(stringModelCopy)
-				#print(stringModel)
 		else:
 			layer[LayerCharacteristics.DropoutRate.value] = value
 
@@ -404,8 +387,6 @@ def rectify_activations_offspring(stringModel):
 		layer_type = layer[0]
 		activation = layer[2]
 
-		#print(used_activations)
-
 		if layer_type  in used_activations:
 			layer[2] = used_activations[layer_type]
 		else:
@@ -414,7 +395,7 @@ def rectify_activations_offspring(stringModel):
 	return used_activations
 
 
-def population_crossover(parent_pool, max_layers=3):
+def population_crossover(parent_pool, max_layers=3, logger=False):
 
 	pop_size = len(parent_pool)//2
 	problem_type = parent_pool[0].problem_type
@@ -426,19 +407,14 @@ def population_crossover(parent_pool, max_layers=3):
 		parent1 = parent_pool[index*2]
 		parent2 = parent_pool[index*2+1]
 
-		"""
-		print()
-		print("crossover")
-		"""
 		point11, point12, point21, point22, success = two_point_crossover(parent1, parent2, max_layers)
 
-		print("parents")
-		print()
-		print(parent1.stringModel)
-		print()
-		print(parent2.stringModel)
-		print()
-		print("Points: {} {} {} {}, success: {}".format(point11, point12, point21, point22, success))
+		if logger == True:
+
+			logging.info("\nParents\n")
+			logging.info(parent1.stringModel)
+			logging.info(parent2.stringModel)
+			logging.info("Points: {} {} {} {}, success: {}".format(point11, point12, point21, point22, success))
 
 		#If a valid model was created then proceed
 		if success == True:
@@ -460,27 +436,18 @@ def population_crossover(parent_pool, max_layers=3):
 
 			used_activations = rectify_activations_offspring(offspring_stringModel)
 
-			"""
-			print("offspring model")
-			print(offspring_stringModel)
-			print()
-			print("used activations")
-			print(used_activations)
-			"""
+			if logger == True:
+				logging.info("Offspring\n")
+				logging.info(offspring_stringModel)
 
 			offspring = Individual(pop_size+i, problem_type, offspring_stringModel, used_activations)
 			offsprings.append(offspring)
 			i = i+1
 
-		"""
-		if offspring is not None:
-			offsprings.append(offspring)
-		"""
-
 	return offsprings
 
 
-def two_point_crossover(parent1, parent2, max_layers, max_attempts=5):
+def two_point_crossover(parent1, parent2, max_layers, max_attempts=5, logger=False):
 
 	stringModel1 = parent1.stringModel
 	len_model1 = len(stringModel1)-1  #Len model-1 because the last layer can not be moved
@@ -500,16 +467,6 @@ def two_point_crossover(parent1, parent2, max_layers, max_attempts=5):
 		point21 = -1
 		point22 = -1
 
-
-		#print("parents")
-		#print(parent1.stringModel)
-		#print()
-		#print(parent2.stringModel)
-
-
-		#print("point11 " + str(point11))
-		#print("point12 " + str(point12))
-
 		if point11 > point12:
 			temp = point11
 			point11 = point12
@@ -518,14 +475,6 @@ def two_point_crossover(parent1, parent2, max_layers, max_attempts=5):
 			point12 = len_model1-1  #Go to the last layer (excepting the output layer)
 		else:
 			pass
-
-		#print("point11 " + str(point11))
-		#print("point12 " + str(point12))
-
-		"""
-		layer11 = stringModel1[point11]
-		layer12 = stringModel1[point12]
-		"""
 
 		first_layer = True if point11 == 0 else False
 
@@ -536,14 +485,7 @@ def two_point_crossover(parent1, parent2, max_layers, max_attempts=5):
 
 		layer_next = stringModel1[point12+1]
 
-		#print("previous layer to selected point11")
-		#print(layer_prev)
-		#print("next layer to point12")
-		#print(layer_next)
-
-		#print("before find match")
 		compatible_previuos, compatible_next = find_match(parent2, layer_prev, layer_next, first_layer, max_layers)
-		#print("after find match")
 
 		if compatible_next != [] or compatible_previuos != []:  #If there are compatible layers, proceed, otherwise look for other crossover points
 
@@ -554,7 +496,6 @@ def two_point_crossover(parent1, parent2, max_layers, max_attempts=5):
 					if j-i < max_layers and j-i >= 0:
 						compatible_substructures.append((i,j)) 
 
-			#print(compatible_substructures)
 			if compatible_substructures != []:
 
 				k = np.random.randint(len(compatible_substructures))
@@ -563,9 +504,6 @@ def two_point_crossover(parent1, parent2, max_layers, max_attempts=5):
 				point22 = chosen_substructure[1]
 				success = True
 				break
-
-	#print("point21 " + str(point21))
-	#print("point22 " + str(point22))
 
 	return (point11, point12, point21, point22, success)
 
@@ -582,22 +520,13 @@ def find_match(parent, layer_prev, layer_next, first_layer, max_layers):
 	compatible_previuos = []
 	compatible_next = []
 
-	"""
-	print("Is first layer " + str(first_layer))
-	print("layer")
-	print(layer_prev)
-	"""
-
 	for i in range(len_model-1):  #Dismiss last layer
 
 		layer = stringModel[i]
-		#print(layer)
 
 		#Check forward compatibility
 		if first_layer == True: 
 			if layer[0] == layer_prev[0]:
-				#print(layer[0])
-				#print(layer_prev[0])
 				compatible_previuos.append(i)
 		else:
 			compatible_layers = ann_building_rules[layer_prev[0]]
@@ -610,15 +539,6 @@ def find_match(parent, layer_prev, layer_next, first_layer, max_layers):
 
 		if layer_next[0] in compatible_layers:
 			compatible_next.append(i)
-
-
-	#Randomly select from the compatible layers
-	"""
-	print("Compatible with point11 ")
-	print(compatible_previuos)
-	print("Compatible with point12 ")
-	print(compatible_next)
-	"""
 
 	return compatible_previuos, compatible_next
 

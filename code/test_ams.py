@@ -14,8 +14,8 @@ from ann_encoding_rules import Layers
 
 class Configuration():
 
-	def __init__(self, architecture_type, problem_type, input_shape, output_shape, pop_size, tournament_size, max_similar, cross_val  = 0.2, more_layers_prob = 0.5, 
-		max_generations = 10, binary_selection = True, mutation_ratio = 0.4, similarity_threshold = 0.9):
+	def __init__(self, architecture_type, problem_type, input_shape, output_shape, pop_size, tournament_size, max_similar, size_scaler=1, epochs=10, cross_val=0.2, more_layers_prob=0.5, 
+		max_generations=10, binary_selection=True, mutation_ratio=0.4, similarity_threshold=0.9):
 		
 		self._architecture_type = architecture_type
 		self._problem_type = problem_type  #1 for regression, 2 for classification
@@ -30,6 +30,8 @@ class Configuration():
 		self._mutation_ratio = mutation_ratio
 		self._similarity_threshold = similarity_threshold
 		self._max_similar = max_similar
+		self._epochs = epochs
+		self._size_scaler = size_scaler
 
 	@property
 	def architecture_type(self):
@@ -64,6 +66,14 @@ class Configuration():
 		self._output_shape = output_shape
 
 	@property
+	def epochs(self):
+		return self._epochs
+
+	@epochs.setter
+	def epochs(self, epochs):
+		self._epochs = epochs
+
+	@property
 	def cross_val(self):
 		return self._cross_val
 
@@ -78,6 +88,14 @@ class Configuration():
 	@more_layers_prob.setter
 	def more_layers_prob(self, more_layers_prob):
 		self._more_layers_prob = more_layers_prob
+
+	@property
+	def size_scaler(self):
+		return self._size_scaler
+
+	@size_scaler.setter
+	def size_scaler(self, size_scaler):
+		self._size_scaler = size_scaler
 
 	@property
 	def max_generations(self):
@@ -230,7 +248,7 @@ def run_experiment(configuration, data_handler, experiment_number):
 		#Evaluate population
 		for individual in population:
 			individual.tModel.model.summary()
-			individual.compute_fitness(size_scaler=1)
+			individual.compute_fitness(epochs=configuration.epochs, cross_validation_ratio=configuration.cross_val, size_scaler=configuration.size_scaler)
 
 			#Get generation best
 			if individual.fitness < best_model.fitness:
@@ -359,8 +377,8 @@ def main():
 	#Test using mnist
 	dHandler_mnist = MNISTDataHandler()
 
-	config = Configuration(architecture_type, problem_type, input_shape, output_shape, pop_size, max_similar, tournament_size, cross_val  = 0.2, 
-		max_generations = 10, binary_selection = True, mutation_ratio = 0.4, similarity_threshold = 0.9, more_layers_prob = 0.8)
+	config = Configuration(architecture_type, problem_type, input_shape, output_shape, pop_size, max_similar, tournament_size, epochs=1, cross_val=0.2, size_scaler=1,
+		max_generations=10, binary_selection=True, mutation_ratio=0.4, similarity_threshold=0.9, more_layers_prob=0.8)
 
 	while count_experiments < total_experiments:
 		print("Launching experiment {}".format(count_experiments+1))

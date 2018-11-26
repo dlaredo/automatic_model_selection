@@ -12,8 +12,6 @@ from ann_encoding_rules import Layers, LayerCharacteristics, ann_building_rules,
 import fetch_to_keras
 import CMAPSAuxFunctions
 
-cross_validation_ratio = 0.2
-epochs = 1
 lrate = fetch_to_keras.LearningRateScheduler(CMAPSAuxFunctions.step_decay)
 
 class Individual():
@@ -30,7 +28,7 @@ class Individual():
 		self._used_activations = used_activations
 		self._checksum_vector = np.zeros(1)
 
-	def compute_fitness(self, size_scaler):
+	def compute_fitness(self, epochs, cross_validation_ratio, size_scaler):
 
 		round_up_to = 3
 

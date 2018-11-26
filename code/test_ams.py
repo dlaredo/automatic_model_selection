@@ -14,8 +14,8 @@ from ann_encoding_rules import Layers
 
 class Configuration():
 
-	def __init__(self, architecture_type, problem_type, input_shape, output_shape, pop_size, tournament_size, max_similar, size_scaler=1, epochs=10, cross_val=0.2, more_layers_prob=0.5, 
-		max_generations=10, binary_selection=True, mutation_ratio=0.4, similarity_threshold=0.9):
+	def __init__(self, architecture_type, problem_type, input_shape, output_shape, pop_size, tournament_size, max_similar, size_scaler=1, epochs=1, cross_val=0.2, more_layers_prob=0.5, 
+		max_generations=1, binary_selection=True, mutation_ratio=0.4, similarity_threshold=0.9):
 		
 		self._architecture_type = architecture_type
 		self._problem_type = problem_type  #1 for regression, 2 for classification
@@ -249,6 +249,7 @@ def run_experiment(configuration, data_handler, experiment_number):
 		for individual in population:
 			individual.tModel.model.summary()
 			individual.compute_fitness(epochs=configuration.epochs, cross_validation_ratio=configuration.cross_val, size_scaler=configuration.size_scaler)
+			individual.individual_label = count
 
 			#Get generation best
 			if individual.fitness < best_model.fitness:
@@ -362,7 +363,7 @@ def main():
 	pop_size = 5
 	tournament_size = 4
 	max_similar = 3
-	total_experiments = 2
+	total_experiments = 1
 	new_experiment = True
 	count_experiments = 0
 
@@ -378,7 +379,7 @@ def main():
 	dHandler_mnist = MNISTDataHandler()
 
 	config = Configuration(architecture_type, problem_type, input_shape, output_shape, pop_size, max_similar, tournament_size, epochs=1, cross_val=0.2, size_scaler=1,
-		max_generations=10, binary_selection=True, mutation_ratio=0.4, similarity_threshold=0.9, more_layers_prob=0.8)
+		max_generations=1, binary_selection=True, mutation_ratio=0.4, similarity_threshold=0.9, more_layers_prob=0.8)
 
 	while count_experiments < total_experiments:
 		print("Launching experiment {}".format(count_experiments+1))

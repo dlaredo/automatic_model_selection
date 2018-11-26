@@ -596,15 +596,19 @@ def launch_new_generation(population, max_similar, similar_threshold=0.9, logger
 		#print(population[i])
 		#print(population[j])
 
+		"""
 		distance = population[i].checksum_vector - population[j].checksum_vector
-		#print(distance)
+		print(distance)
 		distance_norm = np.linalg.norm(distance, 2)
+		"""
+
+		distance_norm = distance_between_models(population[i].stringModel, population[j].stringModel)
 		distances[pair] = distance_norm
 
 		if distance_norm > max_distance:
 			max_distance = distance_norm
 			max_pair = pair
-	#print(distances)
+	print(distances)
 	#print(max_distance)
 
 	#Normalize distances and see how many are greater than threshold
@@ -612,8 +616,10 @@ def launch_new_generation(population, max_similar, similar_threshold=0.9, logger
 		normalized_distance = distances[key]/max_distance
 		distances[key] = normalized_distance
 
-		if normalized_distance > similar_threshold and key != max_pair:
+		if normalized_distance < similar_threshold and key != max_pair:
 			similar = similar + 1
+
+	print(distances)
 
 	if similar > max_similar:
 		launch_new_experiment = False
@@ -625,6 +631,55 @@ def launch_new_generation(population, max_similar, similar_threshold=0.9, logger
 	return launch_new_experiment
 
 
+def distance_between_models(stringModel1, stringModel2):
+	"""Compute the similarity between two given models"""
+
+	len_model1 = len(stringModel1)
+	len_model2 = len(stringModel2)
+
+	len_layer = len(stringModel1[0])
+
+	layer_distance = np.zeros(len_layer)
+
+	distance = 0
+
+	if len_model1 > len_model2:
+
+		for i in range(len_model2):
+			layer_distance[0] = stringModel1[i][0].value - stringModel2[i][0].value
+
+			for j in range(1, len_layer):
+				layer_distance[j] = stringModel1[i][j] - stringModel2[i][j]
+
+			distance += np.linalg.norm(layer_distance, 2)
+
+		for i in range(len_model2, len_model1):
+			layer_distance[0] = stringModel1[i][0].value
+
+			for j in range(1, len_layer):
+				layer_distance[j] = stringModel1[i][j]
+
+			distance += np.linalg.norm(layer_distance, 2)
+
+	else:
+
+		for i in range(len_model1):
+			layer_distance[0] = stringModel2[i][0].value - stringModel1[i][0].value
+
+			for j in range(1, len_layer):
+				layer_distance[j] = stringModel2[i][j] - stringModel1[i][j]
+
+			distance += np.linalg.norm(layer_distance, 2)
+
+		for i in range(len_model1, len_model2):
+			layer_distance[0] = stringModel2[i][0].value
+
+			for j in range(1, len_layer):
+				layer_distance[j] = stringModel2[i][j]
+
+			distance += np.linalg.norm(layer_distance, 2)	
+
+	return distance	
 
 
 

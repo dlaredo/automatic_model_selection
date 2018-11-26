@@ -19,7 +19,7 @@ lrate = fetch_to_keras.LearningRateScheduler(CMAPSAuxFunctions.step_decay)
 class Individual():
 
 
-	def __init__(self, ind_label, problem_type, stringModel, used_activations, tModel = None, raw_score = 0, raw_size = 0, fitness=0):
+	def __init__(self, ind_label, problem_type, stringModel, used_activations, tModel = None, raw_score = 0, raw_size = 0, fitness = 0):
 		self._stringModel = stringModel
 		self._tModel = tModel
 		self._raw_score = raw_score
@@ -28,10 +28,13 @@ class Individual():
 		self._problem_type = problem_type
 		self._individual_label = ind_label
 		self._used_activations = used_activations
+		self._checksum_vector = np.zeros(1)
 
 	def compute_fitness(self, size_scaler):
 
 		round_up_to = 3
+
+		#self.compute_checksum_vector()
 
 		trainable_count = int(np.sum([K.count_params(p) for p in set(self._tModel.model.trainable_weights)]))
 		self._raw_size = trainable_count
@@ -61,6 +64,23 @@ class Individual():
 		self._fitness = metric_score + size_scaler*size_score
 		#print("fitness " + str(self._fitness))
 
+	def compute_checksum_vector(self):
+
+		self._checksum_vector = np.zeros(len(self._stringModel[0]))
+
+		for layer in self._stringModel:
+
+			layer_type = layer[0]
+			self._checksum_vector[0] = self._checksum_vector[0] + layer_type.value
+			#print(layer_type)
+
+			useful_components = ann_encoding_rules.useful_components_by_layer[layer_type]
+			#print(useful_components)
+
+			for index in useful_components:
+				self._checksum_vector[index] = self._checksum_vector[index]+layer[index]
+
+
 	def partial_run(self, cross_validation_ratio, epochs=20, verbose_data=0, veborse_train=0):
 		
 		self._tModel.load_data(verbose=verbose_data, cross_validation_ratio=0.2)
@@ -85,6 +105,7 @@ class Individual():
 
 		str_repr1 = "\n\nString Model\n" + str(self._stringModel) + "\n"
 		str_repr2 = "<Individual(label = '%s' fitness = '%s', raw_score = '%s', raw_size = '%s)>" % (self._individual_label, self._fitness, self._raw_score, self._raw_size)
+		str_repr3 = "\nChecksum vector: " + str(self._checksum_vector)
 
 		#self._tModel.model.summary()
 		#print("String model")
@@ -93,7 +114,7 @@ class Individual():
 		#print("Used activations")
 		#print(self._used_activations)
 
-		str_repr =  str_repr1 + str_repr2
+		str_repr =  str_repr1 + str_repr2 + str_repr3
 
 		return str_repr
 
@@ -162,6 +183,14 @@ class Individual():
 	@used_activations.setter
 	def used_activations(self, used_activations):
 		self._used_activations = used_activations
+
+	@property
+	def checksum_vector(self):
+		return self._checksum_vector
+
+	@checksum_vector.setter
+	def checksum_vector(self, checksum_vector):
+		self._checksum_vector = checksum_vector
 
 
 def generate_model(model=None, prev_component=Layers.Empty, next_component=Layers.Empty, max_layers=64, more_layers_prob=0.8, used_activations = {}):
@@ -543,8 +572,59 @@ def find_match(parent, layer_prev, layer_next, first_layer, max_layers):
 	return compatible_previuos, compatible_next
 
 
+def launch_new_generation(population, max_similar, similar_threshold=0.9, logger=False):
+	#Compute distances between elements and remove those that are very similar
 
+	new_pop = []
+	len_pop = len(population)
+	pairs = []
+	distances = {}
+	max_distance = 0
+	max_pair = None
+	similar = 0
+	launch_new_experiment = True
 
+	for i in range(len_pop):
+		for j in range(len_pop):
+			if j > i:
+				pairs.append((i,j))
+
+	#print(pairs)
+
+	for pair in pairs:
+		i = pair[0]
+		j = pair[1]
+
+		#print(population[i])
+		#print(population[j])
+
+		distance = population[i].checksum_vector - population[j].checksum_vector
+		#print(distance)
+		distance_norm = np.linalg.norm(distance, 2)
+		distances[pair] = distance_norm
+
+		if distance_norm > max_distance:
+			max_distance = distance_norm
+			max_pair = pair
+	#print(distances)
+	#print(max_distance)
+
+	#Normalize distances and see how many are greater than threshold
+	for key in distances:
+		normalized_distance = distances[key]/max_distance
+		distances[key] = normalized_distance
+
+		if normalized_distance > similar_threshold and key != max_pair:
+			similar = similar + 1
+
+	if similar > max_similar:
+		launch_new_experiment = False
+
+	if logger == True:
+		logging.info("similar = " + str(similar))
+		logging.info(distances)
+
+	return launch_new_experiment
 
 
 

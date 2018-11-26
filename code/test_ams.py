@@ -12,6 +12,130 @@ from keras.callbacks import LearningRateScheduler
 from ann_encoding_rules import Layers
 
 
+class Configuration():
+
+	def __init__(self, architecture_type, problem_type, input_shape, output_shape, pop_size, tournament_size, max_similar, cross_val  = 0.2, more_layers_prob = 0.5, 
+		max_generations = 10, binary_selection = True, mutation_ratio = 0.4, similarity_threshold = 0.9):
+		
+		self._architecture_type = architecture_type
+		self._problem_type = problem_type  #1 for regression, 2 for classification
+		self._input_shape = input_shape
+		self._output_shape = output_shape #If regression applies, number of classes
+		self._cross_val = cross_val
+		self._more_layers_prob = more_layers_prob
+		self._max_generations = max_generations
+		self._pop_size = pop_size
+		self._tournament_size = tournament_size
+		self._binary_selection = binary_selection
+		self._mutation_ratio = mutation_ratio
+		self._similarity_threshold = similarity_threshold
+		self._max_similar = max_similar
+
+	@property
+	def architecture_type(self):
+		return self._architecture_type
+
+	@architecture_type.setter
+	def architecture_type(self, architecture_type):
+		self._architecture_type = architecture_type
+
+	@property
+	def problem_type(self):
+		return self._problem_type
+
+	@problem_type.setter
+	def problem_type(self, problem_type):
+		self._problem_type = problem_type
+
+	@property
+	def input_shape(self):
+		return self._input_shape
+
+	@input_shape.setter
+	def input_shape(self, input_shape):
+		self._input_shape = input_shape
+
+	@property
+	def output_shape(self):
+		return self._output_shape
+
+	@output_shape.setter
+	def output_shape(self, output_shape):
+		self._output_shape = output_shape
+
+	@property
+	def cross_val(self):
+		return self._cross_val
+
+	@cross_val.setter
+	def cross_val(self, cross_val):
+		self._cross_val = cross_val
+
+	@property
+	def more_layers_prob(self):
+		return self._more_layers_prob
+
+	@more_layers_prob.setter
+	def more_layers_prob(self, more_layers_prob):
+		self._more_layers_prob = more_layers_prob
+
+	@property
+	def max_generations(self):
+		return self._max_generations
+
+	@max_generations.setter
+	def max_generations(self, max_generations):
+		self._max_generations = max_generations
+
+	@property
+	def pop_size(self):
+		return self._pop_size
+
+	@pop_size.setter
+	def pop_size(self, pop_size):
+		self._pop_size = pop_size
+
+	@property
+	def tournament_size(self):
+		return self._tournament_size
+
+	@tournament_size.setter
+	def tournament_size(self, tournament_size):
+		self._tournament_size = tournament_size
+
+	@property
+	def binary_selection(self):
+		return self._binary_selection
+
+	@binary_selection.setter
+	def binary_selection(self, binary_selection):
+		self._binary_selection = binary_selection
+
+	@property
+	def mutation_ratio(self):
+		return self._mutation_ratio
+
+	@mutation_ratio.setter
+	def mutation_ratio(self, mutation_ratio):
+		self._mutation_ratio = mutation_ratio
+
+	@property
+	def max_similar(self):
+		return self._max_similar
+
+	@max_similar.setter
+	def max_similar(self, max_similar):
+		self._max_similar = max_similar
+
+	@property
+	def similarity_threshold(self):
+		return self._similarity_threshold
+
+	@similarity_threshold.setter
+	def similarity_threshold(self, similarity_threshold):
+		self._similarity_threshold = similarity_threshold
+
+
 
 def partial_run(model_genotype, problem_type, input_shape, data_handler, cross_validation_ratio, run_number, epochs=20):
 	"""This should be run in Ray"""
@@ -54,61 +178,51 @@ def print_pop(parent_pool, logger=False):
 			logging.info(str(ind))
 
 
-
-
-def main():
-	"""Input can be of 3 types, ANN (1), CNN (2) or RNN (3)"""
-
-	architecture_type = Layers.FullyConnected
-	problem_type = 2  #1 for regression, 2 for classification
-	number_classes = 10 #If regression applies, number of classes
-	input_shape = (784,)
-	cross_val = 0.2
-	generations = 2
-	pop_size = 5
-	tournament_size = 4
-	binary_selection = True
-	mutation_ratio = 0.8
-
-	t = datetime.datetime.now()
+def run_experiment(configuration, data_handler, experiment_number):
+	"""Run one experiment"""
+	launch_new_generation = True #First generation is always launched
+	experiment_best = None
+	generation_count = 0
 
 	parent_pop = []
 	elite_archive = []
 
-	best_model = nn_evolutionary.Individual(pop_size*2, problem_type, [], [], fitness=10**8)  #Big score for the first comparisson
-	worst_model = nn_evolutionary.Individual(pop_size*2+1, problem_type, [], [], fitness=0)  #Big score for the first comparisson
+	best_model = nn_evolutionary.Individual(configuration.pop_size*2, configuration.problem_type, [], [], fitness=10**8)  #Big score for the first comparisson
+	worst_model = nn_evolutionary.Individual(configuration.pop_size*2+1, configuration.problem_type, [], [], fitness=0)  #Big score for the first comparisson
 	worst_index = 0
 
-	logging.basicConfig(filename='logs/nn_evolution_' + t.strftime('%m%d%Y%H%M%S') + '.log', level=logging.INFO, 
-		format='%(levelname)s:%(threadName)s:%(message)s', datefmt='%m/%d/%Y %H:%M:%S')
-
-	logging.info("Starting model optimization: Problem type {}, Architecture type {}".format(problem_type, architecture_type))
+	logging.info("Starting model optimization: Problem type {}, Architecture type {}".format(configuration.problem_type, configuration.architecture_type))
 	logging.info("Parameters:")
 	logging.info("Input shape: {}, Output shape: {}, cross_val ratio: {}, Generations: {}, Population size: {}, Tournament size: {}, Binary selection: {}, Mutation ratio: {}".format(
-		input_shape, number_classes, cross_val, generations, pop_size, tournament_size, binary_selection, mutation_ratio))
+		configuration.input_shape, configuration.output_shape, configuration.cross_val, configuration.max_generations, configuration.pop_size, 
+		configuration.tournament_size, configuration.binary_selection, configuration.mutation_ratio))
 
 
-	#Test using mnist
-	dHandler_mnist = MNISTDataHandler()
-
-	population = nn_evolutionary.initial_population(pop_size, problem_type, architecture_type, number_classes=number_classes,
-		more_layers_prob=0.8, cross_validation=cross_val)
+	population = nn_evolutionary.initial_population(configuration.pop_size, configuration.problem_type, configuration.architecture_type, number_classes=configuration.output_shape,
+		more_layers_prob=configuration.more_layers_prob, cross_validation=configuration.cross_val)
 
 
-	for i in range(generations):
+	while launch_new_generation == True and generation_count < configuration.max_generations:
 		
 		count = 0
 		worst_index = 0
 		parent_pool = []
 		offsprings = []
 
-		indices = list(range(pop_size))
+		indices = list(range(configuration.pop_size))
 
-		print("\nGeneration " + str(i+1))
-		logging.info("\n\nGeneration " + str(i+1))
+		print("\nGeneration " + str(generation_count+1))
+		logging.info("\n\nGeneration " + str(generation_count+1))
 
+		#Remove those individuals that are very similar
+		for ind in population:
+			ind.compute_checksum_vector()
+
+		launch_new_generation = nn_evolutionary.launch_new_generation(population, configuration.max_similar, configuration.similarity_threshold, logger=True)
+
+		#Fetch to keras	
 		print("Fetching to keras")
-		fetch_to_keras.population_to_keras(population, input_shape, dHandler_mnist)
+		fetch_to_keras.population_to_keras(population, configuration.input_shape, data_handler)
 
 
 		print("Evaluating population")
@@ -132,7 +246,7 @@ def main():
 			count = count+1
 
 
-		logging.info("\nPopulation at generation " + str(i+1))
+		logging.info("\nPopulation at generation " + str(generation_count+1))
 		print_pop(population, logger=True)
 
 		logging.info("\nGeneration Best model")
@@ -141,7 +255,7 @@ def main():
 		logging.info("\nGeneration worst model")
 		logging.info(worst_model)
 
-		if i > 0: #At least one generation so to have one best model
+		if generation_count > 0: #At least one generation so to have one best model
 
 			previous_best = elite_archive[-1]
 			if previous_best.fitness < worst_model.fitness:
@@ -152,24 +266,32 @@ def main():
 
 		elite_archive.append(best_model)
 
+		#Save global best
+		if experiment_best == None:
+			experiment_best = best_model
+		else:
+			if best_model.fitness < experiment_best.fitness:
+				experiment_best = best_model
+
+		#Proceed with rest of algorithm
 		offsprings_complete = False
 		print("\nGenerating offsprings")
 		logging.info("\n\nCrossover\n\n")
 
 		#select 2*(n-1) individuals for crossover, elitism implemented
 		offspring_pop_size = 0
-		while pop_size-offspring_pop_size > 0:
+		while configuration.pop_size-offspring_pop_size > 0:
 
 			count = 0
-			parents_pool_required = 2*(pop_size-offspring_pop_size)
+			parents_pool_required = 2*(configuration.pop_size-offspring_pop_size)
 
-			logging.info("\nGetting offpsrings with selection: " + 'binary tournament' if binary_selection == True else 'tournament')
+			logging.info("\nGetting offpsrings with selection: " + 'binary tournament' if configuration.binary_selection == True else 'tournament')
 
 			while count < parents_pool_required:
 
-				if binary_selection == True:
+				if configuration.binary_selection == True:
 					random.shuffle(indices)
-					indices_tournament = indices[:tournament_size]
+					indices_tournament = indices[:configuration.tournament_size]
 
 					logging.info(indices)
 					logging.info(indices_tournament)
@@ -193,16 +315,72 @@ def main():
 
 		print("Applying Mutation")
 		logging.info("\n\nMutation\n\n")
-		nn_evolutionary.mutation(offsprings, mutation_ratio)
+		nn_evolutionary.mutation(offsprings, configuration.mutation_ratio)
 
-		parent_pop = population
+		#parent_pop = population
 		population = []
 
 		population = offsprings
 		offsprings = []
 
+		generation_count =  generation_count + 1
+
+		print("Launch new generation?: " + str(launch_new_generation))
+		logging.info("Launch new generation?: " + str(launch_new_generation))
+
+	print("Experiment {} finished".format(experiment_number))
+	logging.info("Experiment {} finished".format(experiment_number))
+	return experiment_best
 
 
+
+def main():
+	"""Input can be of 3 types, ANN (1), CNN (2) or RNN (3)"""
+	architecture_type = Layers.FullyConnected
+	problem_type = 2  #1 for regression, 2 for classification
+	output_shape = 10 #If regression applies, number of classes
+	input_shape = (784,)
+	cross_val = 0.2
+	pop_size = 5
+	tournament_size = 4
+	max_similar = 3
+	total_experiments = 2
+	new_experiment = True
+	count_experiments = 0
+
+	global_best_list = []
+	global_best = None
+
+	t = datetime.datetime.now()
+
+	logging.basicConfig(filename='logs/nn_evolution_' + t.strftime('%m%d%Y%H%M%S') + '.log', level=logging.INFO, 
+		format='%(levelname)s:%(threadName)s:%(message)s', datefmt='%m/%d/%Y %H:%M:%S')
+
+	#Test using mnist
+	dHandler_mnist = MNISTDataHandler()
+
+	config = Configuration(architecture_type, problem_type, input_shape, output_shape, pop_size, max_similar, tournament_size, cross_val  = 0.2, 
+		max_generations = 10, binary_selection = True, mutation_ratio = 0.4, similarity_threshold = 0.9, more_layers_prob = 0.8)
+
+	while count_experiments < total_experiments:
+		print("Launching experiment {}".format(count_experiments+1))
+		logging.info("Launching experiment {}".format(count_experiments+1))
+		best = run_experiment(config, dHandler_mnist, count_experiments + 1)
+
+		global_best_list.append(best)
+
+		if global_best == None:
+			global_best = best
+		else:
+			if best.fitness < global_best.fitness:
+				global_best = best
+
+		count_experiments =  count_experiments + 1
+
+	print("Global best list\n")
+	print(global_best_list)
+	print("Global best is\n")
+	print(global_best)
 
 main()
 

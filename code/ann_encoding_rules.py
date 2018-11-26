@@ -75,6 +75,7 @@ def rectify_dropout_ratio(dropout_ratio):
 
 	return dropout_ratio
 
+
 def generate_characteristic(layer, characteristic):
 	"""Given a desired characteristic, generate a layer that effectively affects the layer"""
 
@@ -124,27 +125,33 @@ def generate_layer(layer_type, used_activations={}):
 	"""
 
 	layer = [layer_type, 0, 0, 0, 0, 0, 0, 0]
-	layer[1] = 8*random.randint(1, max_neuron_multiplier) #Generate a random number of neurons which is a multiple of 8 up to 1024 neurons
+
+	if layer_type == Layers.FullyConnected or layer_type == Layers.Recurrent:
+		layer[1] = 8*random.randint(1, max_neuron_multiplier) #Generate a random number of neurons which is a multiple of 8 up to 1024 neurons
 
 	#Use the same activation for all the similar layers of the network
-	
-	if layer_type in used_activations:
-		layer[2] = used_activations[layer_type]
-	else:
-		layer[2] = random.randint(0,2) if layer_type != Layers.Recurrent else 1  #Exclude softmax since that only goes till the end
-		used_activations[layer_type] = layer[2]
+	if layer_type == Layers.FullyConnected or layer_type == Layers.Convolutional or layer_type == Layers.Recurrent:
+		if layer_type in used_activations:
+			layer[2] = used_activations[layer_type]
+		else:
+			layer[2] = random.randint(0,2) if layer_type != Layers.Recurrent else 1  #Exclude softmax since that only goes till the end
+			used_activations[layer_type] = layer[2]
 
 
-	layer[3] = 8*random.randint(1, max_filter_size_multiplier)
-	layer[4] = 3**random.randint(1, max_filter_size_exponent)
-	layer[5] = random.randint(1, max_filter_stride)
-	layer[6] = 2**random.randint(1, max_pooling_exponent)
+	if layer_type == Layers.Convolutional:
+		layer[3] = 8*random.randint(1, max_filter_size_multiplier)
+		layer[4] = 3**random.randint(1, max_filter_size_exponent)
+		layer[5] = random.randint(1, max_filter_stride)
 
-	#Dropout is of the form 0.1, 0.15, 0.2, 0.25, ....
-	dropout_ratio = random.uniform(0.1, max_dropout)
-	dropout_ratio = round(rectify_dropout_ratio(dropout_ratio),2)
+	if layer_type == Layers.Pooling:
+		layer[6] = 2**random.randint(1, max_pooling_exponent)
 
-	layer[7] = dropout_ratio
+	if layer_type == Layers.Dropout:
+		#Dropout is of the form 0.1, 0.15, 0.2, 0.25, ....
+		dropout_ratio = random.uniform(0.1, max_dropout)
+		dropout_ratio = round(rectify_dropout_ratio(dropout_ratio),2)
+
+		layer[7] = dropout_ratio
 
 	return layer
 

@@ -611,13 +611,20 @@ def launch_new_generation(population, max_similar, similar_threshold=0.9, logger
 	print(distances)
 	#print(max_distance)
 
-	#Normalize distances and see how many are greater than threshold
-	for key in distances:
-		normalized_distance = distances[key]/max_distance
-		distances[key] = normalized_distance
+	if max_distance == 0:
+		launch_new_experiment = False
+	else:
+		#Normalize distances and see how many are greater than threshold
+		for key in distances:
+			normalized_distance = distances[key]/max_distance
+			distances[key] = normalized_distance
 
-		if normalized_distance < similar_threshold and key != max_pair:
-			similar = similar + 1
+			if normalized_distance < similar_threshold and key != max_pair:
+				print("similar treshold" + str(similar_threshold))
+				print("normalized distance "+str(normalized_distance))
+				similar = similar + 1
+				print("similar "+str(similar))
+				print("max_similar"+str(max_similar))
 
 	print(distances)
 
@@ -645,7 +652,7 @@ def distance_between_models(stringModel1, stringModel2):
 
 	if len_model1 > len_model2:
 
-		for i in range(len_model2):
+		for i in range(len_model2-1):
 			layer_distance[0] = stringModel1[i][0].value - stringModel2[i][0].value
 
 			for j in range(1, len_layer):
@@ -653,7 +660,7 @@ def distance_between_models(stringModel1, stringModel2):
 
 			distance += np.linalg.norm(layer_distance, 2)
 
-		for i in range(len_model2, len_model1):
+		for i in range(len_model2-1, len_model1-1):
 			layer_distance[0] = stringModel1[i][0].value
 
 			for j in range(1, len_layer):
@@ -663,7 +670,7 @@ def distance_between_models(stringModel1, stringModel2):
 
 	else:
 
-		for i in range(len_model1):
+		for i in range(len_model1-1):
 			layer_distance[0] = stringModel2[i][0].value - stringModel1[i][0].value
 
 			for j in range(1, len_layer):
@@ -671,7 +678,7 @@ def distance_between_models(stringModel1, stringModel2):
 
 			distance += np.linalg.norm(layer_distance, 2)
 
-		for i in range(len_model1, len_model2):
+		for i in range(len_model1-1, len_model2-1):
 			layer_distance[0] = stringModel2[i][0].value
 
 			for j in range(1, len_layer):

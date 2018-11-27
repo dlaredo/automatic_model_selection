@@ -236,6 +236,7 @@ def run_experiment(configuration, data_handler, experiment_number):
 		for ind in population:
 			ind.compute_checksum_vector()
 
+		print("max similar "+str(configuration.max_similar))
 		launch_new_generation = nn_evolutionary.launch_new_generation(population, configuration.max_similar, configuration.similarity_threshold, logger=True)
 
 		#Fetch to keras	
@@ -363,7 +364,7 @@ def main():
 	pop_size = 5
 	tournament_size = 4
 	max_similar = 3
-	total_experiments = 1
+	total_experiments = 5
 	new_experiment = True
 	count_experiments = 0
 
@@ -378,8 +379,8 @@ def main():
 	#Test using mnist
 	dHandler_mnist = MNISTDataHandler()
 
-	config = Configuration(architecture_type, problem_type, input_shape, output_shape, pop_size, max_similar, tournament_size, epochs=1, cross_val=0.2, size_scaler=1,
-		max_generations=1, binary_selection=True, mutation_ratio=0.4, similarity_threshold=0.9, more_layers_prob=0.8)
+	config = Configuration(architecture_type, problem_type, input_shape, output_shape, pop_size, tournament_size, max_similar, epochs=1, cross_val=0.2, size_scaler=1,
+		max_generations=10, binary_selection=True, mutation_ratio=0.4, similarity_threshold=0.2, more_layers_prob=0.8)
 
 	while count_experiments < total_experiments:
 		print("Launching experiment {}".format(count_experiments+1))

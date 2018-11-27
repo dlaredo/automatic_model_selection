@@ -18,11 +18,6 @@ def create_tunable_model(model_genotype, problem_type, input_shape, data_handler
 	#K.clear_session()  #Clear the previous tensorflow graph
 	model = decode_genotype(model_genotype, problem_type, input_shape, 1)
 
-	"""
-	if model != None:
-		model.summary()
-	"""
-
 	lrate = LearningRateScheduler(CMAPSAuxFunctions.step_decay)
 
 	model = get_compiled_model(model, problem_type, optimizer_params=[])
@@ -31,17 +26,19 @@ def create_tunable_model(model_genotype, problem_type, input_shape, data_handler
 	return tModel
 
 
-def population_to_keras(population, input_shape, data_handler):
+def population_to_keras(population, input_shape, data_handler, tModel_scaler=None):
 
 	for i in range(len(population)):
 
 		individual = population[i]
 
 		tModel = create_tunable_model(individual.stringModel, individual.problem_type, input_shape, data_handler, i+1)
+		
+		if tModel_scaler != None:
+			tModel.data_handler.data_scaler = None
+			tModel.data_scaler = tModel_scaler
 
-		#Create the individual
 		individual.tModel = tModel
-		#individual = Individual(i, problem_type, model_genotype)
 
 
 def decode_genotype(model_genotype, problem_type, input_shape, output_dim):

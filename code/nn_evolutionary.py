@@ -28,25 +28,21 @@ class Individual():
 		self._used_activations = used_activations
 		self._checksum_vector = np.zeros(1)
 
-	def compute_fitness(self, epochs, cross_validation_ratio, size_scaler):
+
+	def compute_fitness(self, epochs, cross_validation_ratio, size_scaler, verbose_data=0, unroll=False):
 
 		round_up_to = 3
 
-		#self.compute_checksum_vector()
-
 		trainable_count = int(np.sum([K.count_params(p) for p in set(self._tModel.model.trainable_weights)]))
 		self._raw_size = trainable_count
-		#print("trainable params " + str(trainable_count))
-		self.partial_run(cross_validation_ratio, epochs, veborse_train=1)
+
+		self.partial_run(cross_validation_ratio, epochs, verbose_data=verbose_data, veborse_train=1, unroll=unroll)
 		metric_score = self._tModel.scores['score_1']
 		self._raw_score = metric_score
-		#print("metric score " + str(metric_score))
 
 		#Round up to the first 3 digits before computing log
 		rounding_scaler = 10**round_up_to
 		trainable_count = round(trainable_count/rounding_scaler)*rounding_scaler
-		#print("rounded trainable count " + str (trainable_count))
-
 
 		#For classification estimate the error which is between 0 and 1
 		if self._problem_type == 2:
@@ -56,11 +52,8 @@ class Individual():
 
 		size_score = math.log10(trainable_count)
 
-		#print("size score " + str (size_score))
-		#print("metric score " + str(metric_score))
-
 		self._fitness = metric_score + size_scaler*size_score
-		#print("fitness " + str(self._fitness))
+
 
 	def compute_checksum_vector(self):
 
@@ -70,18 +63,16 @@ class Individual():
 
 			layer_type = layer[0]
 			self._checksum_vector[0] = self._checksum_vector[0] + layer_type.value
-			#print(layer_type)
 
 			useful_components = ann_encoding_rules.useful_components_by_layer[layer_type]
-			#print(useful_components)
 
 			for index in useful_components:
 				self._checksum_vector[index] = self._checksum_vector[index]+layer[index]
 
 
-	def partial_run(self, cross_validation_ratio, epochs=20, verbose_data=0, veborse_train=0):
-		
-		self._tModel.load_data(verbose=verbose_data, cross_validation_ratio=0.2)
+	def partial_run(self, cross_validation_ratio, epochs=20, verbose_data=0, veborse_train=0, unroll=False):
+
+		self._tModel.load_data(verbose=verbose_data, cross_validation_ratio=0.2, unroll=unroll)
 
 		if verbose_data == 1:
 			self._tModel.print_data()
@@ -104,13 +95,6 @@ class Individual():
 		str_repr1 = "\n\nString Model\n" + str(self._stringModel) + "\n"
 		str_repr2 = "<Individual(label = '%s' fitness = '%s', raw_score = '%s', raw_size = '%s)>" % (self._individual_label, self._fitness, self._raw_score, self._raw_size)
 		str_repr3 = "\nChecksum vector: " + str(self._checksum_vector)
-
-		#self._tModel.model.summary()
-		#print("String model")
-		#print(self._stringModel)
-
-		#print("Used activations")
-		#print(self._used_activations)
 
 		str_repr =  str_repr1 + str_repr2 + str_repr3
 
@@ -197,8 +181,6 @@ def generate_model(model=None, prev_component=Layers.Empty, next_component=Layer
 	layer_count = 0
 	success = False
 
-	#print(more_layers_prob)
-
 	if model == None:
 		model = list()
 
@@ -214,7 +196,6 @@ def generate_model(model=None, prev_component=Layers.Empty, next_component=Layer
 			ann_building_rules[Layers.Dropout].remove(Layers.Dropout)
 
 		rndm = random.random()
-		#print(rndm)
 		more_layers = (rndm <= more_layers_prob)
 
 		#Keep adding more layers
@@ -446,13 +427,6 @@ def population_crossover(parent_pool, max_layers=3, logger=False):
 		#If a valid model was created then proceed
 		if success == True:
 
-			#Include layers in parent 1
-			"""
-			offspring_stringModel = parent1.stringModel[:point11+1]
-			offspring_stringModel.extend(parent2.stringModel[point21:point22+1])
-			offspring_stringModel.extend(parent1.stringModel[point12:])
-			"""
-
 			#Dont include layers in parent 1
 			offspring_stringModel = parent1.stringModel[:point11]
 			offspring_stringModel.extend(parent2.stringModel[point21:point22+1])
@@ -587,14 +561,9 @@ def launch_new_generation(population, max_similar, similar_threshold=0.9, logger
 			if j > i:
 				pairs.append((i,j))
 
-	#print(pairs)
-
 	for pair in pairs:
 		i = pair[0]
 		j = pair[1]
-
-		#print(population[i])
-		#print(population[j])
 
 		"""
 		distance = population[i].checksum_vector - population[j].checksum_vector
@@ -608,8 +577,6 @@ def launch_new_generation(population, max_similar, similar_threshold=0.9, logger
 		if distance_norm > max_distance:
 			max_distance = distance_norm
 			max_pair = pair
-	print(distances)
-	#print(max_distance)
 
 	if max_distance == 0:
 		launch_new_experiment = False
@@ -620,13 +587,7 @@ def launch_new_generation(population, max_similar, similar_threshold=0.9, logger
 			distances[key] = normalized_distance
 
 			if normalized_distance < similar_threshold and key != max_pair:
-				print("similar treshold" + str(similar_threshold))
-				print("normalized distance "+str(normalized_distance))
 				similar = similar + 1
-				print("similar "+str(similar))
-				print("max_similar"+str(max_similar))
-
-	print(distances)
 
 	if similar > max_similar:
 		launch_new_experiment = False

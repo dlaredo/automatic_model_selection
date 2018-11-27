@@ -3,13 +3,25 @@ import fetch_to_keras
 import random
 import datetime
 import logging
+import sys
+import numpy as np
 
-from data_handler_MNIST import MNISTDataHandler
+sys.path.append('/Users/davidlaredorazo/Documents/University_of_California/Research/Projects/data_handlers/')
+
 from tunable_model import SequenceTunableModelRegression
 from CMAPSAuxFunctions import TrainValTensorBoard
 from keras import backend as K
 from keras.callbacks import LearningRateScheduler
 from ann_encoding_rules import Layers
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+
+#Data handlers
+from data_handler_MNIST import MNISTDataHandler
+from data_handler_CMAPS import CMAPSDataHandler
+
+
+
+#from data_handlers import data_handler_MNIST
 
 
 class Configuration():
@@ -170,21 +182,26 @@ def partial_run(model_genotype, problem_type, input_shape, data_handler, cross_v
 
 	model = fetch_to_keras.get_compiled_model(model, problem_type, optimizer_params=[])
 	tModel = SequenceTunableModelRegression('ModelMNIST_SN_'+str(run_number), model, lib_type='keras', data_handler=data_handler)
-	tModel.load_data(verbose=1, cross_validation_ratio=0.2)
+	
+
+	#tModel.load_data(verbose=1, cross_validation_ratio=0.2)
+	tModel.load_data(verbose=1, cross_validation_ratio=0.2, unroll=True)
+
+
 	tModel.print_data()
 
 	tModel.epochs = epochs
 	tModel.train_model(learningRate_scheduler=lrate, verbose=1)
 
 	tModel.evaluate_model(cross_validation=True)
-
 	cScores = tModel.scores
 	print(cScores)
 
+	"""
 	tModel.evaluate_model(cross_validation=False)
-
 	cScores = tModel.scores
 	print(cScores)
+	"""
 
 
 def print_pop(parent_pool, logger=False):
@@ -196,7 +213,7 @@ def print_pop(parent_pool, logger=False):
 			logging.info(str(ind))
 
 
-def run_experiment(configuration, data_handler, experiment_number):
+def run_experiment(configuration, data_handler, experiment_number, unroll=False, verbose_data=0, tModel_scaler=None):
 	"""Run one experiment"""
 	launch_new_generation = True #First generation is always launched
 	experiment_best = None
@@ -236,12 +253,11 @@ def run_experiment(configuration, data_handler, experiment_number):
 		for ind in population:
 			ind.compute_checksum_vector()
 
-		print("max similar "+str(configuration.max_similar))
 		launch_new_generation = nn_evolutionary.launch_new_generation(population, configuration.max_similar, configuration.similarity_threshold, logger=True)
 
 		#Fetch to keras	
 		print("Fetching to keras")
-		fetch_to_keras.population_to_keras(population, configuration.input_shape, data_handler)
+		fetch_to_keras.population_to_keras(population, configuration.input_shape, data_handler, tModel_scaler=tModel_scaler)
 
 
 		print("Evaluating population")
@@ -249,7 +265,7 @@ def run_experiment(configuration, data_handler, experiment_number):
 		#Evaluate population
 		for individual in population:
 			individual.tModel.model.summary()
-			individual.compute_fitness(epochs=configuration.epochs, cross_validation_ratio=configuration.cross_val, size_scaler=configuration.size_scaler)
+			individual.compute_fitness(epochs=configuration.epochs, cross_validation_ratio=configuration.cross_val, size_scaler=configuration.size_scaler, verbose_data=verbose_data, unroll=unroll)
 			individual.individual_label = count
 
 			#Get generation best
@@ -264,7 +280,6 @@ def run_experiment(configuration, data_handler, experiment_number):
 			individual.individual_label = count
 
 			count = count+1
-
 
 		logging.info("\nPopulation at generation " + str(generation_count+1))
 		print_pop(population, logger=True)
@@ -337,7 +352,6 @@ def run_experiment(configuration, data_handler, experiment_number):
 		logging.info("\n\nMutation\n\n")
 		nn_evolutionary.mutation(offsprings, configuration.mutation_ratio)
 
-		#parent_pop = population
 		population = []
 
 		population = offsprings
@@ -353,12 +367,31 @@ def run_experiment(configuration, data_handler, experiment_number):
 	return experiment_best
 
 
+def cmaps_dhandler():
+
+	#Selected as per CNN paper
+	features = ['T2', 'T24', 'T30', 'T50', 'P2', 'P15', 'P30', 'Nf', 'Nc', 'epr', 'Ps30', 'phi', 'NRf', 'NRc', 'BPR', 
+	'farB', 'htBleed', 'Nf_dmd', 'PCNfR_dmd', 'W31', 'W32']
+	selected_indices = np.array([2, 3, 4, 7, 8, 9, 11, 12, 13, 14, 15, 17, 20, 21])
+	selected_features = list(features[i] for i in selected_indices-1)
+	data_folder = '../CMAPSSData'
+
+	window_size = 25
+	window_stride = 1
+	max_rul = 130
+
+	dHandler_cmaps = CMAPSDataHandler(data_folder, 1, selected_features, max_rul, window_size, window_stride)
+
+	input_shape = (len(selected_features)*window_size, )
+
+	return dHandler_cmaps, input_shape
+
 
 def main():
 	"""Input can be of 3 types, ANN (1), CNN (2) or RNN (3)"""
 	architecture_type = Layers.FullyConnected
-	problem_type = 2  #1 for regression, 2 for classification
-	output_shape = 10 #If regression applies, number of classes
+	problem_type = 1  #1 for regression, 2 for classification
+	output_shape = 1 #If regression applies, number of classes
 	input_shape = (784,)
 	cross_val = 0.2
 	pop_size = 5
@@ -367,9 +400,12 @@ def main():
 	total_experiments = 5
 	new_experiment = True
 	count_experiments = 0
+	unroll = True
 
 	global_best_list = []
 	global_best = None
+
+	min_max_scaler = MinMaxScaler(feature_range=(-1, 1))
 
 	t = datetime.datetime.now()
 
@@ -377,7 +413,7 @@ def main():
 		format='%(levelname)s:%(threadName)s:%(message)s', datefmt='%m/%d/%Y %H:%M:%S')
 
 	#Test using mnist
-	dHandler_mnist = MNISTDataHandler()
+	dhandler_cmaps, input_shape = cmaps_dhandler()
 
 	config = Configuration(architecture_type, problem_type, input_shape, output_shape, pop_size, tournament_size, max_similar, epochs=1, cross_val=0.2, size_scaler=1,
 		max_generations=10, binary_selection=True, mutation_ratio=0.4, similarity_threshold=0.2, more_layers_prob=0.8)
@@ -385,7 +421,7 @@ def main():
 	while count_experiments < total_experiments:
 		print("Launching experiment {}".format(count_experiments+1))
 		logging.info("Launching experiment {}".format(count_experiments+1))
-		best = run_experiment(config, dHandler_mnist, count_experiments + 1)
+		best = run_experiment(config, dhandler_cmaps, count_experiments + 1, unroll=unroll, verbose_data=1, tModel_scaler=min_max_scaler)
 
 		global_best_list.append(best)
 

@@ -313,7 +313,7 @@ def layer_based_mutation(stringModel, layer_index, logger=True):
 		logging.info("Choosen characteristic " + str(characteristic))
 		logging.info("Selected value " + str(value))
 
-	#If valid layer, the generate 
+	#If valid layer, then generate 
 	if characteristic != LayerCharacteristics.DropoutRate and value != -1:
 		layer[characteristic.value] = value
 

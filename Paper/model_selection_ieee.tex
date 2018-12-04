@@ -648,9 +648,9 @@ Specifically speaking and taking inspiration from the micro-GA the pseudocode fo
 \subsection{The fitness function}
 \label{sec:fitness_function}
 
-In order to steer the search in the most promising directions, a carefully designed fitness function is required. The algorithm's goals are to generate a neural network architecture with good inference performance for the class of problem at hand while keeping the complexity of the network as low as possible. Measuring the inference power of the network is straightforward; having a valid neural network we can assess its inference power by training it on the set $\mathcal{D}_{t}$ and then evaluating the predictions using the set $\mathcal{D}_{v}$. A more robust approach would be performing a $k$-fold cross-validation which splits the data into $k$ equal sized partitions $ \mathcal{D}^{1}_{v}, \ldots,  \mathcal{D}^{k}_{v}$ and sets $ \mathcal{D}^{i}_{t} =  D \backslash D^{i}_{v}$ for $i = 1, \ldots, k$. Note that making an accurate assessment of the inference performance of a neural network involves training it for a large number of epochs. Since the training process usually involves extensive computations our algorithm can not make use of it entirely, since this would make the entire process very computationally expensive in most cases and unfeasible in some others, instead we opt to relax the training process for our evaluation of the model and use instead a \textit{partial train} which follows the same process as training but uses a very limited number of epochs.
+In order to steer the search in the most promising directions, a carefully designed fitness function is required. The algorithm's goals are to generate a neural network architecture with good inference performance for the class of problem at hand while keeping the complexity of the network as low as possible. Measuring the inference power of the network is straightforward; having a valid neural network we can assess its inference power by training it on the set $\mathcal{D}_{t}$ and then evaluating the predictions using the set $\mathcal{D}_{v}$. A more robust approach would be performing a $k$-fold cross-validation which splits the data into $k$ equal sized partitions $ \mathcal{D}^{1}_{v}, \ldots,  \mathcal{D}^{k}_{v}$ and sets $ \mathcal{D}^{i}_{t} =  D \backslash D^{i}_{v}$ for $i = 1, \ldots, k$. Note that making an accurate assessment of the inference performance of a neural network involves training it for a large number of epochs. Since the training process usually involves extensive computations our algorithm can not make use of it entirely, since this would make the entire process very computationally expensive in most cases and unfeasible in some others, instead we opt to relax the training process for our evaluation of the model and use instead a \textit{partial train} which follows the same process as training but uses a very limited number of epochs (only a few tens of them). As stated in [] this does not affect the searching process of the micro-GA since even after training for few epochs the models start showing a clear trend in terms of whether a model is promising or not.
 
-Let $A \in \mathcal{A}$ be a certain neural network architecture trained on set $\mathcal{D}_{t}$, let also $\mathcal{P}_{A}(\mathcal{D}_{v})$ represent the performance of the neural network $A$ when tested using validation set $\mathcal{D}_{v}$ and the user-defined performance indicator $p$, where $p$ is usually any of the metrics listed in Table \ref{table:performance_metrics} . Using $k$-fold cross-validation the average performance of the algorithm can be written as
+Let $A \in \mathcal{A}$ be a certain neural network architecture trained on set $\mathcal{D}_{t}$, let also $\mathcal{P}_{A}(\mathcal{D}_{v})$ represent the performance of the neural network $A$ when tested using validation set $\mathcal{D}_{v}$ and the user-defined metric $m$, where $m$ is usually any of the metrics listed in Table \ref{table:performance_metrics} . Using $k$-fold cross-validation the average performance of the algorithm can be written as
 
 \begin{equation}
 p = \frac{1}{k} \sum_{i=1}^{k}  \mathcal{P}_{A}(\mathcal{D}^{i}_{v})
@@ -662,11 +662,34 @@ For measuring the complexity of the architecture we consider the number of train
 Using $p$ and $w$ we propose the following fitness function
 
 \begin{equation}
-f = p + \lambda w, 
+f = p + \alpha w, 
 \label{eq:fitness_function}
 \end{equation}
 
-where $\lambda \in [0,1]$ is a scaling factor that indicates how much does the number of trainable weights $w$ affects the overall fitness of the neural network. By setting $\lambda = 1$ the preference is given to very compact architectures, while $\lambda = 0$ will only care about architectures that find the best possible value for $p$ regardless of their complexity.
+where $\alpha \in [0,1]$ is a scaling factor that indicates how much does the number of trainable weights $w$ affects the overall fitness of the neural network. By setting $\alpha = 1$ the preference is given to very compact architectures, while $\alpha = 0$ will only care about architectures that find the best possible value for $p$ regardless of their complexity.
+
+Computing the fitness of individuals using the current definitions of $p$ and $w$ posses a big problem though, namely that the performance definition $p$ and the number of weights $w$ are on entirely different scales. While $w$ can range from a few hundreds up to several millions, the range of $p$ is 
+
+\begin{equation}
+p \in
+\begin{cases}
+\left[ 0, \inf \right], \text{if } m \text{ is } R^2 \\
+\left[ 0,1 \right],  \text{otherwise}.\\
+\end{cases}
+\end{equation}
+
+As can be observed, even $p$ can be in different ranges, it is necessary for our application that the range of $p$ is consistent no matter the type of metric $m$, thus, in the case $m$ is the $R^2$ metric we normalize the values of $m$ to be within the range $\left[ 0,1 \right]$. The normalization process is quite straightforward: assuming a population $\mathcal{C}$ with $n_s$ individuals, take the maximum value $m_{max}$ for $m$ at the population, then divide every individual in $\mathcal{C}$ by $m_{max}$. Following this process $p \in \left[ 0,1 \right]$ for any of the metrics $m$.
+
+Now we focus on $w$. For the sake of simplicity lets just consider the case of the MLP class of neural networks since this is usually the model where $w$ is larger. Let $l_{max}$ be the maximum number of possible layers for any model, for this work we will limit $l_{max} = 64$ since we consider this a pretty decent number for most of the mainstream deep learning models. From Table \ref{table:neural_network_array_details} we know that the maximum number of neurons at any layer is 1024, thus the maximum number of $w$, which we will call $w_{max}$ for any given model is $w_{max} = 1024^2 \times 64 = 2^{16}$. It can be clearly seen that taking $w^* = log(w)$ puts $w^* \in \left[ 0, log(2)*16 \right]$ which is close to  $w^* \in \left[0, 4.8\right]$.
+
+Thus, we redefine Equation \ref{eq:fitness_function} as
+
+\begin{equation}
+f = 5p + \alpha w^*.
+\label{eq:fitness_function_scaled}
+\end{equation}
+
+As can be observed, Equation \ref{eq:fitness_function_scaled} is now properly scaled, and therefore it is a suitable choice as the fitness function for assessing the performance of a neural network model.
 
 \subsection{Encoding neural networks as genotypes}
 \label{sec:encoding_nn}

@@ -36,7 +36,7 @@ ann_building_rules = {
 					Layers.FullyConnected:[Layers.FullyConnected, Layers.Dropout],
 					Layers.Convolutional:[Layers.FullyConnected, Layers.Convolutional, Layers.Pooling, Layers.Dropout],
 					Layers.Pooling:[Layers.FullyConnected, Layers.Convolutional],
-					Layers.Recurrent:[Layers.FullyConnected, Layers.Convolutional],
+					Layers.Recurrent:[Layers.FullyConnected, Layers.Recurrent],
 					Layers.Dropout:[Layers.FullyConnected, Layers.Convolutional, Layers.Recurrent],
 					Layers.PerturbateParam:[],
 					Layers.Empty:[Layers.FullyConnected, Layers.Convolutional, Layers.Recurrent]

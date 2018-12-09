@@ -82,7 +82,7 @@
 % When switching from latex to pdflatex and vice-versa, the compiler may
 % have to be run twice to clear warning/error messages.
 
-\usepackage{algpseudocode,algorithm,algorithmicx}
+\usepackage{algorithm,algpseudocode}
 \usepackage{comment}
 
 
@@ -159,7 +159,7 @@
 
 % *** MATH PACKAGES ***
 %
-%\usepackage{amsmath}
+\usepackage{amsmath}
 % A popular package from the American Mathematical Society that provides
 % many useful and powerful commands for dealing with mathematics.
 %
@@ -446,7 +446,7 @@ CA, 95340 USA e-mail: dlaredorazo@ucmerced.edu.}}% <-this % stops a space
 % As a general rule, do not put math, special symbols or citations
 % in the abstract or keywords.
 \begin{abstract}
-Neural networks and deep learning are changing the way that artificial intelligence is being done. Efficiently choosing a suitable model (including hyperparameters) for a specific problem is a time-consuming task. Choosing among the many different combinations of neural networks available gives rise to a staggering number of possible alternatives overall. Here we address this problem by proposing a fully automated framework for efficiently selecting a neural network model given a specific problem (whether it is classification or regression). Our proposal focuses on a distributed decision-making algorithm for keeping the most promising models among a pool of possible models. We hope that this approach will help non-expert users to more effectively identify neural network based models and hyperparameter settings appropriate to their applications, and hence to achieve improved performance.
+Neural networks and deep learning are changing the way that artificial intelligence is being done. Efficiently choosing a suitable model (including hyperparameters) for a specific problem is a time-consuming task. Choosing among the many different combinations of neural networks available gives rise to a staggering number of possible alternatives overall. Here we address this problem by proposing a fully automated framework for efficiently selecting a neural network model given a specific problem (whether it is classification or regression). Our proposal focuses on a distributed decision-making algorithm for keeping the most promising models among a pool of possible models for three of the major neural network architectures, namely Convolutional Neural Networks (CNNs), Multi-Layer Perceptrons (MLPs) and Recurrent Neural Networks (RNNs). This work develops AutoNN, a new micro genetic algorithm (along with a new representation for the neural network as a genotype and new crossover and mutation operator) that automatically and efficiently finds the most suitable neural network model for a problem specified by the user. Our evaluation on four different datasets show that the AutoNN effectively finds suitable neural network models while being efficient in terms of the computational burden, our results are compared against other state of the art methods such as Auto-Weka and SkLearn.
 \end{abstract}
 
 % Note that keywords are not normally used for peerreview papers.
@@ -487,17 +487,19 @@ artificial neural networks, model selection, hyperparameter tuning, distributed 
 % 
 % Here we have the typical use of a "T" for an initial drop letter
 % and "HIS" in caps to complete the first word.
-\IEEEPARstart{M}{achine} learning studies automatic algorithms that improve themselves through experience. Given the large amounts of data currently available in many fields such as engineering, biomedical, finance, etc, and the increasingly computing power available machine learning is now  practiced by people with very diverse backgrounds. Increasingly, users of machine learning tools are non-experts who require off-the-shelf solutions. The machine learning community has aided these users by making available a variety of easy to use learning algorithms and feature selection methods as WEKA \cite{Hall2009} and PyBrain \cite{Schaul2010}. Nevertheless, the user still needs to make some choices which not may be obvious or intuitive (selecting a learning algorithm, hyperparameters, features, etc).
+\IEEEPARstart{M}{achine} learning studies automatic algorithms that improve themselves through experience. Given the large amounts of data currently available in many fields such as engineering, biomedical, finance, etc, and the increasingly computing power available machine learning is now  practiced by people with very diverse backgrounds. Increasingly, users of machine learning tools are non-experts who require off-the-shelf solutions. The machine learning community has aided these users by making available a variety of easy to use learning algorithms and feature selection methods such as WEKA \cite{Hall2009}, PyBrain \cite{Schaul2010} or MLLib \cite{mlib2017}. Nevertheless, the user still needs to make some choices which not may be obvious or intuitive (selecting a learning algorithm, hyperparameters, features, etc) thus leading to the selection of non optimal models.
 
-Recently, neural networks have gained a lot of attention due to the newer models (CNN, RNN, Deep Learning, etc.) and their flexibility and generality for solving a large number of problems: regression, classification, natural language processing, recommendation systems, just to mention a few. Furthermore, there are a lot software libraries which makes their implementations easy to use (tensorflow, keras, kaffe, etc.). Nevertheless, the task of picking the right neural network model (hyperparameters included) can be even more complicated than that of other algorithms. Given the popularity of neural networks, specially among non computer scientist we will focus our efforts in this study to them and leave other algorithms for future work.
+Recently, deep neural networks have gained a lot of attention due to the newer models (CNN, RNN, Deep Learning, etc.) and their flexibility and generality for solving a large number of problems: regression, classification, natural language processing, recommendation systems, just to mention a few. Furthermore, there are a lot software libraries which makes their implementations easy to use (TensorFlow \cite{TensorFlow2015}, Keras \cite{keras2015}, Caffe \cite{caffe2014}, CNTK \cite{cntk2016}, etc). Nevertheless, the task of picking the right neural network model (hyperparameters included) can be even more complicated and time consuming than that of other algorithms. Given the popularity of neural networks, specially among non computer scientist we will restrict our efforts in this study to them and leave other machine learning algorithms for future work.
 
-Usually, the process of selecting a suitable machine learning model for a particular problem is done in an iterative manner. First, an input dataset must be transformed from a domain specific format to features which are predictive of the field of interest. Once features have engineered users must pick a learning setting appropriate to their problem, e.g. regression, classification or recommendation. Next users must pick an appropriate model, such as support vector machines (SVM), logistic regression, any flavor of neural networks (NN). Each model family has a number of hyperparameters, such as regularization degree, learning rate, number of neurons, and each pf these must be tuned to achieve optimal results. Finally, users must pick a software package that can train their model, configure one or more machines to execute the training and evaluate the model's quality. It can be challenging to make the right choice when faced with so many degrees of freedom, leaving many users to select a model based on intuition or randomness and/or leave hyperparameters set to default. Certainly this approach will usually yield suboptimal results.
+Usually, the process of selecting a suitable machine learning model for a particular problem is done in an iterative manner. First, an input dataset must be transformed from a domain specific format to features which are predictive of the field of interest, once features have been engineered users must pick a learning setting appropriate to their problem, e.g. regression, classification or recommendation. Next users must pick an appropriate model, such as support vector machines (SVM), logistic regression or any flavor of neural networks (NNs). Each model family has a number of hyperparameters, such as regularization degree, learning rate, number of neurons, etc, and each of these must be tuned to achieve optimal results. Finally, users must pick a software package that can train their model, configure one or more machines to execute the training and evaluate the model's quality. It can be challenging to make the right choice when faced with so many degrees of freedom, leaving many users to select a model based on intuition or randomness and/or leave hyperparameters set to default, this approach will usually yield suboptimal results.
 
-This suggests a natural challenge for machine learning: given a dataset, to automatically and simultaneously chose a learning algorithm and set its hyperparameters to optimize performance. As mentioned in \cite{Hall2009} the combined space of learning algorithm and hyperparemeters is very challenging to search: the response function is noisy and the space is high dimensional, involves both, categorical and continuous choices and containes hierarchical dependencies (e.g. hyperparameters of the algorithm are only meaningful if that algorithm is chosen). Thus, identifying a high quality model is typically costly (in the sense that entails a lot of computational effort) and time consuming.
+This suggests a natural challenge for machine learning: given a dataset, to automatically and simultaneously chose a learning algorithm and set its hyperparameters to optimize performance. As mentioned in \cite{Hall2009} the combined space of learning algorithm and hyperparemeters is very challenging to search: the response function is noisy and the space is high dimensional involving both, categorical and continuous choices and containing hierarchical dependencies (e.g. hyperparameters of the algorithm are only meaningful if that algorithm is chosen). Thus, identifying a high quality model is typically costly (in the sense that entails a lot of computational effort) and time consuming.
 
 Distributed and cloud computing provide a compelling way to accelerate this process, but also present additional challenges. Though parallel storage and processing techniques enable users to train models on massive datasets and accelerate the search process by training multiple models at once, the distributed setting forces several more decisions upon users: what parallel execution strategy to use, how big a cluster to provision, how to efficiently distribute computation across it, and what machine learning framework to use. These decisions are onerous, particularly for users who are experts in their own field but inexperienced in machine learning and distributed systems.
 
-To address this challenges we propose NeuroTuner a flexible and scalable system to automate the process of selecting artificial neural network models.
+To address this challenges we propose AutoNN a flexible and scalable system to automate the process of selecting artificial neural network models. The key contributions of this paper include: 1) a new way to encode neural networks as genotypes for evolutionary computation algorithms, 2) new crossover and mutation operators to generate valid neural networks models from an evolutionary algorithm, 3) defining a way of measuring the similarity between two neural networks, 4) all these components together make a new evolutionary algorithm, which we call AutoNN, which can be used to find an optimal neural network architecture for a given problem.
+
+The remainder of this paper is organized as follows: Section \ref{sec:model_selection} formally introduces the model selection problem (also referred as CASH problem). The related work is briefly reviewed in Section \ref{sec:literature_review}. Next the AutoNN algorithm and all of its components are described in detail in Section \ref{sec:auto_nn}, experiments to test the algorithm and comparison against other state of the art methods are presented in Section ... . Finally conclusions and future work are discussed in Section ... .
 
 %----------------------------------------------------------------------------------------
 %	Model selection
@@ -506,7 +508,7 @@ To address this challenges we propose NeuroTuner a flexible and scalable system 
 \section{The CASH problem}
 \label{sec:model_selection}
 
-In this section we introduce and formally describe the model selection problem, for this section we borrow the definitions given in \cite{Thornton2013}. This work focuses on supervised learning: learning a function $f: \mathcal{X} \mapsto \mathcal{Y}$ with finite $\mathcal{Y}$. A learning algorithm $A$ maps a set $\{d_1, \ldots, d_n\}$ of training data points $d_i = (\mathbf{x_i}, \mathbf{y_i}) \in \mathcal{X} \times \mathcal{Y}$ to such a function. Most learning algorithms $A$ further expose hyperparameters $\lambda \in \mathbf{\Lambda}$, which change the way the learning algorithm $A_{\lambda}$ works. One example of hyperparameters is the number of neurons in a hidden layer of an ANN, another common example is the learning rate $\alpha$ of a neural network. These hyperparameters are typically optmized in an ``outer loop'' that evaluates the performance of each hyperparameter configuration using cross-validation.
+In this section we introduce and formally describe the model selection problem, our description borrows the definitions given in \cite{Thornton2013}. For the sake of simplicity for this work we only consider supervised learning problems, i.e. learning a function $f: \mathcal{X} \mapsto \mathcal{Y}$ with finite $\mathcal{Y}$ labels. A learning algorithm $A$ maps a set $\{d_1, \ldots, d_n\}$ of training data points $d_i = (\mathbf{x_i}, \mathbf{y_i}) \in \mathcal{X} \times \mathcal{Y}$ to such a function $f$. Most learning algorithms $A$ further expose hyperparameters $\lambda \in \mathbf{\Lambda}$, which change the way the learning algorithm $A_{\lambda}$ works. One example of hyperparameters is the number of neurons in a hidden layer of an ANN, another common example is the learning rate $\alpha$ of a neural network. These hyperparameters are typically optmized in an ``outer loop'' that evaluates the performance of each hyperparameter configuration using cross-validation \cite{alpaydin2010}.
 
 \subsection{Model selection}
 
@@ -520,13 +522,21 @@ where $ \mathcal{L} \left( A, \mathcal{D}^{i}_{t},  \mathcal{D}^{i}_{v} \right) 
 
 \subsection{Hyperparameter optimization}
 
-The problem of optimizing the hyperparameters $\lambda \in \mathbf{\Lambda}$ of a given learning algorithm $A$ is conceptually similar to that of model selection. Some key differences are that hyperparameters are often continuous, that hyperparameter spaces are often high dimensional, and that we can exploit correlation structure between different hyperparameter settings $\lambda_1,\lambda_2 \in \mathbf{\Lambda} $. Given $n$ hyperparameters $\lambda_1, \ldots, \lambda_n$ with domains $\Lambda_1, \ldots, \Lambda_n$ , the hyperparameter space $\mathbf{\Lambda} $ is a subset of the crossproduct of these domains: $\mathbf{\Lambda} \subset \Lambda_1 \ldots \Lambda_n$. This subset is often strict, such as when certain settings of one hyperparameter render other hyperparameters inactive. For example, the parameters determining the specifics of the third layer of a deep belief network are not relevant if the network depth is set to one or two. More formally, following \cite{Hutter2009}, we say that a hyperparameter $\lambda_i$ is conditional on another hyperparameter $\lambda_j$, if $\lambda_i$ is only active if hyperparameter $\lambda_j$ takes values from a given set $V_i \left(j \right) \subsetneq \Lambda_j$; in this case we call $\lambda_j$ a parent of $\lambda_i$. Conditional hyperparameters can in turn be parents of other conditional hyperparameters, giving rise to a tree-structured space \cite{Bergstra2011} or, in some cases, a directed acyclic graph (DAG) \cite{Hutter2009}. Given such a structured space $\mathbf{\Lambda}$, the (hierarchical) hyperparameter optimization problem can be written as:
+The problem of optimizing the hyperparameters $\lambda \in \mathbf{\Lambda}$ of a given learning algorithm $A$ is conceptually similar to that of model selection. Some key differences are that hyperparameters are often continuous, that hyperparameter spaces are often high dimensional, and that we can exploit correlation structure between different hyperparameter settings $\lambda_1,\lambda_2 \in \mathbf{\Lambda} $. Given $n$ hyperparameters $\lambda_1, \ldots, \lambda_n$ with domains $\Lambda_1, \ldots, \Lambda_n$ , the hyperparameter space $\mathbf{\Lambda}$ is a subset of the crossproduct of these domains: $\mathbf{\Lambda} \subset \Lambda_1 \times \ldots \times \Lambda_n$. This subset is often strict, such as when certain settings of one hyperparameter render other hyperparameters inactive. For example, the parameters determining the specifics of the third layer of a deep belief network are not relevant if the network depth is set to one or two. More formally, following \cite{Hutter2009}, we say that a hyperparameter $\lambda_i$ is conditional on another hyperparameter $\lambda_j$, if $\lambda_i$ is only active if hyperparameter $\lambda_j$ takes values from a given set $V_i \left(j \right) \subsetneq \Lambda_j$; in this case we call $\lambda_j$ a parent of $\lambda_i$. Conditional hyperparameters can in turn be parents of other conditional hyperparameters, giving rise to a tree-structured space \cite{Bergstra2011} or, in some cases, a directed acyclic graph (DAG) \cite{Hutter2009}. Given such a structured space $\mathbf{\Lambda}$, the (hierarchical) hyperparameter optimization problem can be written as:
 
 \begin{equation}
 \lambda^* \in \underset{\lambda \in \mathbf{\Lambda}}{\operatorname{argmin}} \frac{1}{k} \sum_{i=1}^{k} \mathcal{L} \left( A_{\lambda}, \mathcal{D}^{i}_{t},  \mathcal{D}^{i}_{v} \right),
 \end{equation}
 
-In this study we consider the more general combined algorithm selection and hyperparameter optimization (CASH). That is we intend to optimize both problems at the same time.
+In this study we consider the more general combined algorithm selection and hyperparameter optimization (CASH). That is we intend to optimize both problems at the same time. Given a set of algorithms $\mathbb{A} = \left\lbrace A^{(1)}, \ldots, A^{(k)} \right\rbrace$ with associated hyperparameter spaces $\mathbf{\Lambda}^{(1)}, \ldots \mathbf{\Lambda}^{(k)}$, the CASH problem is the defined as computing
+
+\begin{equation}
+A^* \lambda^* \in \underset{A^{(j)} \in \mathcal{A}, \lambda \in \mathbf{\Lambda}^{(j)}}{\operatorname{argmin}} \frac{1}{k} \sum_{i=1}^{k} \mathcal{L} \left( A_{\lambda}^{(j)}, \mathcal{D}^{i}_{t},  \mathcal{D}^{i}_{v} \right).
+\end{equation}
+
+Note that this problem can be reformulated as a single combined hierarchical hyperparameter optimization problem with parameter space $\mathbf{\Lambda} =  \mathbf{\Lambda}^{(1)} \cup \ldots \cup \mathbf{\Lambda}^{(k)} \cup \left\lbrace \lambda_r \right\rbrace$, where $\lambda_r$ is a new root-level hyperparameter that selects between algorithms $A^{(1)}, \ldots, A^{(k)}$. The root-level parameters of each subspace $\mathbf{\Lambda}^{(i)}$ are made conditional on $\lambda_r$ being instantiated to $A_i$.
+
+Although the CASH problem can be solved using Bayesian Optimization \cite{Brochu2010} and Sequential Model Based Optimization (SMBO) \cite{Hutter2011} the studies presented so far are very restricted when it comes to neural networks. Instead, in this work we aim to solve the CASH problem for neural networks using evolutionary algorithms.
 
 %----------------------------------------------------------------------------------------
 %	LITERATURE REVIEW
@@ -557,14 +567,14 @@ TuPAQ \cite{sparks2015} is a system designed to efficiently and scalably automat
 %	PROPOSAL
 %----------------------------------------------------------------------------------------
 
-\section{An evolutionary framework for the CASH problem }
-\label{sec:proposal}
+\section{An evolutionary algorithm for the CASH problem }
+\label{sec:auto_nn}
 
-While there is a number of methods for automatic model selection and hyperparameter tuning, the most popular ones still have room for improvement. In the case of AutoWEKA and Auto-sklearn they do not provide good support for large machine learning problems, nor provide support for distributed computing. TuPAQ on the other hand, provides wide support for distributed computing, maximizing the use of computational resources through the use of sophisticated optimizations, nevertheless its restricted to only classification problems and does not provide support for neural networks.
+While there is a number of methods for automatic model selection and hyperparameter tuning, the most popular ones do not provide support for some of the most sophisticated deep learning architectures. In the case of AutoWEKA and Auto-sklearn they do not provide good support for large machine learning problems, nor provide support for distributed computing. TuPAQ on the other hand, provides wide support for distributed computing, maximizing the use of computational resources through the use of sophisticated optimizations, nevertheless its restricted to only classification problems and does not provide support for neural networks.
 
-We propose to implement a system for automatically selecting the most fitting neural network architecture (only fully connected networks in the first stage) for a given problem, whether it is classification or regression. Furthermore, we plan that the system should be scalable and should be able to be used in distributed computing environments, allowing it to be usable for large datasets and complex models. To achieve the latter we propose to build our system using Ray \cite{Moritz2017} which is a distributed system designed with large scale distributed machine learning in mind.
+We propose to implement a system for automatically selecting the most fitting neural network architecture for a given problem, whether it is classification or regression. Furthermore, that proposed system is scalable and easy to use in distributed computing environments, allowing it to be usable for large datasets and complex models. To achieve the latter we make use of Ray \cite{Moritz2017}, a distributed framework designed with large scale distributed machine learning in mind.
 
-For this work we will consider three major architectures of neural networks, namely multilayer percpetrons (MLPs) \cite{Engelbrecht2007}, convolutional neural networks (CNNs) \cite{imagenet_cvpr09} and recurrent neural networks (RNNs) \cite{dblp_lipton_2015}. Each one of these architectures can be built by stacking together a \textit{valid} combination of any of the four following layers: fully connected layers, recurrent layers, convolutional layers and pooling layers.
+For this work we consider three major neural networks architectures, namely multilayer percpetrons (MLPs) \cite{Engelbrecht2007}, convolutional neural networks (CNNs) \cite{imagenet_cvpr09} and recurrent neural networks (RNNs) \cite{dblp_lipton_2015}. Each one of these architectures can be built by stacking together a \textit{valid} combination of any of the four following layers: fully connected layers, recurrent layers, convolutional layers and pooling layers.
 
 We say that a neural network architecture is \textit{valid} if it complies with the following set of rules, which we derived empirically from our practice in the field:
 
@@ -576,42 +586,20 @@ We say that a neural network architecture is \textit{valid} if it complies with 
 \item The last layer is always a fully connected layer with either a softmax activation function for classification or a linear activation function for regression problems
 \end{itemize}
 
-\subsection{The fitness function}
+\subsection{AutoNN}
 
-In order to steer the search in the most promising search directions, a carefully designed fitness function is required. The framework's goals are to generate a neural network architecture with good predictive power for the class of problem at hand while keeping the complexity of the network as low as possible. Measuring the predictive power of the network is straightforward; having a valid neural network we can assess its predictive power by training it on the set $\mathcal{D}_{t}$ and then evaluating the predictions using the set $\mathcal{D}_{v}$. A more robust approach would be performing a $k$-fold cross-validation which splits the data into $k$ equal sized partitions $ \mathcal{D}^{1}_{v}, \ldots,  \mathcal{D}^{k}_{v}$ and sets $ \mathcal{D}^{i}_{t} =  D \backslash D^{i}_{v}$ for $i = 1, \ldots, k$.
-
-Let $A \in \mathcal{A}$ be a certain neural network architecture trained on set $\mathcal{D}_{t}$, let also $\mathcal{P}_{A}(\mathcal{D}_{v})$ represent the performance of the neural network $A$ when tested using validation set $\mathcal{D}_{v}$ and the user-defined performance indicator $p$, where $p$ is usually any of the metrics listed in Table \ref{table:performance_metrics} . Using $k$-fold cross-validation the average performance of the algorithm can be written as
-
-\begin{equation}
-p = \frac{1}{k} \sum_{i=1}^{k}  \mathcal{P}_{A}(\mathcal{D}^{i}_{v})
-\label{eq:performance_crossval}
-\end{equation}
-
-For measuring the complexity of the architecture we consider the number of trainable weights $w$ of the neural network which is a good indicator of how complex the architecture is.
-
-Using $p$ and $w$ we propose the following fitness function
-
-\begin{equation}
-f = p + \lambda w, 
-\label{eq:fitness_function}
-\end{equation}
-
-where $\lambda \in [0,1]$ is a scaling factor that indicates how much does the number of trainable weights $w$ affects the overall fitness of the neural network. By setting $\lambda = 1$ the preference is given to very compact architectures, while $\lambda = 0$ will only care about architectures that find the best possible value for $p$ regardless of their complexity.
-
-\subsection{Evolutionary algorithms}
-
-The main part of the framework consists of an evolutionary algorithm, evolutionary algorithms (EAs) are a family of methods for optimization problems. The methods do not make any assumptions about the problem, treating it as a black box that merely provides a measure of quality given a candidate solution. Furthermore, EAs do not require the gradient when searching for optimal solutions, making them very suitable for applications such as neural networks.
+The main part of this work consists of developing an evolutionary algorithm (EA) capable of trying and evolving different neural network architectures and, in the end, find a suitable model for the given problem while being computationally efficient. EAs were chosen for this work since, contrary to the more classical optimization techniques, they do not make any assumptions about the problem, treating it as a black box that merely provides a measure of quality given a candidate solution,  furthermore, they do not require the gradient when searching for optimal solutions making them very suitable for applications such as the one at hand.
 
 In the following we describe the very basics of evolutionary algorithms as an introduction for the reader. 
 
-Every evolutionary algorithm consists of a population of individuals (sometimes EAs are also referred as population based algorithms). Each individual in the population is indeed a potential solution to the optimization problem. Individuals are generally encoded, this encoded solution is often called a genotype while the actual representation of the genotype in the domain of the problem is referred as a fenotype, for our application the fenotype represents the neural network architecture while the genotype will be defined later on. Each solution is evaluated using a so-called fitness function, where the function represents how does the individual performs with respect to a certain metric. 
+Every evolutionary algorithm consists of a population of individuals (sometimes EAs are also referred as population based algorithms) where each individual in the population (in this case neural network model) is indeed a potential solution to the optimization problem (in this case the CASH problem). Every individual has a specific encoding, in the evolutionary algorithm domain, that represents a solution to the given problem while the actual representation of the individual, in the specific application domain, is often referred as the phenotype. In particular, for this application  the fenotype represents the neural network architecture while the genotype is represented by a list of lists. To assess the quality of an individual EAs make use of a so-called fitness function, which indicates how does every individual in the population performs with respect to a certain metric, establishing thus an absolute order among the various solutions and a way of fairly comparing them against each other. 
 
-At every iteration a new generation of solutions is generated by using crossover and mutation operators. Crossover operator is an evolutionary operator used to combine the information of two parents to generate new offspring while the mutation operator is used to maintain genetic diversity from one generation of the population to the next.
+New generation of solutions are generated iteratively by using crossover and mutation operators. Crossover operator is an evolutionary operator used to combine the information of two parents to generate new offspring while the mutation operator is used to maintain genetic diversity from one generation of the population to the next.
 
 The basic template for an evolutionary algorithm is the following
 
 \begin{algorithm}[!htb]
-\caption{Basic Evolutionary Algorithm}\label{euclid}
+\caption{Basic Evolutionary Algorithm}
 \begin{algorithmic}
 %\Procedure{Basic Evolutionary Algorithm}{$a,b$}\Comment{The g.c.d. of a and b}
 \State Let $t = 0$ be the generation counter
@@ -623,41 +611,263 @@ The basic template for an evolutionary algorithm is the following
 	\State Advance to the new generation, i.e. $t = t +1$
 \EndWhile
 \end{algorithmic}
+\label{algorithm:generic_ea}
 \end{algorithm}
 
-Among the many different choices for evolutionary algorithms three major trends currently lead the way, we refer to the genetic algorithms (GAs), evolutionary strategies (ES) and genetic programming (GP) \cite{Engelbrecht2007}.
+One of the major drawbacks of EAs is the time penalty involved in evaluating the fitness function. If the computation of the fitness function is computationally expensive, as in this case, then using any flavor of EA may be very computationally expensive and in some instances unfeasible. Micro-genetic algorithms \cite{Krishnakumar1989} are one variant of GAs whose main difference is the use of small populations (less than 10 individuals per population) in contrast to some well established EAs like the genetic algorithms (GAs), evolutionary strategies (ES) and genetic programming (GP) \cite{Engelbrecht2007}. Since computational efficiency is one of our main concerns for this work we will follow general principles of micro-GA in order to reduce the computational burden of the algorithm. 
+
+Specifically speaking and taking inspiration from the micro-GA the pseudocode for our proposed algorithm is described in Algorithm \ref{algorithm:nn_ea}. Let $C_p$ and $M_p$ be the crossover and mutation probabilities respectively, let also $G_{max}$ be the maximum number of allowed generations and $E_{max}$ the maximum number of repetitions for the micro-GA, finally let $\mathcal{B}$ be an archive for storing the best architectures found at every run of the micro-GA. Our Algorithm is as follows
+
+\begin{algorithm}[!htb]
+\caption{Neural Network Evolution}
+\begin{algorithmic}
+%\Procedure{Basic Evolutionary Algorithm}{$a,b$}\Comment{The g.c.d. of a and b}
+\State Let $t_e = 0$ be the experiments counter
+\While{$t_e < E_{max}$}
+	\State Let $t_g = 0$ be the generation counter
+	\State Create and initialize an initial population $\mathcal{C}(0)$, consisting of $n_s$ individuals, where $n_s <= 10$. See section \ref{sec:valid_models}
+	\While{$t_g <G_{max}$ or nominal convergence not reached}
+		\State Check for nominal convergence in $\mathcal{C}(t)$. See section \ref{sec:convergence}
+		\State Evaluate the fitness, $f(\mathbf{x}_i(t))$, of each individual, $\mathbf{x}_i(t)$. See section \ref{sec:fitness_function}
+		\State Identify best and worst individuals of $\mathcal{C}(t)$
+		\State Replace worst individual in $\mathcal{C}(t)$ with best from $\mathcal{C}(t-1)$
+		\State Perform selection. See section \ref{sec:selection}
+		\State Perform crossover of individuals in $\mathcal{C}(t)$ with $C_p=1$. Let $\mathcal{O}(t)$ be the offspring population. See section \ref{sec:crossover}
+		\State For each individual in $\mathcal{O}(t)$ perform mutation with $M_p$ probability. See section \ref{sec:mutation}
+		\State Make $\mathcal{C}(t+1) = \mathcal{O}(t)$ 
+	    \State $t_g = t_g + 1$
+	\EndWhile
+	 \State Append best solution from previous run to $\mathcal{B}$
+	 \State $t_e = t_e + 1$
+\EndWhile
+\State Final Solution is best existing solution in $\mathcal{B}$
+\end{algorithmic}
+\label{algorithm:nn_ea}
+\end{algorithm}
+
+\subsection{The fitness function}
+\label{sec:fitness_function}
+
+In order to steer the search in the most promising directions, a carefully designed fitness function is required. The algorithm's goals are to generate a neural network architecture with good inference performance for the class of problem at hand while keeping the complexity of the network as low as possible. Measuring the inference power of the network is straightforward; having a valid neural network we can assess its inference power by training it on the set $\mathcal{D}_{t}$ and then evaluating the predictions using the set $\mathcal{D}_{v}$. A more robust approach would be performing a $k$-fold cross-validation which splits the data into $k$ equal sized partitions $ \mathcal{D}^{1}_{v}, \ldots,  \mathcal{D}^{k}_{v}$ and sets $ \mathcal{D}^{i}_{t} =  D \backslash D^{i}_{v}$ for $i = 1, \ldots, k$. Note that making an accurate assessment of the inference performance of a neural network involves training it for a large number of epochs. Since the training process usually involves extensive computations our algorithm can not make use of it entirely, since this would make the entire process very computationally expensive in most cases and unfeasible in some others, instead we opt to relax the training process for our evaluation of the model and use instead a \textit{partial train} which follows the same process as training but uses a very limited number of epochs (only a few tens of them). As stated in [] this does not affect the searching process of the micro-GA since even after training for few epochs the models start showing a clear trend in terms of whether a model is promising or not.
+
+Let $A \in \mathcal{A}$ be a certain neural network architecture trained on set $\mathcal{D}_{t}$, let also $\mathcal{P}_{A}(\mathcal{D}_{v})$ represent the performance of the neural network $A$ when tested using validation set $\mathcal{D}_{v}$ and the user-defined metric $m$, where $m$ is usually any of the metrics listed in Table \ref{table:performance_metrics} . Using $k$-fold cross-validation the average performance of the algorithm can be written as
+
+\begin{equation}
+p = \frac{1}{k} \sum_{i=1}^{k}  \mathcal{P}_{A}(\mathcal{D}^{i}_{v})
+\label{eq:performance_crossval}
+\end{equation}
+
+For measuring the complexity of the architecture we consider the number of trainable weights $w$ of the neural network which is a good indicator of how complex the architecture is.
+
+Using $p$ and $w$ we propose the following fitness function
+
+\begin{equation}
+f = p + \alpha w, 
+\label{eq:fitness_function}
+\end{equation}
+
+where $\alpha \in [0,1]$ is a scaling factor that indicates how much does the number of trainable weights $w$ affects the overall fitness of the neural network. By setting $\alpha = 1$ the preference is given to very compact architectures, while $\alpha = 0$ will only care about architectures that find the best possible value for $p$ regardless of their complexity.
+
+Computing the fitness of individuals using the current definitions of $p$ and $w$ posses a big problem though, namely that the performance definition $p$ and the number of weights $w$ are on entirely different scales. While $w$ can range from a few hundreds up to several millions, the range of $p$ is 
+
+\begin{equation}
+p \in
+\begin{cases}
+\left[ 0, \inf \right], \text{if } m \text{ is } R^2 \\
+\left[ 0,1 \right],  \text{otherwise}.\\
+\end{cases}
+\end{equation}
+
+As can be observed, even $p$ can be in different ranges, it is necessary for our application that the range of $p$ is consistent no matter the type of metric $m$, thus, in the case $m$ is the $R^2$ metric we normalize the values of $m$ to be within the range $\left[ 0,1 \right]$. The normalization process is quite straightforward: assuming a population $\mathcal{C}$ with $n_s$ individuals, take the maximum value $m_{max}$ for $m$ at the population, then divide every individual in $\mathcal{C}$ by $m_{max}$. Following this process $p \in \left[ 0,1 \right]$ for any of the metrics $m$.
+
+Now we focus on $w$. For the sake of simplicity lets just consider the case of the MLP class of neural networks since this is usually the model where $w$ is larger. Let $l_{max}$ be the maximum number of possible layers for any model, for this work we will limit $l_{max} = 64$ since we consider this a pretty decent number for most of the mainstream deep learning models. From Table \ref{table:neural_network_array_details} we know that the maximum number of neurons at any layer is 1024, thus the maximum number of $w$, which we will call $w_{max}$ for any given model is $w_{max} = 1024^2 \times 64 = 2^{16}$. It can be clearly seen that taking $w^* = log(w)$ puts $w^* \in \left[ 0, log(2)*16 \right]$ which is close to  $w^* \in \left[0, 4.8\right]$.
+
+Thus, we redefine Equation \ref{eq:fitness_function} as
+
+\begin{equation}
+f = 5p + \alpha w^*.
+\label{eq:fitness_function_scaled}
+\end{equation}
+
+As can be observed, Equation \ref{eq:fitness_function_scaled} is now properly scaled, and therefore it is a suitable choice as the fitness function for assessing the performance of a neural network model.
 
 \subsection{Encoding neural networks as genotypes}
+\label{sec:encoding_nn}
 
 In order to perform the optimization of neural network architectures a suitable encoding for the neural networks is needed. A good encoding has to be flexible enough to represent neural network architectures of variable length while also making it easy to verify the \textit{validity} of a proposed neural network architecture. 
 
-While array based encodings are quite popular for numerical problems, they often use a fixed-length genotype. While it is possible to use an array based representation for encoding a neural network, this would require the use of very large arrays, furthermore verifying the validity of the encoded neural network is hard to achieve. Three-based representation as that used in genetic programming enables more flexibility when it comes to the length of the genotype, nevertheless imposing constraints for building a valid neural network requires traversing the entire tree or making use of complex data structures every time a new layer is to be stacked in the model. 
+While array based encodings are quite popular for numerical problems, they often use a fixed-length genotype. While it is possible to use an array based representation for encoding a neural network, this would require the use of very large arrays, furthermore verifying the validity of the encoded neural network is hard to achieve. Three-based representation as those used in genetic programming \cite{Engelbrecht2007} enables more flexibility when it comes to the length of the genotype, nevertheless imposing constraints for building a valid neural network requires traversing the entire tree or making use of complex data structures every time a new layer is to be stacked in the model. 
 
 For this work, the chosen encoding is list-based, that is, the genotype is represented as a list of arrays, where the length of the list can be arbitrary. Each array within the list represents the details of a given layer as described in Table \ref{table:neural_network_array_details}. A visual depiction of the array is presented in Table \ref{table:neural_network_array}.
 
 \begin{table}[!htb]
 \begin{center}
-\begin{tabular}{| c | c | c | c | c | c |}
+\scalebox{0.8}{
+\begin{tabular}{| c | c | c | c | c | c | c | c |}
 \hline
-Layer & Neuron & Activation & CNN & CNN & CNN\\
-type & number & function & filter size & kernel size & stride\\
+Layer & Neuron & Activation & CNN & CNN & CNN & Pooling & Dropout\\
+type & number & function & filter size & kernel size & stride & size & rate\\
 \hline
 \end{tabular}
+}
 \end{center}
 \caption{Visual representation of a neural network layer as an array.}
 \label{table:neural_network_array}
 \end{table}
 
-Encoding the neural network as a list of arrays presents two big advantages over other representations. First, the number of layers that can be stacked is in principle arbitrary. Second, the validity of an architecture can be verified, in constant time, every time a new layer is to be stacked to the model, this is due to the fact that in order to stack a layer in between the model one just needs to verify the previous layer and the layer ahead to check for compatibility.
+Let us illustrate the proposed encoding with an example, let $S_e$ be a model composed of several stacked layers as those shown in Table \ref{table:neural_network_array}.
 
-\subsection{The evolutionary operators}
+\begin{align*}
+S_e = \left[ \left[1, 264, 2, 0, 0, 0, 0, 0 \right], \left[5, 0, 0, 0, 0, 0, 0, 0.65 \right], \right. \\
+\left. \left[1, 464, 2, 0, 0, 0, 0, 0 \right], \left[5, 0, 0, 0, 0, 0, 0, 0.35 \right], \right. \\
+\left. \left[1, 872, 2, 0, 0, 0, 0, 0 \right], \left[1, 10, 3, 0, 0, 0, 0, 0 \right] \right]
+\end{align*}
 
-Since the encoding chosen for this task is rather peculiar, no specific operators exist for it. Instead of trying to create new operators for this task we take common evolutionary operators and adapt them to our encoding, in the following we describe the operators and their adaptations.
 
-\subsubsection{Mutation operator}
+The neural network representation of the model just presented is described in Table \ref{table:neural_network_model} \\
 
-\subsubsection{Crossover operator}
+\begin{table}[!htb]
+\begin{center}
+\begin{tabular}{| c | c | c | c |}
+\hline
+Layer type & Neurons & Activation Function & Dropout Ratio \\
+\hline
+Fully connected & 264 & ReLU & n/a \\
+Dropout & n/a & n/a & 0.65 \\
+Fully Connected & 464 & ReLU & n/a\\
+Dropout & n/a & n/a & 0.35\\
+Fully Connected & 872 & ReLU & n/a\\
+Fully Connected & 10 & Softmax & n/a\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Neural network model.}
+\label{table:neural_network_model}
+\end{table}
 
+Encoding the neural network as a list of arrays presents two big advantages over other representations. First, the number of layers that can be stacked is, in principle, arbitrary. Second, the validity of an architecture can be verified, in constant time, every time a new layer is to be stacked to the model, this is due to the fact that in order to stack a layer in between the model one just needs to verify the previous layer and the layer ahead to check for compatibility. The rules for stacking layers together are described in Table \ref{table:neural_network_building_rules}. As can be observed, the ability of stacking layers dynamically and verifying its correctness as a new layer is stacked allows for a powerful representation that can build several kinds of neural networks such as fully connected, convolutional and recursive.
+
+\subsection{Generating valid models}
+\label{sec:valid_models}
+
+Generating valid models is straightforward. An initial layer type has to be specified by the user, the initial layer type can be FullyConnected, Convolutional or Recurrent. As it can be seen, defining the initial layer type effectively defines the type of architectures that can effectively be generated by the algorithm, i.e. if the user chooses FullyConected as the initial layer, all the generated models will be fully connected, if the user chooses Convolutional as initial layer the algorithm will generate Convolutional models only and so on.
+
+Just as the initial layer type has to be defined in advance, the final/output layer is also defined in advance, in fact, all of the generated models share the same output layer. The output layer is always a FullyConnected layer, furthermore, it is generated based on the type of problem to solve (classification or regression). In the case of classification problems the number of neurons is defined by the number of classes in the problem and the softmax function is used as activation function. For regression problems the number of neurons is one and the activation function used is the linear function.
+
+Having defined the architecture type and the output layer generating an initial model is an iterative process of stacking new layers that comply with the rules in Table \ref{table:neural_network_building_rules}. A user defined parameter $m_l$ is used to stop inserting new layers, every time a new layer is stacked in the model a random number $n_r \in \left[0,1\right]$ is generated, if $n_r < m_l$ and if the current layer is compatible with the last layer (according to Table \ref{table:neural_network_building_rules}) then no more layers are inserted. With regards to layers that have an activation function, even though in principle any valid combination is possible, for this application we choose to keep all the activations for similar layers the same across the model since this is usually the common practice. 
+
+\subsection{Selection}
+\label{sec:selection}
+
+In order to generate $n_s$ offsprings $2n_s$ parents are required. The parents are chosen using a selection mechanism which takes the population $\mathcal{C}(t)$ at generation the current generation  and returns a list of parents for crossover. For our application, the selection mechanism used is based on the binary tournament selection \cite{Engelbrecht2007, Krishnakumar1989}. A description of the mechanism is given next: 
+
+\begin{itemize}
+\item Select $n_p$ parents at random where $n_p < n_s$.
+\item Compare the selected elements in a pair-wise manner and return the most fit individuals.
+\item Repeat the procedure until $2n_s$ parents are selected.
+\end{itemize}
+
+It is important to note in the above procedure that the larger $n_p$ is, the more the probable that the best individual in the population is chosen as one of the parents, this is not a desirable behavior, thus we warn the users to keep $n_p$ small. Also, recall from Algorithm \ref{algorithm:nn_ea} that our approach uses elitism, therefore the best individual of a current generation goes unchanged in the next generation.
+
+\subsection{Crossover operator}
+\label{sec:crossover}
+
+Since the encoding chosen for this task is rather peculiar, the existing operators are not suitable for our encoding. In this section we describe in detail the used crossover operator. Our operator is based on the two point crossover operator for genetic algorithms \cite{holland1992} in the sense that two points are selected for each parent, nevertheless our operator is more restrictive in order to ensure the generation of valid architectures. The selection mechanism is described in Algorithm \ref{algorithm:crossover_method}. The following algorithm will be executed for $n_s$ times, where $n_s$ is a user defined parameter, at most or until a valid offspring is generated. Nevertheless, based on our experience with the algorithm it usually takes only 1 attempt to successfully generate a valid offspring. Finally we would like to note that although this is the implementation we used, it may not be the only one to achieve the expected results.
+
+\begin{algorithm}[!htb]
+\caption{Crossover Method}
+\begin{algorithmic}
+%\Procedure{Basic Evolutionary Algorithm}{$a,b$}\Comment{The g.c.d. of a and b}
+\State Let $S_1, S_2$ be the arrays containing the stacked layers of a neural network model in parents 1 and 2 respectively.
+\State Take two random points $(r_1, r_2)$ from $S_1$ where $r_1 <= r_2 $
+\If{$r_1 = r_2 $} 
+	\State {$r_2 = len(S_1-1)$} 
+\Else 
+	\State{pass} 
+\EndIf
+\State Find all the compatible pairs of points $(r_3, r_4)_i$ in $S_2$ that are compatible with $(r_1, r_2)$ where $r_3 < r_4$ and $r_4 - r_3 < l_{max}$
+\State Randomly pick any of the pairs $(r_3, r_4)_i$
+\State Replace the layers in $S_1$ between $r_1, r_2$ inclusive with the layers in $S_2$ between $r_3, r_4$ inclusive. Label the new model as $S_3$
+\State Rectify the activation functions of $S_3$ to match the activation functions of $S_1$
+\end{algorithmic}
+\label{algorithm:crossover_method}
+\end{algorithm}
+
+In Algorithm \ref{algorithm:crossover_method} when we mean compatibility between two points we mean that such two points can be interchanged and still comply with the building rules stated in Table \ref{table:neural_network_building_rules}. Let us illustrate Algorithm \ref{algorithm:crossover_method} with an example. Consider the following models\\
+
+\begin{align*}
+S_1 & = \left[ \left[1, 264, 2, 0, 0, 0, 0, 0 \right], \left[5, 0, 0, 0, 0, 0, 0, 0.65 \right], \right. \\
+& \left. \left[1, 464, 2, 0, 0, 0, 0, 0 \right], \left[5, 0, 0, 0, 0, 0, 0, 0.35 \right], \right. \\
+& \left. \left[1, 872, 2, 0, 0, 0, 0, 0 \right], \left[1, 10, 3, 0, 0, 0, 0, 0 \right] \right]
+\end{align*}
+
+\begin{align*}
+S_2 & = \left[ \left[1, 56, 0, 0, 0, 0, 0, 0 \right], \left[5, 0, 0, 0, 0, 0, 0, 0.25 \right], \right. \\
+&  \left. \left[1, 360, 0, 0, 0, 0, 0, 0 \right], \left[1, 480, 0, 0, 0, 0, 0, 0 \right] \right. \\
+&  \left. \left[1, 88, 0, 0, 0, 0, 0, 0 \right], \left[5, 0, 0, 0, 0, 0, 0, 0.2 \right], \right. \\
+&  \left. \left[1, 10, 3, 0, 0, 0, 0, 0 \right] \right]
+\end{align*}
+
+Lets take $r_1 = 1$ and $r_2 = 3$, since these points are going to be removed from the model then we need to find the compatible layers with $S_1[r_1-1]$ and $S_1[r_2]$ according to the rules described in Table \ref{table:neural_network_building_rules}. Note however that if $r_1 = 0$, i.e. the initial layer, then only a layer whose layer type is equal to the layer type of $S_1[0]$ is compatible. Thus, for this example the compatible pairs of points $(r_3, r_4)_i$ are:
+
+\begin{align*}
+& \left[ (0, 0), (0, 2), (0, 4), (0, 5), (1, 2), (1, 4), (1, 5), \right. \\
+& \left. (2, 2), (2, 4), (2, 5), (4, 4), (4, 5), (5, 5) \right]
+\end{align*} 
+
+Now assume we pick at random the pair $(2,4)$, thus the offspring which we will for simplicity call $S_3$ looks like:
+
+\begin{align*}
+S_3 & = \left[ \left[1, 264, 2, 0, 0, 0, 0, 0 \right], \left[1, 360, 2, 0, 0, 0, 0, 0 \right], \right. \\
+& \left. \left[1, 480, 2, 0, 0, 0, 0, 0 \right] , \left[1, 88, 2, 0, 0, 0, 0, 0 \right], \right. \\
+& \left. \left[1, 872, 2, 0, 0, 0, 0, 0 \right], \left[1, 10, 3, 0, 0, 0, 0, 0 \right] \right]
+\end{align*}
+
+which is indeed a valid model, the reader can check the actual model representations for each of the models in this example in Tables \ref{table:neural_network_model_S1} to \ref{table:neural_network_model_S3}. Notice though that all the activation functions of the same layer types are changed to match the activation functions of the first parent $S_1$, this is what we call activation function rectification, which basically means changing all the activation functions of the layers that share the same layer type between $S_1$ and $S_3$ to the activation functions used in $S_1$. 
+
+We would like to highlight one important feature of this crossover operator, namely that it has the ability to generate neural network models of different sizes, i.e. it can shrink or increase the size of one of the parents. This is a desirable behavior as in real life, machine learning experts will often try various sizes of neural network models when trying to find the one that has the best inference capabilities.
+
+\subsection{Mutation operator}
+\label{sec:mutation}
+
+The mutation operator is used to induce small changes to some of the models generated through the crossover mechanism. In the realm of evolutionary computation these subtle changes tend to improve the exploration properties of the current population (genetic diversity) by injecting random noise to the current solutions.  Although according to \cite{Krishnakumar1989} mutation is not needed in the micro-GA, we believe some sort of mutation is needed in our application in order to get more diverse models which could potentially lead to better inference abilities, nevertheless, our mutation approach will be less disruptive in order to mitigate its effect. Following the same ideas found on the literature we developed a mutation operator to handle neural network models.
+
+As stated above our mutation approach is less disruptive than the common mutation operators \cite{Engelbrecht2007}, this decision follows two main reasons: First, is the fact that usually micro genetic algorithms don't make use of the mutation algorithm since the crossover operator has already induce significant genetic diversity in the population. The second reason is related to the way neural networks are usually built by human experts, commonly experts try a number of models and then make subtle changes to each of them in order to try to improve the inference ability of them, such changes usually involve changing the parameters in a layer, adding or removing a layer, adding regularization or changing the activation functions. 
+
+Based on the principles described above, our mutation process randomly chooses one layer of the model and the proceeds to make one of the following operations:
+
+\begin{itemize}
+\item Change a parameter of the layer chosen for a value complying the values stated in Table \ref{table:neural_network_array_details}.
+\item Change the activation function of the layer. This would involve rectifying the entire model (described in section \ref{sec:crossover}).
+\item Add a dropout layer if the chosen layer is compatible.\\
+\end{itemize} 
+
+This operations together provide a rich set of possibilities for performing efficient mutation while still keeping valid models after mutation is performed. 
+
+\subsection{Determining nominal convergence}
+\label{sec:convergence}
+
+Nominal convergence is one of the criteria used for early stopping of the evolutionary procedure of our algorithm. Some literature defines the convergence in terms of the fitness of the individuals [], while in [] the convergence is defined in terms of the genotype or phenotype of the individuals. Although convergence based on the actual fitness of the individuals may be easier to asses given that the fitness is already calculated, we believe that an assessment of convergence based on the actual genotype of the individuals suits our needs better, this follows the following reasoning.
+
+Since neural networks are stochastic in nature, we expect some variations in the fitness of the individuals at every different run, furthermore since we are running the training process for only few epochs (in order to avoid a high computational burden) the performance of the networks can be quite different and would not be a reliable indicator of convergence. Instead, to assess convergence we look at the genotype and compute the similarities between the different individuals.
+
+To compute the similarities between different individuals we take the following approach. Let $S_1, S_2$ where $len(S_2) >= len(S_1)$ be the genotype representing two different models, let also $S_1 - S_2$ represent the layer-wise difference between each model and $S_i[j]$ be the array representation of the $j-th$ layer of model $i$, $S_2 - S_1$ is defined in Algorithm \ref{algorithm:difference_between_networks}.
+
+\begin{algorithm}[!htb]
+\caption{$S_2 - S_1$ Method}
+\begin{algorithmic}[0]
+%\Procedure{Basic Evolutionary Algorithm}{$a,b$}\Comment{The g.c.d. of a and b}
+\State Let $d \in \mathbb{R}$ be the distance between the two models. Make $d = 0$
+\For{Each layer $i$ in $S_1$ except last layer}
+	\State{$d = d + norm_2(S_2[i]-S_1[i])$}
+\EndFor
+\For{Each remaining layer $i$ in $S_2$ except last layer}
+	\State{$d = d + norm_2(S_2[i])$}
+\EndFor
+\State Return $d$
+\end{algorithmic}
+\label{algorithm:difference_between_networks}
+\end{algorithm}
 
 \begin{comment}
 Our proposal includes the comparisson of an evolutionary algorithm against sequential model based optimization for the selection of an optimal model, along with sampling and pruning techniques to only keep the most promising models and discard the rest of them. Furthermore, we propose to train multiple models simultaneously using Ray and perform bandit allocation resource to perform efficient resource allocation towards the most promising models. Our results will be fisrt tested using the CMAPSS dataset \cite{CMAPS2008} for regression and the MNIST dataset \cite{Lecun2010} for classification. A comparisson against AutoWEKA and Auto-sklearn (on the neural networks) will also be provided.
@@ -761,12 +971,14 @@ F1 & Classification \\
 \hline
 Cell number & Cell name & Data Type & Represents & Applicable to & Values\\
 \hline
-0 & Layer type & Integer & The type of layer. See table \ref{table:index_to_layer_function} & MLP/RNN/CNN & $x \in \left\lbrace 1, \ldots, 5 \right\rbrace$\\
+0 & Layer type & Integer & The type of layer. See table \ref{table:neural_network_building_rules} & MLP/RNN/CNN & $x \in \left\lbrace 1, \ldots, 5 \right\rbrace$\\
 1 & Neuron number & Integer & Number of neurons/units in the layer & MLP/RNN & $8*x$ where $x \in \left\lbrace 1, \ldots, 128 \right\rbrace$ \\
-2 & Activation function & Integer &Type of activation function. See table \ref{table:index_to_layer_function} & MLP/RNN/CNN & $x \in \left\lbrace 1, \ldots, 4 \right\rbrace$\\
+2 & Activation function & Integer &Type of activation function. See table \ref{table:index_to_activation_functions} & MLP/RNN/CNN & $x \in \left\lbrace 1, \ldots, 4 \right\rbrace$\\
 3 & Filter size & Integer & Number of filters generated by the layer & CNN & $8*x$ where $x \in \left\lbrace 1, \ldots 64 \right\rbrace$\\
 4 & Kernel size & Integer & Size of the kernel used for convolutions & CNN & $3^x$ where $x \in \left\lbrace 1, \ldots, 6 \right\rbrace$\\
 5 & Stride & Integer & Stride used for convolutions & CNN & $x \in \left\lbrace 1, \ldots, 6 \right\rbrace$\\
+6 & Pooling size & Integer & Size for the pooling operator & CNN & $2^x$ where $x \in \left\lbrace 1, \ldots 6 \right\rbrace$\\
+7 & Dropout rate & Float & The dropout rate applied to the following layer & MLP/RNN/CNN & $x \in \left[0,1\right]$\\
 \hline
 \end{tabular}
 \end{center}
@@ -776,19 +988,94 @@ Cell number & Cell name & Data Type & Represents & Applicable to & Values\\
 
 \begin{table}[!htb]
 \begin{center}
-\begin{tabular}{| c | c | c | c | c | c |}
+\begin{tabular}{| c | c | c |}
 \hline
-Index &Type of layer & Activation function \\
+Layer type & Layer name & Can be followed by \\
 \hline
-1 & Fully connected & Sigmoid \\
-2 & Convolutional & Hyperbolic tangent \\
-3 & Recursive & ReLU \\
-4 & Pooling & Not applicable \\
+1 & Fully connected & $\left[ 1, 5 \right]$ \\
+2 & Convolutional & $\left[ 1, 2, 3, 5 \right]$ \\
+3 & Pooling & $\left[ 1, 2 \right]$\\
+4 & Recurrent & $\left[ 1, 4 \right]$\\
+5 & Dropout & $\left[ 1, 2, 4 \right]$\\
 \hline
 \end{tabular}
 \end{center}
-\caption{Mapping from indexes to layer/function.}
-\label{table:index_to_layer_function}
+\caption{Neural network stacking/building rules.}
+\label{table:neural_network_building_rules}
+\end{table}
+
+\begin{table}[!htb]
+\begin{center}
+\begin{tabular}{| c | c |}
+\hline
+Index & Activation function \\
+\hline
+0 & Sigmoid \\
+1 & Hyperbolic tangent \\
+2 & ReLU \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Available activation functions.}
+\label{table:index_to_activation_functions}
+\end{table}
+
+\begin{table}[!htb]
+\begin{center}
+\begin{tabular}{| c | c | c | c |}
+\hline
+Layer type & Neurons & Activation Function & Dropout Ratio \\
+\hline
+Fully connected & 264 & ReLU & n/a \\
+Dropout & n/a & n/a & 0.65 \\
+Fully Connected & 464 & ReLU & n/a\\
+Dropout & n/a & n/a & 0.35\\
+Fully Connected & 872 & ReLU & n/a\\
+Fully Connected & 10 & Softmax & n/a\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Neural network model corresponding to $S_1$.}
+\label{table:neural_network_model_S1}
+\end{table}
+
+\begin{table}[!htb]
+\begin{center}
+\begin{tabular}{| c | c | c | c |}
+\hline
+Layer type & Neurons & Activation Function & Dropout Ratio \\
+\hline
+Fully connected & 56 & Sigmoid & n/a \\
+Dropout & n/a & n/a & 0.25 \\
+Fully Connected & 360 & Sigmoid & n/a\\
+Fully Connected & 480 & Sigmoid & n/a\\
+Fully Connected & 80 & Sigmoid & n/a\\
+Dropout & n/a & n/a & 0.20\\
+Fully Connected & 10 & Softmax & n/a\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Neural network model corresponding to $S_2$.}
+\label{table:neural_network_model_S2}
+\end{table}
+
+\begin{table}[!htb]
+\begin{center}
+\begin{tabular}{| c | c | c | c |}
+\hline
+Layer type & Neurons & Activation Function & Dropout Ratio \\
+\hline
+Fully connected & 264 & ReLU & n/a \\
+Fully Connected & 360 & ReLU & n/a\\
+Fully Connected & 480 & ReLU & n/a\\
+Fully Connected & 88 & ReLU & n/a\\
+Fully Connected & 872 & ReLU & n/a\\
+Fully Connected & 10 & Softmax & n/a\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Neural network model corresponding to $S_3$.}
+\label{table:neural_network_model_S3}
 \end{table}
 
 % that's all folks

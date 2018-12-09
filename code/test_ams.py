@@ -6,7 +6,7 @@ import logging
 import sys
 import numpy as np
 
-sys.path.append('/Users/davidlaredorazo/Documents/University_of_California/Research/Projects/data_handlers/')
+sys.path.append('../../data_handlers/')
 
 from tunable_model import SequenceTunableModelRegression
 from CMAPSAuxFunctions import TrainValTensorBoard
@@ -228,9 +228,9 @@ def run_experiment(configuration, data_handler, experiment_number, unroll=False,
 
 	logging.info("Starting model optimization: Problem type {}, Architecture type {}".format(configuration.problem_type, configuration.architecture_type))
 	logging.info("Parameters:")
-	logging.info("Input shape: {}, Output shape: {}, cross_val ratio: {}, Generations: {}, Population size: {}, Tournament size: {}, Binary selection: {}, Mutation ratio: {}".format(
+	logging.info("Input shape: {}, Output shape: {}, cross_val ratio: {}, Generations: {}, Population size: {}, Tournament size: {}, Binary selection: {}, Mutation ratio: {}, Size scaler: {}".format(
 		configuration.input_shape, configuration.output_shape, configuration.cross_val, configuration.max_generations, configuration.pop_size, 
-		configuration.tournament_size, configuration.binary_selection, configuration.mutation_ratio))
+		configuration.tournament_size, configuration.binary_selection, configuration.mutation_ratio, configuration.size_scaler))
 
 
 	population = nn_evolutionary.initial_population(configuration.pop_size, configuration.problem_type, configuration.architecture_type, number_classes=configuration.output_shape,
@@ -386,16 +386,21 @@ def cmaps_dhandler():
 
 	return dHandler_cmaps, input_shape
 
+def print_best(best_list):
+
+	for i in best_list:
+		print(i)
+		logging.info(i)
+
 
 def main():
 	"""Input can be of 3 types, ANN (1), CNN (2) or RNN (3)"""
 	architecture_type = Layers.FullyConnected
-	problem_type = 1  #1 for regression, 2 for classification
-	output_shape = 1 #If regression applies, number of classes
+	problem_type = 2  #1 for regression, 2 for classification
+	output_shape = 10 #If regression applies, number of classes
 	input_shape = (784,)
-	cross_val = 0.2
 	pop_size = 5
-	tournament_size = 4
+	tournament_size = 3
 	max_similar = 3
 	total_experiments = 5
 	new_experiment = True
@@ -412,16 +417,19 @@ def main():
 	logging.basicConfig(filename='logs/nn_evolution_' + t.strftime('%m%d%Y%H%M%S') + '.log', level=logging.INFO, 
 		format='%(levelname)s:%(threadName)s:%(message)s', datefmt='%m/%d/%Y %H:%M:%S')
 
-	#Test using mnist
-	dhandler_cmaps, input_shape = cmaps_dhandler()
+	#cmaps datahandler
+	#dhandler_cmaps, input_shape = cmaps_dhandler()
 
-	config = Configuration(architecture_type, problem_type, input_shape, output_shape, pop_size, tournament_size, max_similar, epochs=1, cross_val=0.2, size_scaler=1,
-		max_generations=10, binary_selection=True, mutation_ratio=0.4, similarity_threshold=0.2, more_layers_prob=0.8)
+	#mnist datahandler
+	dHandler_mnist = MNISTDataHandler()
+
+	config = Configuration(architecture_type, problem_type, input_shape, output_shape, pop_size, tournament_size, max_similar, epochs=5, cross_val=0.2, size_scaler=0.4,
+			       max_generations=10, binary_selection=True, mutation_ratio=0.4, similarity_threshold=0.2, more_layers_prob=0.8)
 
 	while count_experiments < total_experiments:
 		print("Launching experiment {}".format(count_experiments+1))
 		logging.info("Launching experiment {}".format(count_experiments+1))
-		best = run_experiment(config, dhandler_cmaps, count_experiments + 1, unroll=unroll, verbose_data=1, tModel_scaler=min_max_scaler)
+		best = run_experiment(config, dHandler_mnist, count_experiments + 1, unroll=unroll, verbose_data=0, tModel_scaler=min_max_scaler)
 
 		global_best_list.append(best)
 
@@ -434,9 +442,13 @@ def main():
 		count_experiments =  count_experiments + 1
 
 	print("Global best list\n")
-	print(global_best_list)
+	logging.info("Global best list\n")
+	print_best(global_best_list)
+	
 	print("Global best is\n")
 	print(global_best)
+	logging.info("Global best is\n")
+	logging.info(global_best)
 
 main()
 

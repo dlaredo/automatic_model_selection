@@ -106,7 +106,7 @@
 % http://www.ctan.org/pkg/cite
 % The documentation is contained in the cite.sty file itself.
 
-
+%\usepackage[maxbibnames=4]{biblatex}
 
 
 
@@ -349,7 +349,7 @@
     colorlinks=true,
     linkcolor=black,
     filecolor=magenta,      
-    urlcolor=black,
+    urlcolor=blue,
     citecolor=black
 }
 
@@ -388,8 +388,8 @@
 % was not built to handle multiple paragraphs
 %
 
-\author{David Laredo% <-this % stops a space
-\thanks{D. Laredo is with the Department of Mechanical Engineering, University of California, Merced,
+\author{David Laredo, Jian-Qiao Sun% <-this % stops a space
+\thanks{D. Laredo and JQ Sun are with the Department of Mechanical Engineering, University of California, Merced,
 CA, 95340 USA e-mail: dlaredorazo@ucmerced.edu.}}% <-this % stops a space
 
 % note the % following the last \IEEEmembership and also \thanks - 
@@ -680,7 +680,7 @@ p \in
 
 As can be observed, even $p$ can be in different ranges, it is necessary for our application that the range of $p$ is consistent no matter the type of metric $m$, thus, in the case $m$ is the $R^2$ metric we normalize the values of $m$ to be within the range $\left[ 0,1 \right]$. The normalization process is quite straightforward: assuming a population $\mathcal{C}$ with $n_s$ individuals, take the maximum value $m_{max}$ for $m$ at the population, then divide every individual in $\mathcal{C}$ by $m_{max}$. Following this process $p \in \left[ 0,1 \right]$ for any of the metrics $m$.
 
-Now we focus on $w$. For the sake of simplicity lets just consider the case of the MLP class of neural networks since this is usually the model where $w$ is larger. Let $l_{max}$ be the maximum number of possible layers for any model, for this work we will limit $l_{max} = 64$ since we consider this a pretty decent number for most of the mainstream deep learning models. From Table \ref{table:neural_network_array_details} we know that the maximum number of neurons at any layer is 1024, thus the maximum number of $w$, which we will call $w_{max}$ for any given model is $w_{max} = 1024^2 \times 64 = 2^{16}$. It can be clearly seen that taking $w^* = log(w)$ puts $w^* \in \left[ 0, log(2)*16 \right]$ which is close to  $w^* \in \left[0, 4.8\right]$.
+Now we focus on $w$. For the sake of simplicity lets just consider the case of the MLP class of neural networks since this is usually the model where $w$ is larger. Let $l_{max}$ be the maximum number of possible layers for any model, for this work we will limit $l_{max} = 64$ since we consider this a pretty decent number for most of the mainstream deep learning models. From Table \ref{table:neural_network_array_details} we know that the maximum number of neurons at any layer is 1024, thus the maximum number of $w$, which we will call $w_{max}$ for any given model is $w_{max} = 1024^2 \times 64 = 2^{26}$. Furthermore, we want neural networks that are similar (by a few thousands of weights) to have the same score $w$, therefore we discard the last 3 digits of the neural network and replace them by 0s, therefore let $w^+$ be this new weight with the last 3 digits discarded. Let $w^* = log(w^+)$, therefore $w_{max}^* \approx  log(2)*26$, hence we assume $w^* \in \left[0, 7.8\right]$.
 
 Thus, we redefine Equation \ref{eq:fitness_function} as
 
@@ -696,10 +696,18 @@ As can be observed, Equation \ref{eq:fitness_function_scaled} is now properly sc
 
 In order to perform the optimization of neural network architectures a suitable encoding for the neural networks is needed. A good encoding has to be flexible enough to represent neural network architectures of variable length while also making it easy to verify the \textit{validity} of a proposed neural network architecture. 
 
-While array based encodings are quite popular for numerical problems, they often use a fixed-length genotype. While it is possible to use an array based representation for encoding a neural network, this would require the use of very large arrays, furthermore verifying the validity of the encoded neural network is hard to achieve. Three-based representation as those used in genetic programming \cite{Engelbrecht2007} enables more flexibility when it comes to the length of the genotype, nevertheless imposing constraints for building a valid neural network requires traversing the entire tree or making use of complex data structures every time a new layer is to be stacked in the model. 
+Array based encodings are quite popular for numerical problems, nevertheless they often use a fixed-length genotype which is not suitable for representing neural network architectures. While it is possible to use an array based representation for encoding a neural network, this would require the use of very large arrays, furthermore verifying the validity of the encoded neural network is hard to achieve. Three-based representation as those used in genetic programming \cite{Engelbrecht2007} enables more flexibility when it comes to the length of the genotype, nevertheless imposing constraints for building a valid neural network requires traversing the entire tree or making use of complex data structures every time a new layer is to be stacked in the model. 
 
-For this work, the chosen encoding is list-based, that is, the genotype is represented as a list of arrays, where the length of the list can be arbitrary. Each array within the list represents the details of a given layer as described in Table \ref{table:neural_network_array_details}. A visual depiction of the array is presented in Table \ref{table:neural_network_array}.
+For this work, we introduce a new list-based encoding, that is, the genotype is represented as a list of arrays, where the length of the list can be arbitrary. Each array within the list represents the details of a given layer as described in Table \ref{table:neural_network_array_details}. A visual depiction of the array is presented in Figure \ref{fig:neural_network_array}.
 
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.48\textwidth]{img/array_layer.png}
+\caption{Visual representation of a neural network layer as an array.}
+\label{fig:neural_network_array}
+\end{figure}
+
+\begin{comment}
 \begin{table}[!htb]
 \begin{center}
 \scalebox{0.8}{
@@ -714,8 +722,9 @@ type & number & function & filter size & kernel size & stride & size & rate\\
 \caption{Visual representation of a neural network layer as an array.}
 \label{table:neural_network_array}
 \end{table}
+\end{comment}
 
-Let us illustrate the proposed encoding with an example, let $S_e$ be a model composed of several stacked layers as those shown in Table \ref{table:neural_network_array}.
+Let us illustrate the proposed encoding with an example, let $S_e$ be a model composed of several stacked layers as those shown in Figure \ref{fig:neural_network_array}.
 
 \begin{align*}
 S_e = \left[ \left[1, 264, 2, 0, 0, 0, 0, 0 \right], \left[5, 0, 0, 0, 0, 0, 0, 0.65 \right], \right. \\
@@ -724,7 +733,7 @@ S_e = \left[ \left[1, 264, 2, 0, 0, 0, 0, 0 \right], \left[5, 0, 0, 0, 0, 0, 0, 
 \end{align*}
 
 
-The neural network representation of the model just presented is described in Table \ref{table:neural_network_model} \\
+The neural network representation of the model just presented is described in Table \ref{table:neural_network_model}. \\
 
 \begin{table}[!htb]
 \begin{center}
@@ -745,12 +754,12 @@ Fully Connected & 10 & Softmax & n/a\\
 \label{table:neural_network_model}
 \end{table}
 
-Encoding the neural network as a list of arrays presents two big advantages over other representations. First, the number of layers that can be stacked is, in principle, arbitrary. Second, the validity of an architecture can be verified, in constant time, every time a new layer is to be stacked to the model, this is due to the fact that in order to stack a layer in between the model one just needs to verify the previous layer and the layer ahead to check for compatibility. The rules for stacking layers together are described in Table \ref{table:neural_network_building_rules}. As can be observed, the ability of stacking layers dynamically and verifying its correctness as a new layer is stacked allows for a powerful representation that can build several kinds of neural networks such as fully connected, convolutional and recursive.
+Encoding the neural network as a list of arrays presents two big advantages over other representations. First, the number of layers that can be stacked is, in principle, arbitrary. Second, the validity of an architecture can be verified in constant time every time a new layer is to be stacked to the model, this is due to the fact that in order to stack a layer in between the model one just needs to verify the previous layer and the layer ahead to check for compatibility. The rules for stacking layers together are described in Table \ref{table:neural_network_building_rules}. As can be observed, the ability of stacking layers dynamically and verifying its correctness as a new layer is stacked allows for a powerful representation that can build several kinds of neural networks such as fully connected, convolutional and recursive.
 
 \subsection{Generating valid models}
 \label{sec:valid_models}
 
-Generating valid models is straightforward. An initial layer type has to be specified by the user, the initial layer type can be FullyConnected, Convolutional or Recurrent. As it can be seen, defining the initial layer type effectively defines the type of architectures that can effectively be generated by the algorithm, i.e. if the user chooses FullyConected as the initial layer, all the generated models will be fully connected, if the user chooses Convolutional as initial layer the algorithm will generate Convolutional models only and so on.
+Generating valid models is straightforward. An initial layer type has to be specified by the user, the initial layer type can be FullyConnected, Convolutional or Recurrent. As it can be seen, defining the initial layer type effectively defines the type of architectures that can be generated by the algorithm, i.e. if the user chooses FullyConected as the initial layer, all the generated models will be fully connected, if the user chooses Convolutional as initial layer the algorithm will generate Convolutional models only and so on.
 
 Just as the initial layer type has to be defined in advance, the final/output layer is also defined in advance, in fact, all of the generated models share the same output layer. The output layer is always a FullyConnected layer, furthermore, it is generated based on the type of problem to solve (classification or regression). In the case of classification problems the number of neurons is defined by the number of classes in the problem and the softmax function is used as activation function. For regression problems the number of neurons is one and the activation function used is the linear function.
 
@@ -759,7 +768,7 @@ Having defined the architecture type and the output layer generating an initial 
 \subsection{Selection}
 \label{sec:selection}
 
-In order to generate $n_s$ offsprings $2n_s$ parents are required. The parents are chosen using a selection mechanism which takes the population $\mathcal{C}(t)$ at generation the current generation  and returns a list of parents for crossover. For our application, the selection mechanism used is based on the binary tournament selection \cite{Engelbrecht2007, Krishnakumar1989}. A description of the mechanism is given next: 
+In order to generate $n_s$ offsprings $2n_s$ parents are required. The parents are chosen using a selection mechanism which takes the population $\mathcal{C}(t)$ at the current generation and returns a list of parents for crossover. For our application, the selection mechanism used is based on the binary tournament selection \cite{Engelbrecht2007, Krishnakumar1989}. A description of the mechanism is given next: 
 
 \begin{itemize}
 \item Select $n_p$ parents at random where $n_p < n_s$.
@@ -834,7 +843,7 @@ The mutation operator is used to induce small changes to some of the models gene
 
 As stated above our mutation approach is less disruptive than the common mutation operators \cite{Engelbrecht2007}, this decision follows two main reasons: First, is the fact that usually micro genetic algorithms don't make use of the mutation algorithm since the crossover operator has already induce significant genetic diversity in the population. The second reason is related to the way neural networks are usually built by human experts, commonly experts try a number of models and then make subtle changes to each of them in order to try to improve the inference ability of them, such changes usually involve changing the parameters in a layer, adding or removing a layer, adding regularization or changing the activation functions. 
 
-Based on the principles described above, our mutation process randomly chooses one layer of the model and the proceeds to make one of the following operations:
+Based on the principles described above, our mutation process randomly chooses one layer, using a probability $m_p$, of the model and then proceeds to make one of the following operations:
 
 \begin{itemize}
 \item Change a parameter of the layer chosen for a value complying the values stated in Table \ref{table:neural_network_array_details}.
@@ -847,11 +856,11 @@ This operations together provide a rich set of possibilities for performing effi
 \subsection{Determining nominal convergence}
 \label{sec:convergence}
 
-Nominal convergence is one of the criteria used for early stopping of the evolutionary procedure of our algorithm. Some literature defines the convergence in terms of the fitness of the individuals [], while in [] the convergence is defined in terms of the genotype or phenotype of the individuals. Although convergence based on the actual fitness of the individuals may be easier to asses given that the fitness is already calculated, we believe that an assessment of convergence based on the actual genotype of the individuals suits our needs better, this follows the following reasoning.
+Nominal convergence is one of the criteria used for early stopping of the evolutionary procedure of our algorithm. Some literature defines the convergence in terms of the fitness of the individuals \cite{Engelbrecht2007}, while in \cite{Krishnakumar1989} the convergence is defined in terms of the genotype or phenotype of the individuals. Although convergence based on the actual fitness of the individuals may be easier to asses given that the fitness is already calculated, we believe that an assessment of convergence based on the actual genotype of the individuals suits our needs better, this follows the following reasoning.
 
 Since neural networks are stochastic in nature, we expect some variations in the fitness of the individuals at every different run, furthermore since we are running the training process for only few epochs (in order to avoid a high computational burden) the performance of the networks can be quite different and would not be a reliable indicator of convergence. Instead, to assess convergence we look at the genotype and compute the similarities between the different individuals.
 
-To compute the similarities between different individuals we take the following approach. Let $S_1, S_2$ where $len(S_2) >= len(S_1)$ be the genotype representing two different models, let also $S_1 - S_2$ represent the layer-wise difference between each model and $S_i[j]$ be the array representation of the $j-th$ layer of model $i$, $S_2 - S_1$ is defined in Algorithm \ref{algorithm:difference_between_networks}.
+To compute the similarities between different individuals we take the following approach. Let $S_1, S_2$ where $len(S_2) >= len(S_1)$ be the genotype representing two different models, let also $S_1 - S_2$ represent the layer-wise difference between each model and $S_i[j]$ be the array representation of the $j-th$ layer of model $i$, $S_2 - S_1$ is defined in Algorithm \ref{algorithm:difference_between_networks}. \\
 
 \begin{algorithm}[!htb]
 \caption{$S_2 - S_1$ Method}
@@ -868,6 +877,188 @@ To compute the similarities between different individuals we take the following 
 \end{algorithmic}
 \label{algorithm:difference_between_networks}
 \end{algorithm}
+
+This method is computationally inexpensive since the size of the population is small. Furthermore, it helps accurately establish the similarity between any two neural networks, given two neural network models $S_1$ and $S_2$ is $S_1 = S_2$ then $S_2 - S_1 = 0$. For our purposes we stop the algorithm and launch the new experiment if the distance between any $s$ models is smaller than $c$ where both $s$ and $c$ are user defined parameters.
+
+\subsection{Implementation}
+\label{sec:implementation}
+
+AutoNN is implemented in about 700 lines of code in Python. The code can be found in \url{https://github.com/dlaredo/automatic_model_selection}. We took a functional programming approach for its implementation. The models $S_i$ generated by the algorithm are fetched to Keras \cite{keras2015} and then evaluated, nevertheless the models can be evaluated in any other framework such as TensorFlow or Pytorch and even using different programming languages such as C++ for performance reasons.
+
+In order to boost performance we make use of Ray \cite{Moritz2017} which is a distributed computing framework tailored for AI applications. In order to distribute workloads in Ray developers only have to define Remote Functions make use of Python annotations, Ray will then distribute these Remote Functions across the different nodes in the cluster. There are three different types of nodes in Ray: Drivers, Workers and Actors. A Driver is the process executing the user program, a Worker is a stateless process that executes remote functions invoked by a driver or another worker, finally, an Actor is a statefull process that executes, when invoked, the methods it exposes.
+
+For our implementation we code the individual fetching to Keras and its fitness evaluation as Ray Remote Functions (Workers), while the rest of our algorithm is implemented within the Driver, therefore the partial train of each neural network within the current population is performed in a distributed way, highly increasing the performance of our algorithm. Furthermore since the only messages being sent over the cluster are arrays (the neural network representation $S_i$) and the fitness of the neural network model $f$ there is little chance that the data interchanged causes a bottleneck or increases latency in the system.
+
+\section{Evaluation}
+\label{sec:evaluation}
+
+We evaluate AutoNN with two different datasets, each of which is a different type of inference problem. Our results are compared against baseline implementations and state-of-the-art methods for automatic model selection. In particular we compare our results against AutoWeka \cite{Thornton2016}, PyBrain \cite{Schaul2010} and MLLib \cite{mlib2017}.
+
+\subsection{MNIST Dataset}
+
+We first test our algorithm with the MNIST Dataset \cite{Lecun2010}. The MNIST Dataset of handwritten digits is one of the most commonly used datasets for evaluating the performance of neural networks. It has a training set of 60,000 examples and a test set of 10,000 examples. The digits have been size-normalized and centered in a fixed-size image.
+
+We use MNIST dataset as a baseline for measuring the performance of our approach, furthermore, we use MNIST to analyze each one of the major components of AutoNN. Given the popularity of MNIST, several neural networks with varying degrees of accuracy have been proposed, therefore it is easy to find good models to compare with. 
+
+We start by running AutoNN to find a suitable FullyConnected model for classification for the MNIST dataset. The details for the parameters used in this test are described in Table \ref{table:MNIST_params}
+
+\begin{table}[!htb]
+\begin{center}
+\begin{tabular}{| c | c |}
+\hline
+Parameter & AutoNN Value \\
+\hline
+Problem Type & 1 \\
+Architecture Type & FullyConnected \\
+Input Shape & $(784, M)$  \\
+Output Shape & $(1, M)$ \\
+Cross Validation Ratio & $c_v = 0.2$ \\
+Mutation Ratio & $m_p = 0.4$ \\
+More Layers Probability & $n_r = 0.8$ \\
+Network Size Scaling Factor & $\alpha = 0.8$ \\
+Population Size & $n_s = 10$ \\
+Tournament Size & $n_t = 4$ \\
+Max Similar Models & $s = 3$ \\
+Total Experiments & $E_{max} = 5$ \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Parameters for MNIST for each method.}
+\label{table:MNIST_params}
+\end{table}
+
+We first take a look at the generated initial population. Although we understand that  for the sake of space we will only discuss the sizes of the models, furthermore we will make a small change in our notation for describing the neural network models, for the remainder of this section we denote a layer of a neural network as $(n_e, a_f)$ where $n_e$ denotes the number of neurons in case the layer is fully connected or the dropout rate in case the layer is a dropout layer and $a_f$ denotes the activation function of the later if the layer is a fully connected layer. The initial five generated individuals are presented next.
+
+\begin{align*}
+S_1 & = \left[ (968, 0), (688, 0), (10, 3) \right] \\
+S_2 & = \left[ (824, 2), (0.4), (168, 2), (808, 2), (528, 2), (10, 3) \right] \\
+S_3 & = \left[ (136, 1), (984, 1), (144, 1), (680, 1), (10, 3) \right] \\
+S_4 & = \left[ (712, 2), (0.3), (96, 2), (368, 2), (584, 2), (240, 2) \right. \\
+& \left. (256, 2), (0.65), (384, 2), (536, 2), (648, 2), (0.3), (88, 2), (10, 3) \right] \\
+S_5 & = \left[ (448, 0), (0.3), (888, 0), (10, 3) \right] \\
+\end{align*}
+
+First thing we can observer is that the sizes of the models are variable, with some models having as few as 1 hidden layer and some having up to 10 hidden layers, another thing to note is the variability in terms of activation functions with some models using sigmoid, some using tanh and some using relu as activation functions.
+
+In this particular case, after 5 generations, the population converged to $S^*_1 = \left[ (136, 1), (168,1), (10, 3) \right]$, where * denotes the best individual in the population and the subindex denotes the experiment number.
+
+After running the 5 experiments, we get the following models
+
+\begin{align*}
+S^*_1 & = \left[ (136, 1), (168,1), (10, 3) \right] \\
+S^*_2 & = \left[ (80, 1), (10, 3) \right] \\
+S^*_3 & = \left[ (152, 2), (152, 2), (0.35), (10, 3) \right] \\
+S^*_4 & = \left[ (248, 2),  (10, 3) \right] \\
+S^*_5 & = \left[ (208, 1),  (10, 3) \right] \\
+\end{align*}
+
+Their fitness and raw size of the models are described in Table \ref{table:autonn_mnist_1}. The best overall model is $S^* = S^*_2$.
+
+\begin{table}[!htb]
+\begin{center}
+\begin{tabular}{| c | c | c | c |}
+\hline
+Model & Score (Accuracy) & Trainable Parameters & Fitness\\
+\hline
+$S^*_1$ & 0.959 & 131466 & 4.4963\\
+$S^*_2$ & 0.944 & 63610 & 4.3982\\
+$S^*_3$ & 0.962 & 144106 & 4.4991\\
+$S^*_4$ & 0.962 & 197170 & 4.6105\\
+$S^*_5$ & 0.956 & 165370 & 4.6114\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Scores for the best models found by AutoNN for MNIST. $\alpha = 0.8$}
+\label{table:autonn_mnist_1}
+\end{table}
+
+As can be observed in Table \ref{table:autonn_mnist_1} small models are preferred, regardless if some larger models yield better performance, this is due to the value of the size weighting factor $\alpha = 0.8$ which is still a pretty high value, thus giving a lot of weight to the actual size of the neural network in terms of the fitness of a model. Let us illustrate this by running the algorithm with $\alpha = 1$ and $\alpha = 0.6$.
+
+The best models for each experiment with $\alpha = 0.6$, are listed next, their fitness and raw size of the models are described in Table \ref{table:autonn_mnist_2}. The best overall model is $S^* = S^*_2$.
+
+\begin{align*}
+S^*_1 & = \left[ (72, 2), (0.1), (10, 3) \right] \\
+S^*_2 & = \left[ (64, 2), (64,2), (56,2), (56,2) (10, 3) \right] \\
+S^*_3 & = \left[ (368, 1), (10, 3) \right] \\
+S^*_4 & = \left[ (120, 2),  (10, 3) \right] \\
+S^*_5 & = \left[ (248, 2), (96, 2), (10, 3) \right] \\
+\end{align*}
+
+\begin{table}[!htb]
+\begin{center}
+\begin{tabular}{| c | c | c | c |}
+\hline
+Model & Score (Accuracy) & Trainable Parameters & Fitness\\
+\hline
+$S^*_1$ & 0.947 & 57250 & 2.4306\\
+$S^*_2$ & 0.953 & 61802 & 2.3869\\
+$S^*_3$ & 0.957 & 292570 & 2.6075\\
+$S^*_4$ & 0.956 & 95410 & 2.4294\\
+$S^*_5$ & 0.968 & 219554 & 2.4519\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Scores for the best models found by AutoNN for MNIST, $\alpha = 0.6$.}
+\label{table:autonn_mnist_2}
+\end{table}
+
+Next we repeat the experiment with $\alpha = 1$, again the obtained models are listed next and their fitness and raw size of the models are described in Table \ref{table:autonn_mnist_3}. The best overall model is $S^* = S^*_3$.
+
+\begin{align*}
+S^*_1 & = \left[ (48, 1), (48,1), (10, 3) \right] \\
+S^*_2 & = \left[ (64, 2), (10, 3) \right] \\
+S^*_3 & = \left[ (24, 1), (10, 3) \right] \\
+S^*_4 & = \left[ (72, 2),  (10, 3) \right] \\
+S^*_5 & = \left[ (120, 1),  (10, 3) \right] \\
+\end{align*}
+
+\begin{table}[!htb]
+\begin{center}
+\begin{tabular}{| c | c | c | c |}
+\hline
+Model & Score (Accuracy) & Trainable Parameters & Fitness\\
+\hline
+$S^*_1$ & 0.917 & 40522 & 5.1869\\
+$S^*_2$ & 0.943 & 50890 & 5.2734\\
+$S^*_3$ & 0.917 & 19090 & 5.1037\\
+$S^*_4$ & 0.943 & 57250 & 5.316\\
+$S^*_5$ & 0.949 & 95410 & 5.479\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Scores for the best models found by AutoNN for MNIST, $\alpha = 1$.}
+\label{table:autonn_mnist_3}
+\end{table}
+
+As can be observed by the obtained results in Table \ref{table:autonn_mnist_3}, when the number of trainable parameters has a high weight on the overall fitness of the individuals, the algorithm tends to prefer smaller neural networks, this is specially useful for cases where the computational power is limited, such as embedded systems. Nevertheless, this brings an obvious tradeoff, since more compact neural networks are preferred the algorithm may also choose neural networks that exhibit lower performance compared to larger neural networks. This tradeoff can be controlled by the user by varying the $\alpha$ parameter, as can be observed by the results in Table \ref{table:autonn_mnist_2}, when the impact of the size of the neural network is relaxed on the overall fitness of the individual, the algorithm may prefer bigger neural networks (whether in terms of layers or neurons in each layer) that provide better accuracy. Note that the change in fitness is due to the fact that the size of the neural network was scaled and thus there is no fair way of comparing the results of Table \ref{table:autonn_mnist_1} against those in Table \ref{table:autonn_mnist_2} and so on. Nevertheless, it is also important to note that the accuracy of each of the models presented is already acceptable.
+
+Finally, we train the 3 better models for 50 epochs each and using 10-fold cross-validation in order to obtain the mean accuracy of each of the models, we denote $ S^*_1$ as the best model corresponding to $\alpha = 0.8$, $S^*_2$ corresponds to $\alpha = 0.6$ and $S^*_3$ corresponds to $\alpha = 1$. The accuracy results for the 10-fold cross-validation sets along with the accuracy obtained for the test set are summarized in Table \ref{table:avg_accuracies_mnist}.
+
+\begin{table}[!htb]
+\begin{center}
+\begin{tabular}{| c | c | c | c | c |}
+\hline
+Model & 10-fold Min. & 10-fold Max. & 10-fold Avg. & Test Avg. \\
+\hline
+$S^*_1$ & 0.968 & 0.975 & 0.972 & 0.974\\
+$S^*_2$ & 0.970 & 0.976 & 0.974 & 0.975\\
+$S^*_3$ & 0.950 & 0.959 & 0.954 & 0.957\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Accuracy obtained by each of the top 3 models for MNIST dataset.}
+\label{table:avg_accuracies_mnist}
+\end{table}
+
+As predicted, model $S^*_2$ gets better overall performance (though marginal) because the $\alpha$ penalty for the size of the neural network was relaxed, on the contrary, model $S^*_3$ gets worst performance since the search was constrained to look for more compact models, finally $S^*_1$ lies in between obtaining a good tradeoff between inference power and compactness.
+
+\section{Conclusions and Future Work}
+\label{sec:conclusions}
+
+In this paper we presented AutoNN, a new evolutionary algorithm for efficiently finding suitable neural network models for both classification and regression problems. Making use of efficient mutation and crossover operators the AutoNN is able to generate valid and efficient neural networks, in terms of both the size of the network and its performance. Furthermore, AutoNN is intrinsically distributable, exploiting this feature with the use of Ray \cite{Moritz2017} we were able to find efficient models for the MNIST dataset \cite{Lecun2010}.
+
+Future work will consider more complex neural network architecturs such as LSTM and CNNs, techniques for assembling entire neural network pipelines will also be explored in future, finally a better way of measuring distance between two neural network architectures will be explored, since this last element is of high importance for applications such as visualization and evolutionary computation.
+
 
 \begin{comment}
 Our proposal includes the comparisson of an evolutionary algorithm against sequential model based optimization for the selection of an optimal model, along with sampling and pruning techniques to only keep the most promising models and discard the rest of them. Furthermore, we propose to train multiple models simultaneously using Ray and perform bandit allocation resource to perform efficient resource allocation towards the most promising models. Our results will be fisrt tested using the CMAPSS dataset \cite{CMAPS2008} for regression and the MNIST dataset \cite{Lecun2010} for classification. A comparisson against AutoWEKA and Auto-sklearn (on the neural networks) will also be provided.

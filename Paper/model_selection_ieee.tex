@@ -388,6 +388,12 @@
 % was not built to handle multiple paragraphs
 %
 
+\begin{comment}
+\author{David Laredo% <-this % stops a space
+\thanks{D. Laredo is with the Department of Mechanical Engineering, University of California, Merced,
+CA, 95340 USA e-mail: dlaredorazo@ucmerced.edu.}}% <-this % stops a space
+\end{comment}
+
 \author{David Laredo, Jian-Qiao Sun% <-this % stops a space
 \thanks{D. Laredo and JQ Sun are with the Department of Mechanical Engineering, University of California, Merced,
 CA, 95340 USA e-mail: dlaredorazo@ucmerced.edu.}}% <-this % stops a space
@@ -499,7 +505,7 @@ Distributed and cloud computing provide a compelling way to accelerate this proc
 
 To address this challenges we propose AutoNN a flexible and scalable system to automate the process of selecting artificial neural network models. The key contributions of this paper include: 1) a new way to encode neural networks as genotypes for evolutionary computation algorithms, 2) new crossover and mutation operators to generate valid neural networks models from an evolutionary algorithm, 3) defining a way of measuring the similarity between two neural networks, 4) all these components together make a new evolutionary algorithm, which we call AutoNN, which can be used to find an optimal neural network architecture for a given problem.
 
-The remainder of this paper is organized as follows: Section \ref{sec:model_selection} formally introduces the model selection problem (also referred as CASH problem). The related work is briefly reviewed in Section \ref{sec:literature_review}. Next the AutoNN algorithm and all of its components are described in detail in Section \ref{sec:auto_nn}, experiments to test the algorithm and comparison against other state of the art methods are presented in Section ... . Finally conclusions and future work are discussed in Section ... .
+The remainder of this paper is organized as follows: Section \ref{sec:model_selection} formally introduces the model selection problem (also referred as CASH problem). The related work is briefly reviewed in Section \ref{sec:literature_review}. Next the AutoNN algorithm and all of its components are described in detail in Section \ref{sec:auto_nn}, experiments to test the algorithm and comparison against other state of the art methods are presented in Section \ref{sec:evaluation}. Finally conclusions and future work are discussed in Section \ref{sec:conclusions}.
 
 %----------------------------------------------------------------------------------------
 %	Model selection
@@ -1057,7 +1063,7 @@ As predicted, model $S^*_2$ gets better overall performance (though marginal) be
 
 In this paper we presented AutoNN, a new evolutionary algorithm for efficiently finding suitable neural network models for both classification and regression problems. Making use of efficient mutation and crossover operators the AutoNN is able to generate valid and efficient neural networks, in terms of both the size of the network and its performance. Furthermore, AutoNN is intrinsically distributable, exploiting this feature with the use of Ray \cite{Moritz2017} we were able to find efficient models for the MNIST dataset \cite{Lecun2010}.
 
-Future work will consider more complex neural network architecturs such as LSTM and CNNs, techniques for assembling entire neural network pipelines will also be explored in future, finally a better way of measuring distance between two neural network architectures will be explored, since this last element is of high importance for applications such as visualization and evolutionary computation.
+Future work will consider more complex neural network architecturs such as LSTM and CNNs, techniques for assembling entire neural network pipelines will also be explored in future as well as the inclusion of more hyperparameters in the tuning process. Finally a better way of measuring distance between two neural network architectures will be explored, since this last element is of high importance for applications such as visualization and evolutionary computation.
 
 
 \begin{comment}

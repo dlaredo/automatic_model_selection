@@ -1,5 +1,6 @@
 import random
 import CMAPSAuxFunctions
+import sys
 
 import keras
 import keras.layers
@@ -8,9 +9,12 @@ from keras.optimizers import Adam, SGD
 from keras.callbacks import LearningRateScheduler
 from keras import regularizers
 
+sys.path.append('/Users/davidlaredorazo/Documents/University_of_California/Research/Projects')
+#sys.path.append('/Users/davidlaredorazo/Documents/University_of_California/Research/Projects')
+
 from ann_encoding_rules import Layers, ann_building_rules, activations
 
-from tunable_model import SequenceTunableModelRegression
+from ann_framework.tunable_model.tunable_model import SequenceTunableModelRegression
 
 
 def create_tunable_model(model_genotype, problem_type, input_shape, data_handler, model_number):

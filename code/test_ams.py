@@ -6,18 +6,24 @@ import logging
 import sys
 import numpy as np
 
-sys.path.append('../../data_handlers/')
+sys.path.append('/Users/davidlaredorazo/Documents/University_of_California/Research/Projects')
+#sys.path.append('/Users/davidlaredorazo/Documents/University_of_California/Research/Projects')
 
-from tunable_model import SequenceTunableModelRegression
 from CMAPSAuxFunctions import TrainValTensorBoard
 from keras import backend as K
 from keras.callbacks import LearningRateScheduler
 from ann_encoding_rules import Layers
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
+#Tunable model
+from ann_framework.tunable_model.tunable_model import SequenceTunableModelRegression
+#from tunable_model import SequenceTunableModelRegression
+
 #Data handlers
-from data_handler_MNIST import MNISTDataHandler
-from data_handler_CMAPS import CMAPSDataHandler
+from ann_framework.data_handlers.data_handler_CMAPS import CMAPSDataHandler
+from ann_framework.data_handlers.data_handler_MNIST import MNISTDataHandler
+#from data_handler_MNIST import MNISTDataHandler
+#from data_handler_CMAPS import CMAPSDataHandler
 
 
 

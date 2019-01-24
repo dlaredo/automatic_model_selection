@@ -14,7 +14,7 @@ sys.path.append('/Users/davidlaredorazo/Documents/University_of_California/Resea
 
 from ann_encoding_rules import Layers, ann_building_rules, activations
 
-from ann_framework.tunable_model.tunable_model import SequenceTunableModelRegression
+from ann_framework.tunable_model.tunable_model import SequenceTunableModelRegression, SequenceTunableModelClassification
 
 
 def create_tunable_model(model_genotype, problem_type, input_shape, data_handler, model_number):
@@ -25,7 +25,11 @@ def create_tunable_model(model_genotype, problem_type, input_shape, data_handler
 	lrate = LearningRateScheduler(CMAPSAuxFunctions.step_decay)
 
 	model = get_compiled_model(model, problem_type, optimizer_params=[])
-	tModel = SequenceTunableModelRegression('ModelMNIST_SN_'+str(model_number), model, lib_type='keras', data_handler=data_handler)
+	
+	if problem_type == 1:
+		tModel = SequenceTunableModelRegression('ModelReg_SN_'+str(model_number), model, lib_type='keras', data_handler=data_handler)
+	else:
+		tModel = SequenceTunableModelClassification('ModelClass_SN_'+str(model_number), model, lib_type='keras', data_handler=data_handler)
 
 	return tModel
 

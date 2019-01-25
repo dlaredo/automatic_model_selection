@@ -6,6 +6,8 @@ import logging
 import sys
 import numpy as np
 
+import ray
+
 from keras import backend as K
 from keras.callbacks import LearningRateScheduler
 
@@ -156,6 +158,79 @@ class Configuration():
 		self._similarity_threshold = similarity_threshold
 
 
+def evaluate_population(population, configuration, data_handler, tModel_scaler, best_model, worst_model, unroll, verbose_data):
+	"""Given the population, evaluate it using a framework for deep learning ("keras")"""
+
+	count = 0
+	worst_index = 0
+
+	#Fetch to keras	
+	print("Fetching to keras")
+	fetch_to_keras.population_to_keras(population, configuration.input_shape, data_handler, tModel_scaler=tModel_scaler)
+
+
+	print("Evaluating population")
+
+	#Evaluate population
+	for individual in population:
+		individual.tModel.model.summary()
+		individual.compute_fitness(epochs=configuration.epochs, cross_validation_ratio=configuration.cross_val, size_scaler=configuration.size_scaler, verbose_data=verbose_data, unroll=unroll)
+		individual.individual_label = count
+
+		#Get generation best
+		if individual.fitness < best_model.fitness:
+			best_model = individual
+
+		#Replace worst with previous best
+		if individual.fitness > worst_model.fitness:
+			worst_model = individual
+			worst_index = count
+
+		individual.individual_label = count
+
+		count = count+1
+
+	return best_model, worst_model, worst_index
+
+
+@ray.remote
+def partial_run(model_genotype, problem_type, input_shape, data_handler, cross_validation_ratio, run_number, epochs=20):
+	"""This should be run in Ray"""
+
+	"""How to keep the data in a way such that it doesnt create too much overhead"""
+
+	K.clear_session()  #Clear the previous tensorflow graph
+	model = fetch_to_keras.decode_genotype(model_genotype, problem_type, input_shape, 1)
+
+	if model != None:
+		model.summary()
+
+	lrate = fetch_to_keras.LearningRateScheduler(CMAPSAuxFunctions.step_decay)
+
+	model = fetch_to_keras.get_compiled_model(model, problem_type, optimizer_params=[])
+	tModel = SequenceTunableModelRegression('ModelMNIST_SN_'+str(run_number), model, lib_type='keras', data_handler=data_handler)
+	
+
+	#tModel.load_data(verbose=1, cross_validation_ratio=0.2)
+	tModel.load_data(verbose=1, cross_validation_ratio=0.2, unroll=True)
+
+
+	tModel.print_data()
+
+	tModel.epochs = epochs
+	tModel.train_model(learningRate_scheduler=lrate, verbose=1)
+
+	tModel.evaluate_model(cross_validation=True)
+	cScores = tModel.scores
+	print(cScores)
+
+	"""
+	tModel.evaluate_model(cross_validation=False)
+	cScores = tModel.scores
+	print(cScores)
+	"""
+
+
 
 def partial_run(model_genotype, problem_type, input_shape, data_handler, cross_validation_ratio, run_number, epochs=20):
 	"""This should be run in Ray"""
@@ -229,8 +304,8 @@ def run_experiment(configuration, data_handler, experiment_number, unroll=False,
 
 	while launch_new_generation == True and generation_count < configuration.max_generations:
 		
-		count = 0
-		worst_index = 0
+		#count = 0
+		#worst_index = 0
 		parent_pool = []
 		offsprings = []
 
@@ -245,31 +320,7 @@ def run_experiment(configuration, data_handler, experiment_number, unroll=False,
 
 		launch_new_generation = nn_evolutionary.launch_new_generation(population, configuration.max_similar, configuration.similarity_threshold, logger=True)
 
-		#Fetch to keras	
-		print("Fetching to keras")
-		fetch_to_keras.population_to_keras(population, configuration.input_shape, data_handler, tModel_scaler=tModel_scaler)
-
-
-		print("Evaluating population")
-
-		#Evaluate population
-		for individual in population:
-			individual.tModel.model.summary()
-			individual.compute_fitness(epochs=configuration.epochs, cross_validation_ratio=configuration.cross_val, size_scaler=configuration.size_scaler, verbose_data=verbose_data, unroll=unroll)
-			individual.individual_label = count
-
-			#Get generation best
-			if individual.fitness < best_model.fitness:
-				best_model = individual
-
-			#Replace worst with previous best
-			if individual.fitness > worst_model.fitness:
-				worst_model = individual
-				worst_index = count
-
-			individual.individual_label = count
-
-			count = count+1
+		best_model, worst_model, worst_index = evaluate_population(population, configuration, data_handler, tModel_scaler, best_model, worst_model, unroll, verbose_data)
 
 		logging.info("\nPopulation at generation " + str(generation_count+1))
 		print_pop(population, logger=True)

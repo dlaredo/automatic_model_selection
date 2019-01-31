@@ -7,11 +7,13 @@ import sys
 import numpy as np
 
 import ray
+import CMAPSAuxFunctions
 
 from keras import backend as K
 from keras.callbacks import LearningRateScheduler
 
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from ann_framework.tunable_model.tunable_model import SequenceTunableModelRegression, SequenceTunableModelClassification
 
 #from data_handlers import data_handler_MNIST
 
@@ -193,80 +195,60 @@ def evaluate_population(population, configuration, data_handler, tModel_scaler, 
 	return best_model, worst_model, worst_index
 
 
+#Evaluate the population remotely, in order to prevent a large network overhead we will just send the string model and return the score
+def ray_evaluate_population(population, configuration, data_handler, tModel_scaler, best_model, worst_model, unroll, verbose_data, logging_actor=None):
+
+	count = 0
+	worst_index = 0
+	results = []
+
+	#Fetch to keras, this could also be donde in Ray, but for now lets just do it locally	
+	print("Ray fetching to keras and evaluating population")
+	#fetch_to_keras.population_to_keras(population, configuration.input_shape, data_handler, tModel_scaler=tModel_scaler)
+
+	#Evaluate population
+	for individual in population:
+		#result = partial_run.remote(individual, configuration.input_shape, data_handler, configuration.cross_val, tModel_scaler, count+1, configuration.epochs)
+		result = partial_run.remote(configuration.input_shape, configuration.cross_val, tModel_scaler, count+1, configuration.epochs, logging_actor)
+		results.append(result)
+		count = count + 1
+
+	print(results)
+
+	results = ray.get(results)
+	print(results)
+
+	return 1
+
+
 @ray.remote
-def partial_run(model_genotype, problem_type, input_shape, data_handler, cross_validation_ratio, run_number, epochs=20):
+#def partial_run(individual, input_shape, data_handler, cross_validation_ratio, tModel_scaler, ind_number, epochs=20):
+def partial_run(input_shape, cross_validation_ratio, tModel_scaler, ind_number, epochs=20, logging_actor=None):
 	"""This should be run in Ray"""
 
 	"""How to keep the data in a way such that it doesnt create too much overhead"""
+	if logging_actor != None:
+		logging_actor.log.remote(ind_number, "scaler")
+		logging_actor.log.remote(ind_number, tModel_scaler)
 
+	"""
 	K.clear_session()  #Clear the previous tensorflow graph
-	model = fetch_to_keras.decode_genotype(model_genotype, problem_type, input_shape, 1)
 
-	if model != None:
-		model.summary()
+	tModel = fetch_to_keras.create_tunable_model(individual.stringModel, individual.problem_type, input_shape, data_handler, ind_number)
 
-	lrate = fetch_to_keras.LearningRateScheduler(CMAPSAuxFunctions.step_decay)
+	if tModel_scaler != None:
+		tModel.data_handler.data_scaler = None
+		tModel.data_scaler = tModel_scaler
 
-	model = fetch_to_keras.get_compiled_model(model, problem_type, optimizer_params=[])
-	tModel = SequenceTunableModelRegression('ModelMNIST_SN_'+str(run_number), model, lib_type='keras', data_handler=data_handler)
-	
+	individual.tModel = tModel
 
-	#tModel.load_data(verbose=1, cross_validation_ratio=0.2)
-	tModel.load_data(verbose=1, cross_validation_ratio=0.2, unroll=True)
-
-
-	tModel.print_data()
-
-	tModel.epochs = epochs
-	tModel.train_model(learningRate_scheduler=lrate, verbose=1)
-
-	tModel.evaluate_model(cross_validation=True)
-	cScores = tModel.scores
-	print(cScores)
-
-	"""
-	tModel.evaluate_model(cross_validation=False)
-	cScores = tModel.scores
-	print(cScores)
+	print(individual)
 	"""
 
+	#individual.compute_fitness(epochs=configuration.epochs, cross_validation_ratio=configuration.cross_val, size_scaler=configuration.size_scaler, verbose_data=verbose_data, unroll=unroll)
+	return 1
 
 
-def partial_run(model_genotype, problem_type, input_shape, data_handler, cross_validation_ratio, run_number, epochs=20):
-	"""This should be run in Ray"""
-
-	"""How to keep the data in a way such that it doesnt create too much overhead"""
-
-	K.clear_session()  #Clear the previous tensorflow graph
-	model = fetch_to_keras.decode_genotype(model_genotype, problem_type, input_shape, 1)
-
-	if model != None:
-		model.summary()
-
-	lrate = fetch_to_keras.LearningRateScheduler(CMAPSAuxFunctions.step_decay)
-
-	model = fetch_to_keras.get_compiled_model(model, problem_type, optimizer_params=[])
-	tModel = SequenceTunableModelRegression('ModelMNIST_SN_'+str(run_number), model, lib_type='keras', data_handler=data_handler)
-	
-
-	#tModel.load_data(verbose=1, cross_validation_ratio=0.2)
-	tModel.load_data(verbose=1, cross_validation_ratio=0.2, unroll=True)
-
-
-	tModel.print_data()
-
-	tModel.epochs = epochs
-	tModel.train_model(learningRate_scheduler=lrate, verbose=1)
-
-	tModel.evaluate_model(cross_validation=True)
-	cScores = tModel.scores
-	print(cScores)
-
-	"""
-	tModel.evaluate_model(cross_validation=False)
-	cScores = tModel.scores
-	print(cScores)
-	"""
 
 
 def print_pop(parent_pool, logger=False):
@@ -278,7 +260,7 @@ def print_pop(parent_pool, logger=False):
 			logging.info(str(ind))
 
 
-def run_experiment(configuration, data_handler, experiment_number, unroll=False, verbose_data=0, tModel_scaler=None):
+def run_experiment(configuration, data_handler, experiment_number, unroll=False, verbose_data=0, tModel_scaler=None, logging_actor=None):
 	"""Run one experiment"""
 	launch_new_generation = True #First generation is always launched
 	experiment_best = None
@@ -303,7 +285,7 @@ def run_experiment(configuration, data_handler, experiment_number, unroll=False,
 
 
 	while launch_new_generation == True and generation_count < configuration.max_generations:
-		
+
 		#count = 0
 		#worst_index = 0
 		parent_pool = []
@@ -320,7 +302,10 @@ def run_experiment(configuration, data_handler, experiment_number, unroll=False,
 
 		launch_new_generation = nn_evolutionary.launch_new_generation(population, configuration.max_similar, configuration.similarity_threshold, logger=True)
 
-		best_model, worst_model, worst_index = evaluate_population(population, configuration, data_handler, tModel_scaler, best_model, worst_model, unroll, verbose_data)
+		launch_new_generation = False
+
+		ray_evaluate_population(population, configuration, data_handler, tModel_scaler, best_model, worst_model, unroll, verbose_data, logging_actor)
+		"""best_model, worst_model, worst_index = evaluate_population(population, configuration, data_handler, tModel_scaler, best_model, worst_model, unroll, verbose_data)
 
 		logging.info("\nPopulation at generation " + str(generation_count+1))
 		print_pop(population, logger=True)
@@ -405,7 +390,8 @@ def run_experiment(configuration, data_handler, experiment_number, unroll=False,
 
 	print("Experiment {} finished".format(experiment_number))
 	logging.info("Experiment {} finished".format(experiment_number))
-	return experiment_best
+	return experiment_best"""
+	return 1
 
 
 def print_best(best_list):

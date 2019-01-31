@@ -20,7 +20,7 @@ from ann_framework.tunable_model.tunable_model import SequenceTunableModelRegres
 def create_tunable_model(model_genotype, problem_type, input_shape, data_handler, model_number):
 
 	#K.clear_session()  #Clear the previous tensorflow graph
-	model = decode_genotype(model_genotype, problem_type, input_shape, 1)
+	model = decode_genotype(model_genotype, problem_type, input_shape)
 
 	lrate = LearningRateScheduler(CMAPSAuxFunctions.step_decay)
 
@@ -48,8 +48,8 @@ def population_to_keras(population, input_shape, data_handler, tModel_scaler=Non
 
 		individual.tModel = tModel
 
-
-def decode_genotype(model_genotype, problem_type, input_shape, output_dim):
+#def decode_genotype(model_genotype, problem_type, input_shape, output_dim):
+def decode_genotype(model_genotype, problem_type, input_shape):
 	"""From a model genotype, generate the keras model"""
 
 	model = Sequential()

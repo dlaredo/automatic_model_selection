@@ -9,10 +9,7 @@ from keras import backend as K
 
 import ann_encoding_rules
 from ann_encoding_rules import Layers, LayerCharacteristics, ann_building_rules, activations
-import fetch_to_keras
-import CMAPSAuxFunctions
 
-lrate = fetch_to_keras.LearningRateScheduler(CMAPSAuxFunctions.step_decay)
 
 class Individual():
 
@@ -29,14 +26,14 @@ class Individual():
 		self._checksum_vector = np.zeros(1)
 
 
-	def compute_fitness(self, epochs, cross_validation_ratio, size_scaler, verbose_data=0, unroll=False):
+	def compute_fitness(self, epochs, cross_validation_ratio, size_scaler, verbose_data=0, unroll=False, learningRate_scheduler=None):
 
 		round_up_to = 3
 
 		trainable_count = int(np.sum([K.count_params(p) for p in set(self._tModel.model.trainable_weights)]))
 		self._raw_size = trainable_count
 
-		self.partial_run(cross_validation_ratio, epochs, verbose_data=verbose_data, veborse_train=1, unroll=unroll)
+		self.partial_run(cross_validation_ratio, epochs, verbose_data=verbose_data, veborse_train=1, unroll=unroll, learningRate_scheduler=learningRate_scheduler)
 		metric_score = self._tModel.scores['score_1']
 		self._raw_score = metric_score
 
@@ -70,15 +67,15 @@ class Individual():
 				self._checksum_vector[index] = self._checksum_vector[index]+layer[index]
 
 
-	def partial_run(self, cross_validation_ratio, epochs=20, verbose_data=0, veborse_train=0, unroll=False):
+	def partial_run(self, cross_validation_ratio=0.2, epochs=20, verbose_data=0, veborse_train=0, unroll=False, learningRate_scheduler=None):
 
-		self._tModel.load_data(verbose=verbose_data, cross_validation_ratio=0.2, unroll=unroll)
+		self._tModel.load_data(verbose=verbose_data, cross_validation_ratio=cross_validation_ratio, unroll=unroll)
 
 		if verbose_data == 1:
 			self._tModel.print_data()
 
 		self._tModel.epochs = epochs
-		self._tModel.train_model(learningRate_scheduler=lrate, verbose=veborse_train)
+		self._tModel.train_model(learningRate_scheduler=learningRate_scheduler, verbose=veborse_train)
 
 		self._tModel.evaluate_model(cross_validation=True)
 		cScores = self._tModel.scores
@@ -260,19 +257,19 @@ def mutation(offsprings, mutation_ratio):
 		logging.info("Mutation probability " + str(mutation_probability))
 		if mutation_probability < mutation_ratio:
 
-			 #pick a layer randomly
-			 len_model = len(individual.stringModel)
-			 random_layer_index = np.random.randint(len_model-1)  #Last layer can not be modified
-			 
-			 logging.info("\nInidividual before mutation")
-			 logging.info(individual)
-			 logging.info("\nLayer number " + str(random_layer_index))
-			 logging.info(individual.stringModel[random_layer_index])
-			 
-			 individual.stringModel = layer_based_mutation(individual.stringModel, random_layer_index)
-			 
-			 logging.info("\nInidividual after mutation")
-			 logging.info(individual)
+			#pick a layer randomly
+			len_model = len(individual.stringModel)
+			random_layer_index = np.random.randint(len_model-1)  #Last layer can not be modified
+
+			logging.info("\nInidividual before mutation")
+			logging.info(individual)
+			logging.info("\nLayer number " + str(random_layer_index))
+			logging.info(individual.stringModel[random_layer_index])
+
+			individual.stringModel = layer_based_mutation(individual.stringModel, random_layer_index)
+
+			logging.info("\nInidividual after mutation")
+			logging.info(individual)
 
 
 def layer_based_mutation(stringModel, layer_index, logger=True):
@@ -544,7 +541,7 @@ def find_match(parent, layer_prev, layer_next, first_layer, max_layers):
 	return compatible_previuos, compatible_next
 
 
-def launch_new_generation(population, max_similar, similar_threshold=0.9, logger=False):
+def genration_similar(population, max_similar, similar_threshold=0.9, logger=False):
 	#Compute distances between elements and remove those that are very similar
 
 	new_pop = []
@@ -554,7 +551,7 @@ def launch_new_generation(population, max_similar, similar_threshold=0.9, logger
 	max_distance = 0
 	max_pair = None
 	similar = 0
-	launch_new_experiment = True
+	generation_similar = True
 
 	for i in range(len_pop):
 		for j in range(len_pop):
@@ -579,7 +576,7 @@ def launch_new_generation(population, max_similar, similar_threshold=0.9, logger
 			max_pair = pair
 
 	if max_distance == 0:
-		launch_new_experiment = False
+		generation_similar = False
 	else:
 		#Normalize distances and see how many are greater than threshold
 		for key in distances:
@@ -590,13 +587,13 @@ def launch_new_generation(population, max_similar, similar_threshold=0.9, logger
 				similar = similar + 1
 
 	if similar > max_similar:
-		launch_new_experiment = False
+		generation_similar = False
 
 	if logger == True:
 		logging.info("similar = " + str(similar))
 		logging.info(distances)
 
-	return launch_new_experiment
+	return generation_similar
 
 
 def distance_between_models(stringModel1, stringModel2):

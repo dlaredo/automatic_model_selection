@@ -1,19 +1,11 @@
 import nn_evolutionary
 import fetch_to_keras
 import random
-import datetime
 import logging
-import sys
-import numpy as np
 
 import ray
 
 from keras import backend as K
-from keras.callbacks import LearningRateScheduler
-
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
-
-#from data_handlers import data_handler_MNIST
 
 
 class Configuration():
@@ -158,7 +150,59 @@ class Configuration():
 		self._similarity_threshold = similarity_threshold
 
 
-def evaluate_population(population, configuration, data_handler, tModel_scaler, best_model, worst_model, unroll, verbose_data):
+def evaluate_individual(individual, configuration, data_handler, tModel_scaler, ind_index, unroll, learningRate_scheduler=None, verbose_data=0):
+	"""Given an individual (that only contains the string model) fetch it to keras and evaluate it
+	This is done this way to make possible the distribution of the model evaluation. Furthermore
+	this allows that we can reset the keras/tensorflow session everytime we evaluate a new model"""
+
+	"""Clear the session to avoid clutter from old models/layers (only useful for small number of models,
+		as the number of models grows the session will become more and more cluttered)"""
+	K.clear_session()
+
+	#Fetch the individual to keras
+	print("Fetching model {} to keras".format(ind_index))
+	tModel = fetch_to_keras.create_tunable_model(individual.stringModel, individual.problem_type, configuration.input_shape, data_handler, ind_index)
+	individual.tModel = tModel
+
+	if tModel_scaler != None:
+		tModel.data_handler.data_scaler = None
+		tModel.data_scaler = tModel_scaler
+
+	print("Evaluating model {}".format(ind_index))
+	print(tModel.model.summary())
+
+	individual.compute_fitness(epochs=configuration.epochs, cross_validation_ratio=configuration.cross_val,
+							   size_scaler=configuration.size_scaler, verbose_data=verbose_data, unroll=unroll, learningRate_scheduler=learningRate_scheduler)
+	individual.individual_label = ind_index
+
+
+
+def evaluate_population(population, configuration, data_handler, tModel_scaler, best_model, worst_model, unroll, learningRate_scheduler=None, verbose_data=0):
+	"""Given the population, evaluate it using a framework for deep learning (keras/tensorflow)"""
+
+	count = 0
+	worst_index = 0
+
+	for i in range(len(population)):
+		individual = population[i]
+
+		evaluate_individual(individual, configuration, data_handler, tModel_scaler, i, unroll,
+							learningRate_scheduler=learningRate_scheduler, verbose_data=verbose_data)
+
+		#Get generation best
+		if individual.fitness < best_model.fitness:
+			best_model = individual
+
+		#Replace worst with previous best
+		if individual.fitness > worst_model.fitness:
+			worst_model = individual
+			worst_index = count
+
+
+	return best_model, worst_model, worst_index
+
+
+def evaluate_population2(population, configuration, data_handler, tModel_scaler, best_model, worst_model, unroll, verbose_data):
 	"""Given the population, evaluate it using a framework for deep learning ("keras")"""
 
 	count = 0
@@ -195,6 +239,7 @@ def evaluate_population(population, configuration, data_handler, tModel_scaler, 
 
 @ray.remote
 def partial_run(model_genotype, problem_type, input_shape, data_handler, cross_validation_ratio, run_number, epochs=20):
+	"""Function to partially run a model given its genotype and input data"""
 	"""This should be run in Ray"""
 
 	"""How to keep the data in a way such that it doesnt create too much overhead"""
@@ -233,6 +278,7 @@ def partial_run(model_genotype, problem_type, input_shape, data_handler, cross_v
 
 
 def partial_run(model_genotype, problem_type, input_shape, data_handler, cross_validation_ratio, run_number, epochs=20):
+	"""Function to partially run a model given its genotype and input data"""
 	"""This should be run in Ray"""
 
 	"""How to keep the data in a way such that it doesnt create too much overhead"""
@@ -278,19 +324,21 @@ def print_pop(parent_pool, logger=False):
 			logging.info(str(ind))
 
 
-def run_experiment(configuration, data_handler, experiment_number, unroll=False, verbose_data=0, tModel_scaler=None):
-	"""Run one experiment"""
+def run_experiment(configuration, data_handler, experiment_number, unroll=False, learningRate_scheduler=None, tModel_scaler=None, verbose_data=0):
+	"""Run one experiment. An experiment consists of running the evolutionary algorithm for n generations"""
+
 	launch_new_generation = True #First generation is always launched
 	experiment_best = None
 	generation_count = 0
 
-	parent_pop = []
-	elite_archive = []
+	#parent_pop = []
+	elite_archive = []  #Archive to store the best individuals in each generation
 
 	best_model = nn_evolutionary.Individual(configuration.pop_size*2, configuration.problem_type, [], [], fitness=10**8)  #Big score for the first comparisson
-	worst_model = nn_evolutionary.Individual(configuration.pop_size*2+1, configuration.problem_type, [], [], fitness=0)  #Big score for the first comparisson
+	worst_model = nn_evolutionary.Individual(configuration.pop_size*2+1, configuration.problem_type, [], [], fitness=0)  #Small score for the first comparisson
 	worst_index = 0
 
+	#Log the information of this experiment
 	logging.info("Starting model optimization: Problem type {}, Architecture type {}".format(configuration.problem_type, configuration.architecture_type))
 	logging.info("Parameters:")
 	logging.info("Input shape: {}, Output shape: {}, cross_val ratio: {}, Generations: {}, Population size: {}, Tournament size: {}, Binary selection: {}, Mutation ratio: {}, Size scaler: {}".format(
@@ -304,8 +352,8 @@ def run_experiment(configuration, data_handler, experiment_number, unroll=False,
 
 	while launch_new_generation == True and generation_count < configuration.max_generations:
 		
-		#count = 0
-		#worst_index = 0
+		count = 0
+		worst_index = 0
 		parent_pool = []
 		offsprings = []
 
@@ -314,14 +362,19 @@ def run_experiment(configuration, data_handler, experiment_number, unroll=False,
 		print("\nGeneration " + str(generation_count+1))
 		logging.info("\n\nGeneration " + str(generation_count+1))
 
-		#Remove those individuals that are very similar
+		#Fill checksum vector
 		for ind in population:
 			ind.compute_checksum_vector()
 
-		launch_new_generation = nn_evolutionary.launch_new_generation(population, configuration.max_similar, configuration.similarity_threshold, logger=True)
+		#If the individuals in the generation are very similar prematurely stop the experiment (Here it is important to address the fact on how to measure similarity)
+		generation_similar = nn_evolutionary.genration_similar(population, configuration.max_similar, configuration.similarity_threshold, logger=True)
+		launch_new_generation = not generation_similar
 
-		best_model, worst_model, worst_index = evaluate_population(population, configuration, data_handler, tModel_scaler, best_model, worst_model, unroll, verbose_data)
+		#Assess the fitness of the inidividuals in the population
+		best_model, worst_model, worst_index = evaluate_population(population, configuration, data_handler, tModel_scaler,
+																   best_model, worst_model, unroll, learningRate_scheduler, verbose_data)
 
+		#Save worst and best models. Also append best model to elite archive
 		logging.info("\nPopulation at generation " + str(generation_count+1))
 		print_pop(population, logger=True)
 

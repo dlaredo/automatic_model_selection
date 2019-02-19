@@ -1,13 +1,9 @@
-import random
-import CMAPSAuxFunctions
 import sys
 
 import keras
 import keras.layers
 from keras.models import Sequential
 from keras.optimizers import Adam, SGD
-from keras.callbacks import LearningRateScheduler
-from keras import regularizers
 
 sys.path.append('/Users/davidlaredorazo/Documents/University_of_California/Research/Projects')
 #sys.path.append('/Users/davidlaredorazo/Documents/University_of_California/Research/Projects')
@@ -19,10 +15,7 @@ from ann_framework.tunable_model.tunable_model import SequenceTunableModelRegres
 
 def create_tunable_model(model_genotype, problem_type, input_shape, data_handler, model_number):
 
-	#K.clear_session()  #Clear the previous tensorflow graph
 	model = decode_genotype(model_genotype, problem_type, input_shape, 1)
-
-	lrate = LearningRateScheduler(CMAPSAuxFunctions.step_decay)
 
 	model = get_compiled_model(model, problem_type, optimizer_params=[])
 	
@@ -149,9 +142,9 @@ def array_to_layer(array, problem_type=0, input_shape=(0,), output_dim=0, first_
 
 def get_compiled_model(model, problem_type, optimizer_params=[]):
 	"""Obtain a keras compiled model"""
-	
+
 	#Shared parameters for the models
-	optimizer = Adam(lr=0, beta_1=0.5)
+	optimizer = Adam(lr=0.001, beta_1=0.5)
 	
 	if problem_type == 1:
 		lossFunction = "mean_squared_error"

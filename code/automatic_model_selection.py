@@ -370,6 +370,11 @@ def run_experiment(configuration, data_handler, experiment_number, unroll=False,
 		generation_similar = nn_evolutionary.genration_similar(population, configuration.max_similar, configuration.similarity_threshold, logger=True)
 		launch_new_generation = not generation_similar
 
+		print("launch new")
+		print(launch_new_generation)
+		print("gen similar")
+		print(generation_similar)
+
 		#Assess the fitness of the inidividuals in the population
 		best_model, worst_model, worst_index = evaluate_population(population, configuration, data_handler, tModel_scaler,
 																   best_model, worst_model, unroll, learningRate_scheduler, verbose_data)

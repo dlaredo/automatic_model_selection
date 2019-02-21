@@ -551,7 +551,7 @@ def genration_similar(population, max_similar, similar_threshold=0.9, logger=Fal
 	max_distance = 0
 	max_pair = None
 	similar = 0
-	generation_similar = True
+	generation_similar = False
 
 	for i in range(len_pop):
 		for j in range(len_pop):
@@ -575,8 +575,9 @@ def genration_similar(population, max_similar, similar_threshold=0.9, logger=Fal
 			max_distance = distance_norm
 			max_pair = pair
 
+	#If max distance is zero, then all the elements in the generation are equal
 	if max_distance == 0:
-		generation_similar = False
+		generation_similar = True
 	else:
 		#Normalize distances and see how many are greater than threshold
 		for key in distances:
@@ -587,7 +588,7 @@ def genration_similar(population, max_similar, similar_threshold=0.9, logger=Fal
 				similar = similar + 1
 
 	if similar > max_similar:
-		generation_similar = False
+		generation_similar = True
 
 	if logger == True:
 		logging.info("similar = " + str(similar))

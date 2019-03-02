@@ -26,14 +26,14 @@ class Individual():
 		self._checksum_vector = np.zeros(1)
 
 
-	def compute_fitness(self, epochs, cross_validation_ratio, size_scaler, verbose_data=0, unroll=False, learningRate_scheduler=None):
+	def compute_fitness(self, epochs, cross_validation_ratio, size_scaler, verbose=0, unroll=False, learningRate_scheduler=None):
 
 		round_up_to = 3
 
 		trainable_count = int(np.sum([K.count_params(p) for p in set(self._tModel.model.trainable_weights)]))
 		self._raw_size = trainable_count
 
-		self.partial_run(cross_validation_ratio, epochs, verbose_data=verbose_data, veborse_train=1, unroll=unroll, learningRate_scheduler=learningRate_scheduler)
+		self.partial_run(cross_validation_ratio, epochs, verbose=verbose, unroll=unroll, learningRate_scheduler=learningRate_scheduler)
 		metric_score = self._tModel.scores['score_1']
 		self._raw_score = metric_score
 
@@ -67,15 +67,12 @@ class Individual():
 				self._checksum_vector[index] = self._checksum_vector[index]+layer[index]
 
 
-	def partial_run(self, cross_validation_ratio=0.2, epochs=20, verbose_data=0, veborse_train=0, unroll=False, learningRate_scheduler=None):
+	def partial_run(self, cross_validation_ratio=0.2, epochs=20, verbose=0, unroll=False, learningRate_scheduler=None):
 
-		self._tModel.load_data(verbose=verbose_data, cross_validation_ratio=cross_validation_ratio, unroll=unroll)
-
-		if verbose_data == 1:
-			self._tModel.print_data()
+		self._tModel.load_data(verbose=0, cross_validation_ratio=cross_validation_ratio, unroll=unroll)
 
 		self._tModel.epochs = epochs
-		self._tModel.train_model(learningRate_scheduler=learningRate_scheduler, verbose=veborse_train)
+		self._tModel.train_model(learningRate_scheduler=learningRate_scheduler, verbose=verbose)
 
 		self._tModel.evaluate_model(cross_validation=True)
 		cScores = self._tModel.scores

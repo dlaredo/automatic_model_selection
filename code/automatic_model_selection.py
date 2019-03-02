@@ -11,7 +11,7 @@ from keras import backend as K
 class Configuration():
 
 	def __init__(self, architecture_type, problem_type, input_shape, output_shape, pop_size, tournament_size, max_similar, size_scaler=1, epochs=1, cross_val=0.2, more_layers_prob=0.5, 
-		max_generations=1, binary_selection=True, mutation_ratio=0.4, similarity_threshold=0.9):
+		     max_generations=1, binary_selection=True, mutation_ratio=0.4, similarity_threshold=0.9, verbose_individuals=False, show_model=False, verbose_training=0):
 		
 		self._architecture_type = architecture_type
 		self._problem_type = problem_type  #1 for regression, 2 for classification
@@ -28,6 +28,9 @@ class Configuration():
 		self._max_similar = max_similar
 		self._epochs = epochs
 		self._size_scaler = size_scaler
+		self._verbose_individuals = verbose_individuals
+		self._verbose_training = verbose_training
+		self._show_model = show_model
 
 	@property
 	def architecture_type(self):
@@ -149,8 +152,33 @@ class Configuration():
 	def similarity_threshold(self, similarity_threshold):
 		self._similarity_threshold = similarity_threshold
 
+	@property
+	def verbose_individuals(self):
+		return self._verbose_individuals
 
-def evaluate_individual(individual, configuration, data_handler, tModel_scaler, ind_index, unroll, learningRate_scheduler=None, verbose_data=0):
+	@verbose_individuals.setter
+	def verbose_individuals(self, verbose_individuals):
+		self._verbose_individuals = verbose_individuals
+
+	@property
+	def verbose_training(self):
+		return self._verbose_training
+
+	@verbose_training.setter
+	def verbose_training(self, verbose_training):
+		self._verbose_training = verbose_training
+
+	@property
+	def show_model(self):
+		return self._show_model
+
+	@show_model.setter
+	def show_model(self, show_model):
+		self._show_model = show_model
+
+
+
+def evaluate_individual(individual, configuration, data_handler, tModel_scaler, ind_index, unroll, learningRate_scheduler=None):
 	"""Given an individual (that only contains the string model) fetch it to keras and evaluate it
 	This is done this way to make possible the distribution of the model evaluation. Furthermore
 	this allows that we can reset the keras/tensorflow session everytime we evaluate a new model"""
@@ -160,7 +188,9 @@ def evaluate_individual(individual, configuration, data_handler, tModel_scaler, 
 	K.clear_session()
 
 	#Fetch the individual to keras
-	print("Fetching model {} to keras".format(ind_index))
+	if configuration.show_model:
+		print("Fetching model {} to keras".format(ind_index))
+		
 	tModel = fetch_to_keras.create_tunable_model(individual.stringModel, individual.problem_type, configuration.input_shape, data_handler, ind_index)
 	individual.tModel = tModel
 
@@ -168,16 +198,17 @@ def evaluate_individual(individual, configuration, data_handler, tModel_scaler, 
 		tModel.data_handler.data_scaler = None
 		tModel.data_scaler = tModel_scaler
 
-	print("Evaluating model {}".format(ind_index))
-	print(tModel.model.summary())
+	if configuration.show_model:
+		print("Evaluating model {}".format(ind_index))
+		print(tModel.model.summary())
 
 	individual.compute_fitness(epochs=configuration.epochs, cross_validation_ratio=configuration.cross_val,
-							   size_scaler=configuration.size_scaler, verbose_data=verbose_data, unroll=unroll, learningRate_scheduler=learningRate_scheduler)
+							   size_scaler=configuration.size_scaler, verbose=configuration.verbose_training, unroll=unroll, learningRate_scheduler=learningRate_scheduler)
 	individual.individual_label = ind_index
 
 
 
-def evaluate_population(population, configuration, data_handler, tModel_scaler, best_model, worst_model, unroll, learningRate_scheduler=None, verbose_data=0):
+def evaluate_population(population, configuration, data_handler, tModel_scaler, best_model, worst_model, unroll, learningRate_scheduler=None):
 	"""Given the population, evaluate it using a framework for deep learning (keras/tensorflow)"""
 
 	count = 0
@@ -187,7 +218,10 @@ def evaluate_population(population, configuration, data_handler, tModel_scaler, 
 		individual = population[i]
 
 		evaluate_individual(individual, configuration, data_handler, tModel_scaler, i, unroll,
-							learningRate_scheduler=learningRate_scheduler, verbose_data=verbose_data)
+							learningRate_scheduler=learningRate_scheduler)
+
+		if configuration.verbose_individuals == True:
+			print("Individual {} score/size/fitness {}/{}/{}".format(i, individual.raw_score, individual.raw_size, individual.fitness))
 
 		#Get generation best
 		if individual.fitness < best_model.fitness:
@@ -324,7 +358,7 @@ def print_pop(parent_pool, logger=False):
 			logging.info(str(ind))
 
 
-def run_experiment(configuration, data_handler, experiment_number, unroll=False, learningRate_scheduler=None, tModel_scaler=None, verbose_data=0):
+def run_experiment(configuration, data_handler, experiment_number, unroll=False, learningRate_scheduler=None, tModel_scaler=None):
 	"""Run one experiment. An experiment consists of running the evolutionary algorithm for n generations"""
 
 	launch_new_generation = True #First generation is always launched
@@ -377,7 +411,7 @@ def run_experiment(configuration, data_handler, experiment_number, unroll=False,
 
 		#Assess the fitness of the inidividuals in the population
 		best_model, worst_model, worst_index = evaluate_population(population, configuration, data_handler, tModel_scaler,
-																   best_model, worst_model, unroll, learningRate_scheduler, verbose_data)
+																   best_model, worst_model, unroll, learningRate_scheduler)
 
 		#Save worst and best models. Also append best model to elite archive
 		logging.info("\nPopulation at generation " + str(generation_count+1))

@@ -4,7 +4,6 @@ import copy
 import logging
 
 import numpy as np
-import math
 
 from keras import backend as K
 
@@ -182,23 +181,17 @@ def generate_model(model=None, prev_component=Layers.Empty, next_component=Layer
 	while True:
 
 		curr_component = random.choice(ann_building_rules[prev_component])
-		print("generate layer")
-		print(curr_component)
 
 		#Perturbate param layer
 		if curr_component == Layers.PerturbateParam:
-			print("perturbate param")
 			ann_building_rules[Layers.PerturbateParam] = ann_building_rules[prev_component]
 		elif curr_component == Layers.Dropout: #Dropout layer
 			ann_building_rules[Layers.Dropout] = ann_building_rules[prev_component].copy()
 			ann_building_rules[Layers.Dropout].remove(Layers.Dropout)
 
-		#Use gaussian distribution to
-		#rndm = random.gauss(0, 1)
 		rndm = random.random()
 		rndm = 1 - math.sqrt(1-rndm) #Inverse transformation of -2x + 2 which is the probability distribution we want to follow.
 		more_layers = (rndm <= more_layers_prob)
-		print("more layers {} and random {}".format(more_layers, rndm))
 
 		#Keep adding more layers
 		if more_layers == False:
@@ -235,7 +228,7 @@ def initial_population(pop_size, problem_type, architecture_type, number_classes
 
 		model_genotype, success = generate_model(more_layers_prob=more_layers_prob, prev_component=architecture_type, used_activations=used_activations)
 
-		#Generate first layer, is always of the type of the architecture
+		#Generate first layer
 		layer_first = ann_encoding_rules.generate_layer(architecture_type, used_activations)
 
 		#Last layer is always FC
@@ -293,7 +286,7 @@ def layer_based_mutation(stringModel, layer_index, logger=True):
 		characteristic = random.choice([LayerCharacteristics.NeuronsNumber.value, LayerCharacteristics.ActivationType.value, LayerCharacteristics.DropoutRate.value])
 
 	elif layer_type == Layers.Convolutional:
-		characteristic = random.choice([LayerCharacteristics.ActivationType.value, LayerCharacteristics.FilterSizeCNN.value, LayerCharacteristics.KernelSizeCNN.value,
+		characteristic = random.choice([LayerCharacteristics.ActivationType.value, LayerCharacteristics.FilterSizeCNN.value, LayerCharacteristics.KernelSizeCNN.value, 
 			LayerCharacteristics.StrideCNN.value, LayerCharacteristics.DropoutRate.value])
 
 	elif layer_type == Layers.Pooling:
@@ -315,7 +308,7 @@ def layer_based_mutation(stringModel, layer_index, logger=True):
 		logging.info("Choosen characteristic " + str(characteristic))
 		logging.info("Selected value " + str(value))
 
-	#If valid layer, then generate
+	#If valid layer, then generate 
 	if characteristic != LayerCharacteristics.DropoutRate and value != -1:
 		layer[characteristic.value] = value
 
@@ -497,7 +490,7 @@ def two_point_crossover(parent1, parent2, max_layers, max_attempts=5, logger=Fal
 				for j in compatible_next:
 
 					if j-i < max_layers and j-i >= 0:
-						compatible_substructures.append((i,j))
+						compatible_substructures.append((i,j)) 
 
 			if compatible_substructures != []:
 
@@ -528,7 +521,7 @@ def find_match(parent, layer_prev, layer_next, first_layer, max_layers):
 		layer = stringModel[i]
 
 		#Check forward compatibility
-		if first_layer == True:
+		if first_layer == True: 
 			if layer[0] == layer_prev[0]:
 				compatible_previuos.append(i)
 		else:
@@ -648,9 +641,9 @@ def distance_between_models(stringModel1, stringModel2):
 			for j in range(1, len_layer):
 				layer_distance[j] = stringModel2[i][j]
 
-			distance += np.linalg.norm(layer_distance, 2)
+			distance += np.linalg.norm(layer_distance, 2)	
 
-	return distance
+	return distance	
 
 
 

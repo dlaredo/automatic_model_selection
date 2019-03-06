@@ -169,7 +169,7 @@ class Individual():
 		self._checksum_vector = checksum_vector
 
 
-def generate_model(model=None, prev_component=Layers.Empty, next_component=Layers.Empty, max_layers=64, more_layers_prob=0.8, used_activations = {}):
+def generate_model(model=None, prev_component=Layers.Empty, next_component=Layers.Empty, max_layers=64, more_layers_prob=0.7, used_activations = {}):
 	"""Iteratively and randomly generate a model"""
 
 	layer_count = 0
@@ -190,6 +190,7 @@ def generate_model(model=None, prev_component=Layers.Empty, next_component=Layer
 			ann_building_rules[Layers.Dropout].remove(Layers.Dropout)
 
 		rndm = random.random()
+		rndm = 1 - math.sqrt(1-rndm) #Inverse transformation of -2x + 2 which is the probability distribution we want to follow.
 		more_layers = (rndm <= more_layers_prob)
 
 		#Keep adding more layers
@@ -217,7 +218,7 @@ def generate_model(model=None, prev_component=Layers.Empty, next_component=Layer
 	return model, success
 
 
-def initial_population(pop_size, problem_type, architecture_type, number_classes=2, more_layers_prob=0.5, cross_validation=0):
+def initial_population(pop_size, problem_type, architecture_type, number_classes=2, more_layers_prob=0.7):
 
 	population = []
 

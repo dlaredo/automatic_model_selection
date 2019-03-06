@@ -381,7 +381,7 @@ def run_experiment(configuration, data_handler, experiment_number, unroll=False,
 
 
 	population = nn_evolutionary.initial_population(configuration.pop_size, configuration.problem_type, configuration.architecture_type, number_classes=configuration.output_shape,
-		more_layers_prob=configuration.more_layers_prob, cross_validation=configuration.cross_val)
+		more_layers_prob=configuration.more_layers_prob)
 
 
 	while launch_new_generation == True and generation_count < configuration.max_generations:

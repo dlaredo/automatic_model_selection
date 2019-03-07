@@ -940,7 +940,7 @@ Parameter & AutoNN Value \\
 Problem Type & 1 \\
 Architecture Type & FullyConnected \\
 Input Shape & $(784, M)$  \\
-Output Shape & $(1, M)$ \\
+Output Shape & $(10, M)$ \\
 Cross Validation Ratio & $c_v = 0.2$ \\
 Mutation Ratio & $m_p = 0.4$ \\
 More Layers Probability & $n_r = 0.7$ \\
@@ -992,11 +992,11 @@ S_5 & = \left[ (448, 0), (0.3), (888, 0), (10, 3) \right] \\
 \hline
 Model & Score (Accuracy) & Trainable Parameters & Fitness\\
 \hline
-$S_1$ & 0.946 & 332314 & 4.9519\\
-$S_2$ & 0.915 & 93346 & 4.1827\\
-$S_3$ & 0.105 & 6305682 & 14.3839\\
-$S_4$ & 0.920 & 1862426 & 5.8084\\
-$S_5$ & 0.950 & 1901162 & 5.5140\\
+$S_1$ & 94.6\% & 332314 & 4.9519\\
+$S_2$ & 91.5\% & 93346 & 4.1827\\
+$S_3$ & 10.5\% & 6305682 & 14.3839\\
+$S_4$ & 92.0\% & 1862426 & 5.8084\\
+$S_5$ & 95.0\% & 1901162 & 5.5140\\
 \hline
 \end{tabular}
 \end{center}
@@ -1026,11 +1026,11 @@ S^*_5 & = \left[ (128, 1), (128, 1), (0.3),  (10, 3) \right] \\
 \hline
 Model & Score (Accuracy) & Trainable Parameters & Fitness\\
 \hline
-$S^*_1$ & 0.944 & 76330 & 4.4638\\
-$S^*_2$ & 0.950 & 40522 & 4.1827\\
-$S^*_3$ & 0.968 & 224370 & 4.7226\\
-$S^*_4$ & 0.951 & 235330 & 4.7843\\
-$S^*_5$ & 0.955 & 118282 & 4.5016\\
+$S^*_1$ & 94.4\% & 76330 & 4.4638\\
+$S^*_2$ & 95.0\% & 40522 & 4.1827\\
+$S^*_3$ & 96.8\% & 224370 & 4.7226\\
+$S^*_4$ & 95.1\% & 235330 & 4.7843\\
+$S^*_5$ & 95.5\% & 118282 & 4.5016\\
 \hline
 \end{tabular}
 \end{center}
@@ -1056,11 +1056,11 @@ S^*_5 & = \left[ (88, 2), (88, 2), (10, 3) \right] \\
 \hline
 Model & Score (Accuracy) & Trainable Parameters & Fitness\\
 \hline
-$S^*_1$ & 0.967 & 248050 & 3.5575\\
-$S^*_2$ & 0.968 & 292570 & 3.5976\\
-$S^*_3$ & 0.963 & 159010 & 3.4891\\
-$S^*_4$ & 0.963 & 178090 & 3.5169\\
-$S^*_5$ & 0.952 & 77802 & 3.4094\\
+$S^*_1$ & 96.7\% & 248050 & 3.5575\\
+$S^*_2$ & 96.8\% & 292570 & 3.5976\\
+$S^*_3$ & 96.3\% & 159010 & 3.4891\\
+$S^*_4$ & 96.3\% & 178090 & 3.5169\\
+$S^*_5$ & 95.2\% & 77802 & 3.4094\\
 \hline
 \end{tabular}
 \end{center}
@@ -1086,11 +1086,11 @@ S^*_5 & = \left[ (64, 2),  (10, 3) \right] \\
 \hline
 Model & Score (Accuracy) & Trainable Parameters & Fitness\\
 \hline
-$S^*_1$ & 0.965 & 126762 & 5.4529\\
-$S^*_2$ & 0.939 & 26506 & 5.0388\\
-$S^*_3$ & 0.941 & 44530 & 5.2348\\
-$S^*_4$ & 0.960 & 144106 & 5.5550\\
-$S^*_5$ & 0.946 & 50890 & 5.2475\\
+$S^*_1$ & 96.5\% & 126762 & 5.4529\\
+$S^*_2$ & 93.9\% & 26506 & 5.0388\\
+$S^*_3$ & 94.1\% & 44530 & 5.2348\\
+$S^*_4$ & 96.0\% & 144106 & 5.5550\\
+$S^*_5$ & 94.6\% & 50890 & 5.2475\\
 \hline
 \end{tabular}
 \end{center}
@@ -1107,38 +1107,116 @@ Finally, we compare the best models for each value of $\alpha$ against each othe
 
 \begin{table}[!htb]
 \begin{center}
-\scalebox{0.85}{
-\begin{tabular}{| c | c | c | c | c | c |}
+\begin{tabular}{| c | c | c | c |}
 \hline
-Model & 10-fold Min. & 10-fold Max. & 10-fold Avg. & Test Avg. & Network size\\
+Model & 10-fold Avg. Score & Test Avg. Score & Network size\\
 \hline
-$S^*_1$ & 0.974 & 0.978 & 0.976 & 0.977 & 93346\\
-$S^*_2$ & 0.966 & 0.974 & 0.970 & 0.972 & 77802\\
-$S^*_3$ & 0.958 & 0.965 & 0.961 & 0.964 & 26506\\
+$S^*_1$ & 97.6\% & 97.7\% & 93346\\
+$S^*_2$ & 97.0\% & 97.2\% & 77802\\
+$S^*_3$ & 96.1\% & 96.4\% & 26506\\
 \hline
 \end{tabular}
-}
 \end{center}
 \caption{Accuracy obtained by each of the top 3 models for MNIST dataset.}
 \label{table:avg_accuracies_mnist}
 \end{table}
 
-As expected, model $S^*_3$ yields a smaller neural network (about 3 times smaller) than the rest of the proposed models, nevertheless its accuracy is the worst of the three models (though by a small margin). On the contrary model $S^*_1$ gets the best performance (again marginal) in terms of accuracy but with a larger neural network as compared to model $S^*_3$. Finally, model $S^*_2$ as expected, attains a performance in between $S^*_1$ and $S^*_3$ with a number of trainable parameters also in between $S^*_1$ and $S^*_3$. It is important to note though that the accuracy of each of the models presented for this dataset is acceptable as compared against some modern methods where the accuracy ranges from $97\%$ \cite{lecun-98}, to $99\%$ \cite{deng2011}. A thorough comparison between the obtained models and some other modern models using this dataset is out of the scope of this work mainly fue to the fact that the models obtained by AMS are not fine tuned as the models with higher accuracy.
+As expected, model $S^*_3$ yields a smaller neural network (about 3 times smaller) than the rest of the proposed models, nevertheless its accuracy is the worst of the three models (though by a small margin). On the contrary model $S^*_1$ gets the best performance (again marginal) in terms of accuracy but with a larger neural network as compared to model $S^*_3$. Finally, model $S^*_2$ as expected, attains a performance in between $S^*_1$ and $S^*_3$ with a number of trainable parameters also in between $S^*_1$ and $S^*_3$. It is important to note though that the accuracy of each of the models presented for this dataset is acceptable as compared against some modern methods. Table \ref{table:MNIST_results_top} shows the top models along with their obtained accuracy for the MNIST dataset, it can be observed that the accuracy obtained by AMS is close to that obtained by fine tuned models. A thorough comparison between the obtained models and some other modern models using this dataset is out of the scope of this work mainly fue to the fact that the models obtained by AMS are not fine tuned as the models with higher accuracy.
+
+\begin{table}[!htb]
+\begin{center}
+\begin{tabular}{| c | c | c |}
+\hline
+Method & Test accuracy & Size\\
+\hline
+3 Layer NN, 300+100 hidden units \cite{lecun-98} &  96.95\% & 266610\\
+2 Layer NN, 800 hidden units \cite{Simard2003} & 98.4\% & 636010\\
+6-layer NN (elastic distortions) \cite{Ciresan2010}  & 99.65\% & 11972510\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Top results for MNIST dataset.}
+\label{table:MNIST_results_top}
+\end{table}
+
+where the accuracy ranges from $97\%$ \cite{}, to $99\%$ \cite{deng2011}
 
 
 \subsection{CMAPSS Dataset - A regression problem}
 
-In this section we analyze the performance of AMS when working in regression problems. For testing regression we use the C-MAPSS dataset \cite{CMAPS2008}. The C-MAPSS dataset contains simulated data produced using a model based simulation program developed by NASA. The dataset is further divided into 4 subsets composed of multi-variate temporal data obtained from 21 sensors, nevertheless for our test we will only make use of the first dataset. Training and a separate test set are provided. The training set includes run-to-failure sensor records of multiple aero-engines collected under different operational conditions and fault modes.
+In this section we analyze the performance of AMS when working with regression problems. For testing regression we use the C-MAPSS dataset \cite{CMAPS2008}. The C-MAPSS dataset contains simulated data produced using a model based simulation program developed by NASA. The dataset is further divided into 4 subsets composed of multi-variate temporal data obtained from 21 sensors, nevertheless for our test we will only make use of the first subset of data. Training and separate test sets are provided. The training set includes run-to-failure sensor records of multiple aero-engines collected under different operational conditions and fault modes.
 
 The data is arranged in an $n\times26$ matrix where $n$ is the number of data points in each subset. The first two variables represent the engine and cycle
-numbers, respectively. The following three variables are operational settings which correspond to the conditions in Table \ref{table:CMAPSS} and have a
+numbers, respectively. The following three variables are operational settings which correspond to the conditions in Table \ref{table:dataset_cmaps_params} and have a
 substantial effect on the engine performance. The remaining variables represent the 21 sensor readings that contain the information about the engine
 degradation over time.
 
-Each trajectory within the training and test sets represents the life cycles of the engine. Each engine is simulated with different initial health conditions, i.e. no initial faults. For each trajectory of an engine the last data entry corresponds to the cycle at which the engine is found faulty. On the other hand, the trajectories of the test sets terminate at some point prior to failure, hence the need to predict the remaining useful life. The aim of the MLP model is to predict the RUL of each engine in the test set (regression). The actual RUL values of test trajectories are also included in the dataset for verification. Further discussions of the dataset and details on how the data is generated can be found in \cite{Saxena2008}.
+\begin{table}[!htb]
+\begin{center}
+\scalebox{0.90}{
+\begin{tabular}{| c | c | c | c |}
+\hline
+Train trajectories & Test trajectories & Operating conditions & Fault modes \\
+\hline
+100 & 100 & 1 & 1 \\
+\hline
+\end{tabular}
+}
+\end{center}
+\caption{CMAPSS dataset details.}
+\label{table:dataset_cmaps_params}
+\end{table}
 
-For this test we follow the data pre-processing described in \cite{Laredo2018}, in short only 14 out of the total 21 sensors are used as the input data. Furthermore we also use a strided time-window, with window size of 24, a stride of 1 and earlyRUL of 129, to analyze the sequenced data as used in \cite{Laredo2018}. Further details of the time-window approach can be found in \cite{Laredo2018} and \cite{Li2018}.
+Each trajectory within the training and test sets represents the life cycles of the engine. Each engine is simulated with different initial health conditions, i.e. no initial faults. For each trajectory of an engine the last data entry corresponds to the cycle at which the engine is found faulty. On the other hand, the trajectories of the test sets terminate at some point prior to failure, hence the need to predict the remaining useful life (RUL). The aim of the MLP model is to predict the RUL of each engine in the test set via regression. The actual RUL values of test trajectories are also included in the dataset for verification. Further discussions of the dataset and details on how the data is generated can be found in \cite{Saxena2008}.
 
+For this test we follow the data pre-processing described in \cite{Laredo2018}, in short only 14 out of the total 21 sensors are used as the input data. Furthermore we also use a strided time-window, with window size of 24, a stride of 1 and earlyRUL of 129, to form the feature vectors for the MLP as in \cite{Laredo2018}. Further details of the time-window approach can be found in \cite{Laredo2018} and \cite{Li2018}.
+
+We run AMS to find a suitable FullyConnected model for regression using the CMAPSS dataset. The details for the parameter used in this test are described in Table \ref{table:CMAPSS_params}
+
+\begin{table}[!htb]
+\begin{center}
+\begin{tabular}{| c | c |}
+\hline
+Parameter & AutoNN Value \\
+\hline
+Problem Type & 1 \\
+Architecture Type & FullyConnected \\
+Input Shape & $(336, M)$  \\
+Output Shape & $(1, M)$ \\
+Cross Validation Ratio & $c_v = 0.2$ \\
+Mutation Ratio & $m_p = 0.4$ \\
+More Layers Probability & $n_r = 0.7$ \\
+Network Size Scaling Factor & $\alpha = 0.8$ \\
+Population Size & $n_s = 10$ \\
+Tournament Size & $n_t = 4$ \\
+Max Similar Models & $s = 3$ \\
+Total Experiments & $E_{max} = 5$ \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Parameters for CMAPSS for each method.}
+\label{table:CMAPSS_params}
+\end{table}
+
+Once again we start by presenting the baseline for our tests. Table ... presents some of the top results obtained by MLPs in the CMAPSS dataset, the results are measured in terms of the RMSE (Root Mean Squared Error) between the real RUL and the predicted RUL.
+
+\begin{table}[!htb]
+\begin{center}
+\begin{tabular}{| c | c |}
+\hline
+Method & Reported RMSE on test set \\
+\hline
+Time Window MLP & 15.16 \\
+Time Window MLP with EA & 14.39 \\
+Deep MLP ensemble & 15.04 \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Top results for CMAPSS dataset.}
+\label{table:CMAPSS_results_top}
+\end{table}
+
+As with MNIST dataset we start by analyzing the results obtained when $\alpha=0.8$
 
 \section{Conclusions and Future Work}
 \label{sec:conclusions}

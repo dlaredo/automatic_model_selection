@@ -5,6 +5,8 @@ import logging
 
 import ray
 
+import numpy as np
+
 from keras import backend as K
 
 
@@ -190,7 +192,7 @@ def evaluate_individual(individual, configuration, data_handler, tModel_scaler, 
 	#Fetch the individual to keras
 	if configuration.show_model:
 		print("Fetching model {} to keras".format(ind_index))
-		
+
 	tModel = fetch_to_keras.create_tunable_model(individual.stringModel, individual.problem_type, configuration.input_shape, data_handler, ind_index)
 	individual.tModel = tModel
 
@@ -202,27 +204,67 @@ def evaluate_individual(individual, configuration, data_handler, tModel_scaler, 
 		print("Evaluating model {}".format(ind_index))
 		print(tModel.model.summary())
 
+	"""
 	individual.compute_fitness(epochs=configuration.epochs, cross_validation_ratio=configuration.cross_val,
 							   size_scaler=configuration.size_scaler, verbose=configuration.verbose_training, unroll=unroll, learningRate_scheduler=learningRate_scheduler)
+	"""
+
+	individual.compute_raw_scores(epochs=configuration.epochs, cross_validation_ratio=configuration.cross_val,
+				      verbose=configuration.verbose_training, unroll=unroll, learningRate_scheduler=learningRate_scheduler)
+	
 	individual.individual_label = ind_index
 
 
 
-def evaluate_population(population, configuration, data_handler, tModel_scaler, best_model, worst_model, unroll, learningRate_scheduler=None):
+def evaluate_population(population, configuration, data_handler, tModel_scaler, unroll, learningRate_scheduler=None):
 	"""Given the population, evaluate it using a framework for deep learning (keras/tensorflow)"""
 
+	best_model = nn_evolutionary.Individual(configuration.pop_size*2, configuration.problem_type, [], [], fitness=10**8)  #Big score for the first comparisson
+	worst_model = nn_evolutionary.Individual(configuration.pop_size*2+1, configuration.problem_type, [], [], fitness=0)  #Small score for the first comparisson
+	
 	count = 0
 	worst_index = 0
+	pop_size = len(population)
+	raw_scores = np.zeros((pop_size))
+	normalized_scores = None
 
-	for i in range(len(population)):
+	#Compute the raw score for each individual
+	for i in range(pop_size):
 		individual = population[i]
 
 		evaluate_individual(individual, configuration, data_handler, tModel_scaler, i, unroll,
 							learningRate_scheduler=learningRate_scheduler)
 
-		if configuration.verbose_individuals == True:
-			print("Individual {} score/size/fitness {}/{}/{}".format(i, individual.raw_score, individual.raw_size, individual.fitness))
+		raw_scores[i] = individual.raw_score
+		
+		#if configuration.verbose_individuals == True:
+		#	print("Individual {} score/size/fitness {}/{}/{}".format(i, individual.raw_score, individual.raw_size, individual.fitness))
 
+	#Normalize population
+	normalization_factor = np.linalg.norm(raw_scores)
+	#normalization_factor = raw_scores.max()
+	
+	normalized_scores = raw_scores/normalization_factor
+	#print(normalization_factor)
+	#print(normalized_scores)
+
+	#Compute fitness based on normalized score for each individual
+	for i in range(pop_size):
+
+		individual = population[i]
+
+		#For classification we use the accuracy
+		if individual.problem_type == 2:
+			individual.normalized_score = raw_scores[i]
+		else:  #For regression we used normalized RMSE
+			individual.normalized_score = normalized_scores[i]
+
+		individual.compute_fitness(configuration.size_scaler)
+
+		if configuration.verbose_individuals == True:
+			print("Individual {} score/normalized score/size/fitness {}/{}/{}/{}".format(i, individual.raw_score, individual.normalized_score, individual.raw_size, individual.fitness))
+			logging.info("Individual {} score/normalized score/size/fitness {}/{}/{}/{}".format(i, individual.raw_score, individual.normalized_score, individual.raw_size, individual.fitness))
+			
 		#Get generation best
 		if individual.fitness < best_model.fitness:
 			best_model = individual
@@ -368,10 +410,6 @@ def run_experiment(configuration, data_handler, experiment_number, unroll=False,
 	#parent_pop = []
 	elite_archive = []  #Archive to store the best individuals in each generation
 
-	best_model = nn_evolutionary.Individual(configuration.pop_size*2, configuration.problem_type, [], [], fitness=10**8)  #Big score for the first comparisson
-	worst_model = nn_evolutionary.Individual(configuration.pop_size*2+1, configuration.problem_type, [], [], fitness=0)  #Small score for the first comparisson
-	worst_index = 0
-
 	#Log the information of this experiment
 	logging.info("Starting model optimization: Problem type {}, Architecture type {}".format(configuration.problem_type, configuration.architecture_type))
 	logging.info("Parameters:")
@@ -411,7 +449,7 @@ def run_experiment(configuration, data_handler, experiment_number, unroll=False,
 
 		#Assess the fitness of the inidividuals in the population
 		best_model, worst_model, worst_index = evaluate_population(population, configuration, data_handler, tModel_scaler,
-																   best_model, worst_model, unroll, learningRate_scheduler)
+																   unroll, learningRate_scheduler)
 
 		#Save worst and best models. Also append best model to elite archive
 		logging.info("\nPopulation at generation " + str(generation_count+1))
@@ -442,7 +480,7 @@ def run_experiment(configuration, data_handler, experiment_number, unroll=False,
 				experiment_best = best_model
 
 		#Proceed with rest of algorithm
-		offsprings_complete = False
+		#offsprings_complete = False
 		print("\nGenerating offsprings")
 		logging.info("\n\nCrossover\n\n")
 

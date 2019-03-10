@@ -18,6 +18,7 @@ class Individual():
 		self._stringModel = stringModel
 		self._tModel = tModel
 		self._raw_score = raw_score
+		self._normalized_score = raw_score
 		self._raw_size = raw_size
 		self._fitness = fitness
 		self._problem_type = problem_type
@@ -26,9 +27,7 @@ class Individual():
 		self._checksum_vector = np.zeros(1)
 
 
-	def compute_fitness(self, epochs, cross_validation_ratio, size_scaler, verbose=0, unroll=False, learningRate_scheduler=None):
-
-		round_up_to = 3
+	def compute_raw_scores(self, epochs, cross_validation_ratio, verbose=0, unroll=False, learningRate_scheduler=None):
 
 		trainable_count = int(np.sum([K.count_params(p) for p in set(self._tModel.model.trainable_weights)]))
 		self._raw_size = trainable_count
@@ -36,16 +35,24 @@ class Individual():
 		self.partial_run(cross_validation_ratio, epochs, verbose=verbose, unroll=unroll, learningRate_scheduler=learningRate_scheduler)
 		metric_score = self._tModel.scores['score_1']
 		self._raw_score = metric_score
+		self._normalized_score = metric_score
+
+		
+	def compute_fitness(self, size_scaler):
+
+		round_up_to = 3
 
 		#Round up to the first 3 digits before computing log
 		rounding_scaler = 10**round_up_to
-		trainable_count = round(trainable_count/rounding_scaler)*rounding_scaler
+		trainable_count = round(self._raw_size/rounding_scaler)*rounding_scaler
 
+		scaled_score = self.normalized_score
+		
 		#For classification estimate the error which is between 0 and 1
 		if self._problem_type == 2:
-			metric_score = (1 - metric_score)*10 #Multiply by 10 to have a better scaling. I still need to find an appropriate scaling
+			metric_score = (1 - scaled_score)*10 #Multiply by 10 to have a better scaling. I still need to find an appropriate scaling
 		else:
-			metric_score = metric_score
+			metric_score = scaled_score*10 #Multiply by 10 to have a better scaling. I still need to find an appropiate scaling
 
 		size_score = math.log10(trainable_count)
 
@@ -69,7 +76,18 @@ class Individual():
 
 	def partial_run(self, cross_validation_ratio=0.2, epochs=20, verbose=0, unroll=False, learningRate_scheduler=None):
 
-		self._tModel.load_data(verbose=0, cross_validation_ratio=cross_validation_ratio, unroll=unroll)
+		"""
+		print(self._tModel.data_handler)
+		print("Data loaded?")
+		print(self._tModel.data_loaded)
+		"""
+		
+		self._tModel.load_data(verbose=1, cross_validation_ratio=cross_validation_ratio, unroll=unroll)
+
+		"""
+		print("Data loaded?")
+		print(self._tModel.data_loaded)
+		"""
 
 		self._tModel.epochs = epochs
 		self._tModel.train_model(learningRate_scheduler=learningRate_scheduler, verbose=verbose)
@@ -111,6 +129,14 @@ class Individual():
 	@raw_score.setter
 	def raw_score(self, raw_score):
 		self._raw_score = raw_score
+
+	@property
+	def normalized_score(self):
+		return self._normalized_score
+
+	@normalized_score.setter
+	def normalized_score(self, normalized_score):
+		self._normalized_score = normalized_score
 
 	@property
 	def raw_size(self):

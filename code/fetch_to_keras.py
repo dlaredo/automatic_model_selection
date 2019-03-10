@@ -12,6 +12,20 @@ from ann_encoding_rules import Layers, ann_building_rules, activations
 
 from ann_framework.tunable_model.tunable_model import SequenceTunableModelRegression, SequenceTunableModelClassification
 
+class SingletonTunableModel():
+
+	instance = None
+
+	def __init__(self, problem_type,  model_name, model, lib_type, data_handler):
+		if not SingletonTunableModel.instance:
+			if problem_type == "Regression":
+				SingletonTunableModel.instance = SequenceTunableModelRegression(model_name, model, lib_type=lib_type, data_handler=data_handler)
+			else:
+				SingletonTunableModel.instance = SequenceTunableModelClassification(model_name, model, lib_type=lib_type, data_handler=data_handler)
+		else:
+			SingletonTunableModel.instance.change_model(model_name, model, lib_type)
+			SingletonTunableModel.instance.data_handler = data_handler
+			
 
 def create_tunable_model(model_genotype, problem_type, input_shape, data_handler, model_number):
 
@@ -19,10 +33,13 @@ def create_tunable_model(model_genotype, problem_type, input_shape, data_handler
 
 	model = get_compiled_model(model, problem_type, optimizer_params=[])
 	
+	
 	if problem_type == 1:
-		tModel = SequenceTunableModelRegression('ModelReg_SN_'+str(model_number), model, lib_type='keras', data_handler=data_handler)
+		tModel_singleton = SingletonTunableModel('Regression', 'ModelReg_SN_'+str(model_number), model, lib_type='keras', data_handler=data_handler)
 	else:
-		tModel = SequenceTunableModelClassification('ModelClass_SN_'+str(model_number), model, lib_type='keras', data_handler=data_handler)
+		tModel_singleton = SingletonTunableModel('Classification', 'ModelReg_SN_'+str(model_number), model, lib_type='keras', data_handler=data_handler)
+
+	tModel = tModel_singleton.instance
 
 	return tModel
 

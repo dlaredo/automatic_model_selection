@@ -395,8 +395,8 @@
 CA, 95340 USA e-mail: dlaredorazo@ucmerced.edu.}}% <-this % stops a space
 \end{comment}
 
-\author{David Laredo, Jian-Qiao Sun% <-this % stops a space
-\thanks{D. Laredo and JQ Sun are with the Department of Mechanical Engineering, University of California, Merced,
+\author{David Laredo, Jian-Qiao Sun, Yulin Qin% <-this % stops a space
+\thanks{All the authors are affiliated with the Department of Mechanical Engineering, University of California, Merced,
 CA, 95340 USA e-mail: dlaredorazo@ucmerced.edu.}}% <-this % stops a space
 
 % note the % following the last \IEEEmembership and also \thanks - 
@@ -453,7 +453,7 @@ CA, 95340 USA e-mail: dlaredorazo@ucmerced.edu.}}% <-this % stops a space
 % As a general rule, do not put math, special symbols or citations
 % in the abstract or keywords.
 \begin{abstract}
-Neural networks and deep learning are changing the way that artificial intelligence is being done. Efficiently choosing a suitable model (including hyperparameters) for a specific problem is a time-consuming task. Choosing among the many different combinations of neural networks available gives rise to a staggering number of possible alternatives overall. Here we address this problem by proposing a fully automated framework for efficiently selecting a neural network model given a specific problem (whether it is classification or regression). Our proposal focuses on a distributed decision-making algorithm for keeping the most promising models among a pool of possible models for three of the major neural network architectures, namely Convolutional Neural Networks (CNNs), Multi-Layer Perceptrons (MLPs) and Recurrent Neural Networks (RNNs). This work develops AutoNN, a new micro genetic algorithm (along with a new representation for the neural network as a genotype and new crossover and mutation operator) that automatically and efficiently finds the most suitable neural network model for a problem specified by the user. Our evaluation on four different datasets show that the AutoNN effectively finds suitable neural network models while being efficient in terms of the computational burden, our results are compared against other state of the art methods such as Auto-Weka and SkLearn.
+Neural networks and deep learning are changing the way that artificial intelligence is being done. Efficiently choosing a suitable model (including hyperparameters) for a specific problem is a time-consuming task. Choosing among the many different combinations of neural networks available gives rise to a staggering number of possible alternatives overall. Here we address this problem by proposing a fully automated framework for efficiently selecting a neural network model given a specific problem (whether it is classification or regression). Our proposal focuses on a distributed decision-making algorithm for keeping the most promising models among a pool of possible models for one of the major neural network architectures, Multi-Layer Perceptrons (MLPs). This work develops Automatic Model Selection (AMS), a modified micro genetic algorithm that automatically and efficiently finds the most suitable neural network model for a given dataset. Our contributions include: a simple list based encoding for neural networks as genotypes in an evolutionary algorithm, new crossover and mutation operators, the introduction of a fitness function that considers both, the accuracy of the model and its complexity and a method to measure the similarity between two neural networks. Our evaluation on two different datasets show that AMS effectively finds suitable neural network models while being efficient in terms of the computational burden, our results are compared against other state of the art methods such as Auto-Keras and AutoML.
 \end{abstract}
 
 % Note that keywords are not normally used for peerreview papers.
@@ -494,32 +494,63 @@ artificial neural networks, model selection, hyperparameter tuning, distributed 
 % 
 % Here we have the typical use of a "T" for an initial drop letter
 % and "HIS" in caps to complete the first word.
-\IEEEPARstart{M}{achine} learning studies automatic algorithms that improve themselves through experience. Given the large amounts of data currently available in many fields such as engineering, biomedical, finance, etc, and the increasingly computing power available machine learning is now  practiced by people with very diverse backgrounds. Increasingly, users of machine learning tools are non-experts who require off-the-shelf solutions. The machine learning community has aided these users by making available a variety of easy to use learning algorithms and feature selection methods such as WEKA \cite{Hall2009}, PyBrain \cite{Schaul2010} or MLLib \cite{mlib2017}. Nevertheless, the user still needs to make some choices which not may be obvious or intuitive (selecting a learning algorithm, hyperparameters, features, etc) thus leading to the selection of non optimal models.
+\IEEEPARstart{M}{achine} learning studies algorithms that improve themselves through experience. Given the large amounts of data currently available in many fields such as engineering, biomedical, finance, etc, and the increasingly computing power available machine learning is now practiced by people with very diverse backgrounds. Increasingly, users of machine learning tools are non-experts who require off-the-shelf solutions. Automated Machine Learning (AutoML) is the field of machine learning devoted to developing algorithms and solutions to enable people with limited machine learning background knowledge to use use machine learning models easily. Tools like WEKA \cite{Hall2009}, PyBrain \cite{Schaul2010} or MLLib \cite{mlib2017} follow this paradigm. Nevertheless, the user still needs to make some choices which not may be obvious or intuitive (selecting a learning algorithm, hyperparameters, features, etc) thus leading to the selection of non optimal models.
 
-Recently, deep neural networks have gained a lot of attention due to the newer models (CNN, RNN, Deep Learning, etc.) and their flexibility and generality for solving a large number of problems: regression, classification, natural language processing, recommendation systems, just to mention a few. Furthermore, there are a lot software libraries which makes their implementations easy to use (TensorFlow \cite{TensorFlow2015}, Keras \cite{keras2015}, Caffe \cite{caffe2014}, CNTK \cite{cntk2016}, etc). Nevertheless, the task of picking the right neural network model (hyperparameters included) can be even more complicated and time consuming than that of other algorithms. Given the popularity of neural networks, specially among non computer scientist we will restrict our efforts in this study to them and leave other machine learning algorithms for future work.
+Recently, deep learning models (CNN, RNN, Deep NN) have gained a lot of attention due their improved efficiency on complex learning problems and their flexibility and generality for solving a large number of problems such as: regression, classification, natural language processing, recommendation systems, etc. Furthermore, there are a lot software libraries which makes their implementation easier. TensorFlow \cite{TensorFlow2015}, Keras \cite{keras2015}, Caffe \cite{caffe2014} and CNTK \cite{cntk2016} are some examples of such libraries. Despite the availability of such libraries and tools, the task of picking the right neural network model  and its hyperparameters is usually complex and iterative in nature specially among non computer scientist.
 
 Usually, the process of selecting a suitable machine learning model for a particular problem is done in an iterative manner. First, an input dataset must be transformed from a domain specific format to features which are predictive of the field of interest, once features have been engineered users must pick a learning setting appropriate to their problem, e.g. regression, classification or recommendation. Next users must pick an appropriate model, such as support vector machines (SVM), logistic regression or any flavor of neural networks (NNs). Each model family has a number of hyperparameters, such as regularization degree, learning rate, number of neurons, etc, and each of these must be tuned to achieve optimal results. Finally, users must pick a software package that can train their model, configure one or more machines to execute the training and evaluate the model's quality. It can be challenging to make the right choice when faced with so many degrees of freedom, leaving many users to select a model based on intuition or randomness and/or leave hyperparameters set to default, this approach will usually yield suboptimal results.
 
 This suggests a natural challenge for machine learning: given a dataset, to automatically and simultaneously chose a learning algorithm and set its hyperparameters to optimize performance. As mentioned in \cite{Hall2009} the combined space of learning algorithm and hyperparemeters is very challenging to search: the response function is noisy and the space is high dimensional involving both, categorical and continuous choices and containing hierarchical dependencies (e.g. hyperparameters of the algorithm are only meaningful if that algorithm is chosen). Thus, identifying a high quality model is typically costly (in the sense that entails a lot of computational effort) and time consuming.
 
-Distributed and cloud computing provide a compelling way to accelerate this process, but also present additional challenges. Though parallel storage and processing techniques enable users to train models on massive datasets and accelerate the search process by training multiple models at once, the distributed setting forces several more decisions upon users: what parallel execution strategy to use, how big a cluster to provision, how to efficiently distribute computation across it, and what machine learning framework to use. These decisions are onerous, particularly for users who are experts in their own field but inexperienced in machine learning and distributed systems.
+To address this challenges we propose Automatic Model Selection (AMS) a flexible and scalable method to automate the process of selecting artificial neural network models. The key contributions of this paper include: 1) a simple, list based encoding of neural networks as genotypes for evolutionary computation algorithms, 2) new crossover and mutation operators to generate valid neural networks models from an evolutionary algorithm, 3) the introduction of a fitness function that considers both, the accuracy of the model and its complexity and 3) a method for measuring the similarity between two neural networks. All these components together form a new method based on an evolutionary algorithm, which we call AMS, and that can be used to find an optimal neural network architecture for a given dataset.
 
-To address this challenges we propose AutoNN a flexible and scalable system to automate the process of selecting artificial neural network models. The key contributions of this paper include: 1) a new way to encode neural networks as genotypes for evolutionary computation algorithms, 2) new crossover and mutation operators to generate valid neural networks models from an evolutionary algorithm, 3) defining a way of measuring the similarity between two neural networks, 4) all these components together make a new evolutionary algorithm, which we call AutoNN, which can be used to find an optimal neural network architecture for a given problem.
-
-The remainder of this paper is organized as follows: Section \ref{sec:model_selection} formally introduces the model selection problem (also referred as CASH problem). The related work is briefly reviewed in Section \ref{sec:literature_review}. Next the AutoNN algorithm and all of its components are described in detail in Section \ref{sec:auto_nn}, experiments to test the algorithm and comparison against other state of the art methods are presented in Section \ref{sec:evaluation}. Finally conclusions and future work are discussed in Section \ref{sec:conclusions}.
+The remainder of this paper is organized as follows: Section \ref{sec:model_selection} formally introduces the model selection problem. The related work is briefly reviewed in Section \ref{sec:literature_review}. The AMS algorithm and all of its components are described in detail in Section \ref{sec:auto_nn}, experiments to test the algorithm and comparison against other state of the art methods are presented in Section \ref{sec:evaluation}. Conclusions and future work are discussed in Section \ref{sec:conclusions}.
 
 %----------------------------------------------------------------------------------------
 %	Model selection
 %----------------------------------------------------------------------------------------
 
+\section{Problem Statement}
+\label{sec:model_selection}
+
+In this section we mathematically define the general neural network architecture search problem. Consider a dataset $\mathcal{D}$ made up of training points $d_i = (\mathbf{x_i}, \mathbf{y_i}) \in \mathcal{X} \times \mathcal{Y}$ where $\mathcal{X}$ is the set of data points and $\mathcal{Y}$ is the set of labels. Furthermore, lets split the dataset into training set $D_t$, cross validation set $D_v$, and test set $D_e$. Given a neural network architecture search space $\mathcal{F}$ the performance of a neural network architecture $f \in \mathcal{F}$ on trained on $\mathcal{D}_t$ and validated with  $\mathcal{D}_v$ is defined as:
+
+\begin{equation}
+p = Per(f(D_t); D_v),
+\label{eq:nn_cost}
+\end{equation}
+
+where $Perf(.)$ can be any standard or custom cost metric, e.g. accuracy, precision, mean squared error, etc.  Commonly used performance indicators can be found in Table \ref{table:performance_metrics}. 
+
+Finding a neural network $f^* \in \mathcal{F}$ that achieves a good performance has been explored in \cite{Jin2018, Real2018} among others. While this task alone is challenging, usually the efficiency of $f^*$ is not measured. Indeed, it turns out that there can be several candidate models that can attain similar performance with improved efficiency. By efficiency we mean, in practical terms, how fast is to train $f^*$ as compared to other possible solutions. 
+
+In this paper we aim to achive neural network models $f^*$ that not only exhibit good performance in $\mathcal{D}$ as measured by $p$ but also achieves such performance using a simple structure, which directly translates to improved efficiency of the model. To measure the complexity of the architecture we make use of the number of trainable parameters $w(f)$ of the neural network, we will also refer to $w(f)$ as the ``size'' of the neural network.
+
+The problem of finding an neural network $f$ that achieves both a good performance on the dataset $\mathcal{D}$ with a simple model can be mathematically stated as the following multiobjective optimization problem:
+
+\begin{equation}
+	\begin{aligned}
+	f^* = \underset{f \in \mathcal{F}}{\text{argmin}}
+	& \quad (p(f), w(f))\\
+	\end{aligned}
+	\label{eq:mop}
+\end{equation}
+
+In this paper we develop an algorithm to efficiently solve Eq. \ref{eq:mop}.
+
+
+
+
+
+\begin{comment}
 \section{The CASH problem}
 \label{sec:model_selection}
 
-In this section we introduce and formally describe the model selection problem, our description borrows the definitions given in \cite{Thornton2013}. For the sake of simplicity for this work we only consider supervised learning problems, i.e. learning a function $f: \mathcal{X} \mapsto \mathcal{Y}$ with finite $\mathcal{Y}$ labels. A learning algorithm $A$ maps a set $\{d_1, \ldots, d_n\}$ of training data points $d_i = (\mathbf{x_i}, \mathbf{y_i}) \in \mathcal{X} \times \mathcal{Y}$ to such a function $f$. Most learning algorithms $A$ further expose hyperparameters $\lambda \in \mathbf{\Lambda}$, which change the way the learning algorithm $A_{\lambda}$ works. One example of hyperparameters is the number of neurons in a hidden layer of an ANN, another common example is the learning rate $\alpha$ of a neural network. These hyperparameters are typically optmized in an ``outer loop'' that evaluates the performance of each hyperparameter configuration using cross-validation \cite{alpaydin2010}.
+In this section we introduce and formally describe the model selection problem, our description borrows the definitions given in \cite{Thornton2013}. For the sake of simplicity, for this work we only consider supervised learning problems, i.e. learning a function $f: \mathcal{X} \mapsto \mathcal{Y}$ with finite $\mathcal{Y}$ labels. A learning algorithm $A$ maps a set $\{d_1, \ldots, d_n\}$ of training data points $d_i = (\mathbf{x_i}, \mathbf{y_i}) \in \mathcal{X} \times \mathcal{Y}$ to such a function $f$. Most learning algorithms $A$ further expose hyperparameters $\lambda \in \mathbf{\Lambda}$, which change the way the learning algorithm $A_{\lambda}$ works. One example of hyperparameters is the number of neurons in a hidden layer of an artificial neural network (ANN), another common example is the learning rate $\alpha$ of a neural network. These hyperparameters are typically optmized in an ``outer loop'' that evaluates the performance of each hyperparameter configuration using cross-validation \cite{alpaydin2010}.
 
 \subsection{Model selection}
 
-Given a set of learning algorithms $\mathcal{A}$ and a limited amount of training data $\mathcal{D} = \{ (\mathbf{x_1}, \mathbf{y_1}, \ldots \mathbf{x_n}, \mathbf{y_n}) \}$, the goal of model selection is to determine the algorithm $A^* \in \mathcal{A}$ with optimal generalization performance. Generalization performance is estimated by splitting $\mathcal{D}$ into disjoint training and validation sets $\mathcal{D}_{t}$ and $\mathcal{D}_{v}$ respectively, learning function $f$ by applying $A^*$ to $\mathcal{D}_{t}$, and evaluating the predictive performance of this function on $\mathcal{D}_{v}$. Using $k$-fold validation, which splits the data into $k$ equal sized partitions $ \mathcal{D}^{1}_{v}, \ldots,  \mathcal{D}^{k}_{v}$ and sets $ \mathcal{D}^{i}_{t} =  D \backslash D^{i}_{v}$ for $i = 1, \ldots, k$ the model selection problem is written as:
+Given a set of learning algorithms $\mathcal{A}$ and a limited amount of training data $\mathcal{D} = \{ (\mathbf{x_1}, \mathbf{y_1}, \ldots \mathbf{x_n}, \mathbf{y_n}) \}$, the goal of model selection is to determine the algorithm $A^* \in \mathcal{A}$ with optimal generalization performance. Generalization performance is estimated by splitting $\mathcal{D}$ into disjoint training and validation sets $\mathcal{D}_{t}$ and $\mathcal{D}_{v}$ respectively, learning function $f$ by applying $A^*$ to $\mathcal{D}_{t}$, and evaluating the predictive performance of this function on $\mathcal{D}_{v}$. Using $k$-fold validation, which splits the data into $k$ equal sized cross validation partitions $ \mathcal{D}^{1}_{v}, \ldots,  \mathcal{D}^{k}_{v}$ and training partition $ \mathcal{D}^{i}_{t} =  D \backslash D^{i}_{v}$ for $i = 1, \ldots, k$ the model selection problem is defined as:
 
 \begin{equation}
 A^* \in \underset{A \in \mathcal{A}}{\operatorname{argmin}} \frac{1}{k} \sum_{i=1}^{k} \mathcal{L} \left( A, \mathcal{D}^{i}_{t},  \mathcal{D}^{i}_{v} \right),
@@ -529,7 +560,7 @@ where $ \mathcal{L} \left( A, \mathcal{D}^{i}_{t},  \mathcal{D}^{i}_{v} \right) 
 
 \subsection{Hyperparameter optimization}
 
-The problem of optimizing the hyperparameters $\lambda \in \mathbf{\Lambda}$ of a given learning algorithm $A$ is conceptually similar to that of model selection. Some key differences are that hyperparameters are often continuous, that hyperparameter spaces are often high dimensional, and that we can exploit correlation structure between different hyperparameter settings $\lambda_1,\lambda_2 \in \mathbf{\Lambda} $. Given $n$ hyperparameters $\lambda_1, \ldots, \lambda_n$ with domains $\Lambda_1, \ldots, \Lambda_n$ , the hyperparameter space $\mathbf{\Lambda}$ is a subset of the crossproduct of these domains: $\mathbf{\Lambda} \subset \Lambda_1 \times \ldots \times \Lambda_n$. This subset is often strict, such as when certain settings of one hyperparameter render other hyperparameters inactive. For example, the parameters determining the specifics of the third layer of a deep belief network are not relevant if the network depth is set to one or two. More formally, following \cite{Hutter2009}, we say that a hyperparameter $\lambda_i$ is conditional on another hyperparameter $\lambda_j$, if $\lambda_i$ is only active if hyperparameter $\lambda_j$ takes values from a given set $V_i \left(j \right) \subsetneq \Lambda_j$; in this case we call $\lambda_j$ a parent of $\lambda_i$. Conditional hyperparameters can in turn be parents of other conditional hyperparameters, giving rise to a tree-structured space \cite{Bergstra2011} or, in some cases, a directed acyclic graph (DAG) \cite{Hutter2009}. Given such a structured space $\mathbf{\Lambda}$, the (hierarchical) hyperparameter optimization problem can be written as:
+The problem of optimizing the hyperparameters $\lambda \in \mathbf{\Lambda}$ of a given learning algorithm $A$ is conceptually similar to that of model selection. Some key differences are that hyperparameters are often continuous, hyperparameter spaces are often high dimensional, and that correlation structure between different hyperparameter settings $\lambda_1,\lambda_2 \in \mathbf{\Lambda} $ can be exploited. Given $n$ hyperparameters $\lambda_1, \ldots, \lambda_n$ with domains $\Lambda_1, \ldots, \Lambda_n$ , the hyperparameter space $\mathbf{\Lambda}$ is a subset of the crossproduct of these domains: $\mathbf{\Lambda} \subset \Lambda_1 \times \ldots \times \Lambda_n$. This subset is often strict, such as when certain settings of one hyperparameter render other hyperparameters inactive. For example, the parameters determining the specifics of the third layer of a deep neural network are not relevant if the network depth is set to one or two. The hyperparameter optimization problem can be written as:
 
 \begin{equation}
 \lambda^* \in \underset{\lambda \in \mathbf{\Lambda}}{\operatorname{argmin}} \frac{1}{k} \sum_{i=1}^{k} \mathcal{L} \left( A_{\lambda}, \mathcal{D}^{i}_{t},  \mathcal{D}^{i}_{v} \right),
@@ -541,47 +572,51 @@ In this study we consider the more general combined algorithm selection and hype
 A^* \lambda^* \in \underset{A^{(j)} \in \mathcal{A}, \lambda \in \mathbf{\Lambda}^{(j)}}{\operatorname{argmin}} \frac{1}{k} \sum_{i=1}^{k} \mathcal{L} \left( A_{\lambda}^{(j)}, \mathcal{D}^{i}_{t},  \mathcal{D}^{i}_{v} \right).
 \end{equation}
 
-Note that this problem can be reformulated as a single combined hierarchical hyperparameter optimization problem with parameter space $\mathbf{\Lambda} =  \mathbf{\Lambda}^{(1)} \cup \ldots \cup \mathbf{\Lambda}^{(k)} \cup \left\lbrace \lambda_r \right\rbrace$, where $\lambda_r$ is a new root-level hyperparameter that selects between algorithms $A^{(1)}, \ldots, A^{(k)}$. The root-level parameters of each subspace $\mathbf{\Lambda}^{(i)}$ are made conditional on $\lambda_r$ being instantiated to $A_i$.
+For our particular application we consider $\mathcal{A}$ as the set of all possible fully connected neural network, also known as multi-layer perceptron (MLP), model configurations, i.e. number of layers and number of neurons per layer, and $\Lambda$ as the set of all possible hyperparameters for an MLP, i.e. activation functions, dropout rates, etc.
 
-Although the CASH problem can be solved using Bayesian Optimization \cite{Brochu2010} and Sequential Model Based Optimization (SMBO) \cite{Hutter2011} the studies presented so far are very restricted when it comes to neural networks. Instead, in this work we aim to solve the CASH problem for neural networks using evolutionary algorithms.
+\end{comment}
 
 %----------------------------------------------------------------------------------------
 %	LITERATURE REVIEW
 %----------------------------------------------------------------------------------------
 
-\section{Literature Review}
+\section{Related Work}
 \label{sec:literature_review}
 
-Automatic model selection has been of research interest since the uprising of deep learning. This is no surprise since selecting an effective combination of algorithm and hyperparameter values is currently a challenging task requiring both deep machine learning knowledge and repeated trials. This is not only beyond the capability of layman users with limited computing expertise, but also often a non-trivial task even for machine learning experts \cite{sparks2015}. 
+Automated machine learning has been of research interest since the uprising of deep learning. This is no surprise since selecting an effective combination of algorithm and hyperparameter values is currently a challenging task requiring both deep machine learning knowledge and repeated trials. This is not only beyond the capability of layman users with limited computing expertise, but also often a non-trivial task even for machine learning experts \cite{sparks2015}. 
 
-To make machine learning accessible to non-expert users, researchers have proposed various automatic selection methods for machine learning algorithms and/or hyperparameter values for a given supervised machine learning problem. These methods' goal is to find, withind a pre-specified resource limit (usually specified in terms of time, number of algorithms and/or combintations of hyperparameter values), an effective algorithm and/or combination of hyperparameter values that maximize the accuracy measure on the given machine learning problem and data set. Using an automatic selection method method, the machine learning practitioner can skip the manual and iterative process of selecting and efficient combination of of hyperparameter values and neural network model, which is high labor intensive and requires a high skill set in machine learning.
+Until recently most state-of-the-art image classifier architectures have been manually designed by human experts. To make the the process easier and faster, researchers have looked into automated methods. These methods' goal is to find, withind a pre-specified resource limit (usually specified in terms of time, number of algorithms and/or combintations of hyperparameter values), an effective algorithm and/or combination of hyperparameter values that maximize the accuracy measure on the given machine learning problem and data set. Using an automated machine learning, the machine learning practitioner can skip the manual and iterative process of selecting and efficient combination of of hyperparameter values and neural network model, which is labor intensive and requires a high skill set in machine learning.
 
-In the recent years a number of tools have been made available for users to automate the model selection and/or hyperparameter tuning, in the following we present a brief survey of the most popular methods.
+In the context of deep learning , neural architecture search (NAS) which aims to search for the best neural network architecture for the given learning task and dataset, has become an effective computational tool in AutoML. Unfortunately, existing NAS algorithms are usually computationally expensive where its time complexity can easily scale to $O(nt)$ where $n$ is the number of neural architectures evaluated, and $t$ is the average time consumption for each of the $n$ neural networks. Many NAS approaches such as deep reinforcement learning  \cite{Zoph2016, Baker2016, Zhong2017} and evolutionary algorithms \cite{Liu2018, Liang2017, Angeline1994, Suganuma2017} require a large $n$ to reach good performance. Other approaches include Bayesian Optimization \cite{Thornton2016, Brochu2010} and Sequential Model Based Optimization (SMBO) \cite{Hutter2011, Feurer2015}, nevertheless often times this approaches are as expensive as NAS while being more limited as to what kind of models they can explore.
 
-\subsection{AutoWEKA}
+%\cite{Jin2018, Real2018}
 
-Auto-WEKA \cite{Thornton2016} is a system designed to help machine learning users by automatically searching through the joint space of WEKA's learning algorithms and their respective hyperparameter settings to maximize performance using a state-of-the-art Bayesian optimization method. AutoWEKA addresses the CASH problem by treating all of WEKA as a single, highly parametric machine learning framework, and using Bayesian optimization to find a strong instantiation for a given dataset. AutoWEKA also natively supports parallel runs (on a single machine) to find good configurations faster and save the $N$ best configurations of each run instead of just the single best. AutoWEKA is tightly integrated with WEKA and does provide support for Multilayer Perceptrons (MLP).
+In the recent years a number of tools have been made available for users to automate the model selection and/or hyperparameter tuning, in the following we present a brief description of some of them that share similarities with out method and will serve as comparisson.
+
+\subsection{Auto-Keras}
+
+Write a brief description of the method here
+
+\subsection{AutoML Vision}
+
+Write a brief description of the method here
 
 \subsection{Auto-sklearn}
 
-Auto-sklearn \cite{Feurer2015} is Auto-WEKA's sister package, it uses the same Bayesian optimizer but comprises a smaller space of models and hyperparameters, however it includes additional meta-learning techniques.
-
-\subsection{TuPAQ}
-
-TuPAQ \cite{sparks2015} is a system designed to efficiently and scalably automate the process of training predictive models. One of its main features is a planning algorithm which decides on an efficient parallel execution strategy during model training while identifying new hyperparameter configurations and proactively eliminating models which are unlikely to provide good results. TuPAQ is aimed at large scale machine learning, it builds on top of the well know Apache Spark. TuPaq only focuses on classification problems and considers only three model families (Support Vector Machines, Logistic Regression and nonlinear SVMs), each with several hyperparameters. TuPAQ performs batching to train multiple models simultaneously and deploys bandit resource allocation to allocate more resources to the most promising models. TuPAQ does not provide support for neural networks.
+Auto-sklearn \cite{Feurer2015} is a system designed to help machine learning users by automatically searching through the joint space of sklearn's learning algorithms and their respective hyperparameter settings to maximize performance using a state-of-the-art Bayesian optimization method. Auto-sklearn addresses the model selection problem by treating all of sklearn algorithms as a single, highly parametric machine learning framework, and using Bayesian optimization to find an optimal instance for a given dataset. Auto-sklearn also natively supports parallel runs (on a single machine) to find good configurations faster and save the $n$ best configurations of each run instead of just the single best. Nevertheless, and to the best of our knowledge Auto-sklearn does not provide support for neural networks and it does not take into consideration the complexity of the proposed models for assesing their optimality.
 
 %----------------------------------------------------------------------------------------
 %	PROPOSAL
 %----------------------------------------------------------------------------------------
 
-\section{An evolutionary algorithm for the CASH problem }
+\section{An evolutionary algorithm for the neural network model selection problem }
 \label{sec:auto_nn}
 
-While there is a number of methods for automatic model selection and hyperparameter tuning, the most popular ones do not provide support for some of the most sophisticated deep learning architectures. In the case of AutoWEKA and Auto-sklearn they do not provide good support for large machine learning problems, nor provide support for distributed computing. TuPAQ on the other hand, provides wide support for distributed computing, maximizing the use of computational resources through the use of sophisticated optimizations, nevertheless its restricted to only classification problems and does not provide support for neural networks.
+While there are a number of methods for automatic model selection and hyperparameter tuning, the most popular ones do not provide support for some of the most sophisticated deep learning architectures. In the case of Auto-sklearn it does not provide good support for large machine learning problems, nor provides good support for distributed computing, furthermore, Auto-sklearn lacks support for neuraln networks. Auto-keras and AutoML vision only provide support neural networks, both methods attain models with a high accuracy degree, nevertheless both methods do not consider the complexity (size) of the neural network when assessing the performance of the models. Furthermore, none of them provide support for regression problems.
 
-We propose to implement a system for automatically selecting the most fitting neural network architecture for a given problem, whether it is classification or regression. Furthermore, that proposed system is scalable and easy to use in distributed computing environments, allowing it to be usable for large datasets and complex models. To achieve the latter we make use of Ray \cite{Moritz2017}, a distributed framework designed with large scale distributed machine learning in mind.
+We propose an efficient method that, given a dataset $\mathcal{D}$, will automatically find a neural network model that attains high performance while being computationally efficient. The proposed model is capable of performing inference tasks for both, classification and regression problems. Furthermore, that proposed system is scalable and easy to use in distributed computing environments, allowing it to be usable for large datasets and complex models. To achieve the latter we make use of Ray \cite{Moritz2017}, a distributed framework designed with large scale distributed machine learning in mind.
 
-For this work we consider three major neural networks architectures, namely multilayer percpetrons (MLPs) \cite{Engelbrecht2007}, convolutional neural networks (CNNs) \cite{imagenet_cvpr09} and recurrent neural networks (RNNs) \cite{dblp_lipton_2015}. Each one of these architectures can be built by stacking together a \textit{valid} combination of any of the four following layers: fully connected layers, recurrent layers, convolutional layers and pooling layers.
+For this work we aim to optimize models of any of the three major neural networks architectures, namely multilayer percpetrons (MLPs) \cite{Engelbrecht2007}, convolutional neural networks (CNNs) \cite{imagenet_cvpr09} and recurrent neural networks (RNNs) \cite{dblp_lipton_2015}. Each one of these architectures can be built by stacking together a \textit{valid} combination of any of the four following layers: fully connected layers, recurrent layers, convolutional layers and pooling layers.
 
 We say that a neural network architecture is \textit{valid} if it complies with the following set of rules, which we derived empirically from our practice in the field:
 
@@ -593,9 +628,55 @@ We say that a neural network architecture is \textit{valid} if it complies with 
 \item The last layer is always a fully connected layer with either a softmax activation function for classification or a linear activation function for regression problems
 \end{itemize}
 
-\subsection{AutoNN}
+\subsection{The fitness function}
+\label{sec:fitness_function}
 
-The main part of this work consists of developing an evolutionary algorithm (EA) capable of trying and evolving different neural network architectures and, in the end, find a suitable model for the given problem while being computationally efficient. EAs were chosen for this work since, contrary to the more classical optimization techniques, they do not make any assumptions about the problem, treating it as a black box that merely provides a measure of quality given a candidate solution,  furthermore, they do not require the gradient when searching for optimal solutions making them very suitable for applications such as the one at hand.
+To establish an order between the different testes architecture a cost (fitness) function is required. While equation \ref{eq:mop} can be used as the cost function, using it would give rise to a multi-objective optimization problem (MOP). We leave this approach for a future revision of this work and instead make use of scalarization to transform the MOP into a single- objective optimization problem (SOP). The algorithm's goals are to generate a neural network architecture with good inference performance for the class of problem at hand while keeping the complexity of the network as low as possible. Measuring the inference power of the network is straightforward; having a valid neural network we can assess its inference power by training it on the set $\mathcal{D}_{t}$ and then evaluating the predictions using the set $\mathcal{D}_{v}$. A more robust approach would be performing a $k$-fold cross-validation which splits the data into $k$ equal sized partitions $ \mathcal{D}^{1}_{v}, \ldots,  \mathcal{D}^{k}_{v}$ and sets $ \mathcal{D}^{i}_{t} =  D \backslash D^{i}_{v}$ for $i = 1, \ldots, k$. Note that making an accurate assessment of the inference performance of a neural network involves training it for a large number of epochs. Since the training process usually involves extensive computations our algorithm can not make use of it entirely, since this would make the entire process very computationally expensive in most cases and unfeasible in some others, instead we opt to relax the training process for our evaluation of the model and use instead a \textit{partial train} which follows the same process as training but uses a very limited number of epochs (only a few tens of them). As stated in [] this does not affect the searching process of the micro-GA since even after training for few epochs the models start showing a clear trend in terms of whether a model is promising or not.
+
+Let $A \in \mathcal{A}$ be a certain neural network architecture trained on set $\mathcal{D}_{t}$, let also $\mathcal{P}_{A}(\mathcal{D}_{v})$ represent the performance of the neural network $A$ when tested using validation set $\mathcal{D}_{v}$ and the user-defined metric $m$, where $m$ is usually any of the metrics listed in Table \ref{table:performance_metrics} . Using $k$-fold cross-validation the average performance of the algorithm can be written as
+
+\begin{equation}
+p = \frac{1}{k} \sum_{i=1}^{k}  \mathcal{P}_{A}(\mathcal{D}^{i}_{v})
+\label{eq:performance_crossval}
+\end{equation}
+
+For measuring the complexity of the architecture we consider the number of trainable weights $w$ of the neural network which is a good indicator of how complex the architecture is.
+
+Using $p$ and $w$ we propose the following fitness function
+
+\begin{equation}
+f = p + \alpha w, 
+\label{eq:fitness_function}
+\end{equation}
+
+where $\alpha \in [0,1]$ is a scaling factor that indicates how much does the number of trainable weights $w$ affects the overall fitness of the neural network. By setting $\alpha = 1$ the preference is given to very compact architectures, while $\alpha = 0$ will only care about architectures that find the best possible value for $p$ regardless of their complexity.
+
+Computing the fitness of individuals using the current definitions of $p$ and $w$ posses a big problem though, namely that the performance definition $p$ and the number of weights $w$ are on entirely different scales. While $w$ can range from a few hundreds up to several millions, the range of $p$ is 
+
+\begin{equation}
+p \in
+\begin{cases}
+\left[ 0, \inf \right], \text{if } m \text{ is } R^2 \\
+\left[ 0,1 \right],  \text{otherwise}.\\
+\end{cases}
+\end{equation}
+
+As can be observed, even $p$ can be in different ranges, it is necessary for our application that the range of $p$ is consistent no matter the type of metric $m$, thus, in the case $m$ is the $R^2$ metric we normalize the values of $m$ to be within the range $\left[ 0,1 \right]$. The normalization process is quite straightforward: assuming a population $\mathcal{C}$ with $n_s$ individuals, take the maximum value $m_{max}$ for $m$ at the population, then divide every individual in $\mathcal{C}$ by $m_{max}$. Following this process $p \in \left[ 0,1 \right]$ for any of the metrics $m$.
+
+Now we focus on $w$. For the sake of simplicity lets just consider the case of the MLP class of neural networks since this is usually the model where $w$ is larger. Let $l_{max}$ be the maximum number of possible layers for any model, for this work we will limit $l_{max} = 64$ since we consider this a pretty decent number for most of the mainstream deep learning models. From Table \ref{table:neural_network_array_details} we know that the maximum number of neurons at any layer is 1024, thus the maximum number of $w$, which we will call $w_{max}$ for any given model is $w_{max} = 1024^2 \times 64 = 2^{26}$. Furthermore, we want neural networks that are similar (by a few thousands of weights) to have the same score $w$, therefore we discard the last 3 digits of the neural network and replace them by 0s, therefore let $w^+$ be this new weight with the last 3 digits discarded. Let $w^* = log(w^+)$, therefore $w_{max}^* \approx  log(2)*26$, hence we assume $w^* \in \left[0, 7.8\right]$.
+
+Thus, we redefine Equation \ref{eq:fitness_function} as
+
+\begin{equation}
+f = 5p + \alpha w^*.
+\label{eq:fitness_function_scaled}
+\end{equation}
+
+As can be observed, Equation \ref{eq:fitness_function_scaled} is now properly scaled, and therefore it is a suitable choice as the fitness function for assessing the performance of a neural network model.
+
+\subsection{Automatic Model Selection (AMS)}
+
+The key idea of our method is to develop an evolutionary algorithm (EA) capable of trying and evolving different neural network architectures and, in the end, find a suitable model for the given problem while being computationally efficient. EAs were chosen for this work since, contrary to the more classical optimization techniques, they do not make any assumptions about the problem, treating it as a black box that merely provides a measure of quality given a candidate solution,  furthermore, they do not require the gradient when searching for optimal solutions making them very suitable for applications such as the one at hand.
 
 In the following we describe the very basics of evolutionary algorithms as an introduction for the reader. 
 
@@ -652,51 +733,7 @@ Specifically speaking and taking inspiration from the micro-GA the pseudocode fo
 \label{algorithm:nn_ea}
 \end{algorithm}
 
-\subsection{The fitness function}
-\label{sec:fitness_function}
 
-In order to steer the search in the most promising directions, a carefully designed fitness function is required. The algorithm's goals are to generate a neural network architecture with good inference performance for the class of problem at hand while keeping the complexity of the network as low as possible. Measuring the inference power of the network is straightforward; having a valid neural network we can assess its inference power by training it on the set $\mathcal{D}_{t}$ and then evaluating the predictions using the set $\mathcal{D}_{v}$. A more robust approach would be performing a $k$-fold cross-validation which splits the data into $k$ equal sized partitions $ \mathcal{D}^{1}_{v}, \ldots,  \mathcal{D}^{k}_{v}$ and sets $ \mathcal{D}^{i}_{t} =  D \backslash D^{i}_{v}$ for $i = 1, \ldots, k$. Note that making an accurate assessment of the inference performance of a neural network involves training it for a large number of epochs. Since the training process usually involves extensive computations our algorithm can not make use of it entirely, since this would make the entire process very computationally expensive in most cases and unfeasible in some others, instead we opt to relax the training process for our evaluation of the model and use instead a \textit{partial train} which follows the same process as training but uses a very limited number of epochs (only a few tens of them). As stated in [] this does not affect the searching process of the micro-GA since even after training for few epochs the models start showing a clear trend in terms of whether a model is promising or not.
-
-Let $A \in \mathcal{A}$ be a certain neural network architecture trained on set $\mathcal{D}_{t}$, let also $\mathcal{P}_{A}(\mathcal{D}_{v})$ represent the performance of the neural network $A$ when tested using validation set $\mathcal{D}_{v}$ and the user-defined metric $m$, where $m$ is usually any of the metrics listed in Table \ref{table:performance_metrics} . Using $k$-fold cross-validation the average performance of the algorithm can be written as
-
-\begin{equation}
-p = \frac{1}{k} \sum_{i=1}^{k}  \mathcal{P}_{A}(\mathcal{D}^{i}_{v})
-\label{eq:performance_crossval}
-\end{equation}
-
-For measuring the complexity of the architecture we consider the number of trainable weights $w$ of the neural network which is a good indicator of how complex the architecture is.
-
-Using $p$ and $w$ we propose the following fitness function
-
-\begin{equation}
-f = p + \alpha w, 
-\label{eq:fitness_function}
-\end{equation}
-
-where $\alpha \in [0,1]$ is a scaling factor that indicates how much does the number of trainable weights $w$ affects the overall fitness of the neural network. By setting $\alpha = 1$ the preference is given to very compact architectures, while $\alpha = 0$ will only care about architectures that find the best possible value for $p$ regardless of their complexity.
-
-Computing the fitness of individuals using the current definitions of $p$ and $w$ posses a big problem though, namely that the performance definition $p$ and the number of weights $w$ are on entirely different scales. While $w$ can range from a few hundreds up to several millions, the range of $p$ is 
-
-\begin{equation}
-p \in
-\begin{cases}
-\left[ 0, \inf \right], \text{if } m \text{ is } R^2 \\
-\left[ 0,1 \right],  \text{otherwise}.\\
-\end{cases}
-\end{equation}
-
-As can be observed, even $p$ can be in different ranges, it is necessary for our application that the range of $p$ is consistent no matter the type of metric $m$, thus, in the case $m$ is the $R^2$ metric we normalize the values of $m$ to be within the range $\left[ 0,1 \right]$. The normalization process is quite straightforward: assuming a population $\mathcal{C}$ with $n_s$ individuals, take the maximum value $m_{max}$ for $m$ at the population, then divide every individual in $\mathcal{C}$ by $m_{max}$. Following this process $p \in \left[ 0,1 \right]$ for any of the metrics $m$.
-
-Now we focus on $w$. For the sake of simplicity lets just consider the case of the MLP class of neural networks since this is usually the model where $w$ is larger. Let $l_{max}$ be the maximum number of possible layers for any model, for this work we will limit $l_{max} = 64$ since we consider this a pretty decent number for most of the mainstream deep learning models. From Table \ref{table:neural_network_array_details} we know that the maximum number of neurons at any layer is 1024, thus the maximum number of $w$, which we will call $w_{max}$ for any given model is $w_{max} = 1024^2 \times 64 = 2^{26}$. Furthermore, we want neural networks that are similar (by a few thousands of weights) to have the same score $w$, therefore we discard the last 3 digits of the neural network and replace them by 0s, therefore let $w^+$ be this new weight with the last 3 digits discarded. Let $w^* = log(w^+)$, therefore $w_{max}^* \approx  log(2)*26$, hence we assume $w^* \in \left[0, 7.8\right]$.
-
-Thus, we redefine Equation \ref{eq:fitness_function} as
-
-\begin{equation}
-f = 5p + \alpha w^*.
-\label{eq:fitness_function_scaled}
-\end{equation}
-
-As can be observed, Equation \ref{eq:fitness_function_scaled} is now properly scaled, and therefore it is a suitable choice as the fitness function for assessing the performance of a neural network model.
 
 \subsection{Encoding neural networks as genotypes}
 \label{sec:encoding_nn}
@@ -912,7 +949,7 @@ Dataset & Epochs & Learning Rate & Optimizer & Loss function & Metrics \\
 \hline
 \multirow{2}{*}{MNIST} & \multirow{2}{*}{5} & \multirow{2}{*}{0.001} & \multirow{2}{*}{Adam} & Categorical & Categorical\\
 		  &     &		   &			 & crossenthropy & 	accuracy\\
-CMAPSS & 5 & 0.001 & Adam & MSE & MSE\\
+CMAPSS & 5 & 0.01 & Adam & MSE & MSE\\
 \multirow{2}{*}{CIFAR10} & \multirow{2}{*}{5} & \multirow{2}{*}{0.001} & \multirow{2}{*}{Adam} & Categorical & Categorical\\
 		  &     &		   &			 & crossenthropy & 	accuracy\\
 \hline
@@ -922,6 +959,8 @@ CMAPSS & 5 & 0.001 & Adam & MSE & MSE\\
 \caption{Training parameters for each of the used datasets.}
 \label{table:training_params}
 \end{table}
+
+For CMAPSS dataset we used a larger learning rate since we are evaluating the model using very few epochs for this complex problem, therefore, in order to get a clearer idea of which individuals within the population may be promising we speed up the training process by increasing the learning rate.
 
 \subsection{MNIST Dataset - A classification problem}
 
@@ -1103,7 +1142,7 @@ The results in Table \ref{table:autonn_mnist_3} show that when the number of tra
 
 Note that the change in fitness among the three experiments is due to the fact that the size of the neural network was scaled (See equation \ref{eq:fitness_function_scaled}) and thus there is no fair way of comparing the fitness of the models shown Tables \ref{table:autonn_mnist_1}, \ref{table:autonn_mnist_2} and \ref{table:autonn_mnist_3} against each other.
 
-Finally, we compare the best models for each value of $\alpha$ against each other. A 10-fold cross-validation process, with a training of 50 epochs per fold, was carried out for each one of the best models in order to obtain the mean accuracy for each model. We denote $ S^*_1$ as the best model corresponding to $\alpha = 0.6$, $S^*_2$ is the model corresponding to $\alpha = 0.8$ and $S^*_3$ is the model corresponding to $\alpha = 1$. We also measure the accuracy of each of the models using a test set that was never used during the training or tuning processes of the models. The accuracy averages and size of the networks are summarized in Table \ref{table:avg_accuracies_mnist}.
+Finally, we compare the best models for each value of $\alpha$ against each other. A 10-fold cross-validation process, with a training of 50 epochs per fold, was carried out for each one of the best models in order to obtain the mean accuracy for each model. We denote $ S^*_1$ as the best model corresponding to $\alpha = 0.6$, $S^*_2$ is the model corresponding to $\alpha = 0.8$ and $S^*_3$ is the model corresponding to $\alpha = 1$. We also measure the accuracy of each of the models using a test set that was never used during the training or tuning processes of the models. The accuracy averages and size of the networks are summarized in Table \ref{table:avg_accuracies_mnist}. The experiments for each $\alpha$ value took about 8.5 minutes in our test rig.
 
 \begin{table}[!htb]
 \begin{center}
@@ -1139,7 +1178,7 @@ Method & Test accuracy & Size\\
 \label{table:MNIST_results_top}
 \end{table}
 
-where the accuracy ranges from $97\%$ \cite{}, to $99\%$ \cite{deng2011}
+Comparing the models obtained by AMS agains the models in Table \ref{table:MNIST_results_top} we can observe that eventhough AMS models don't attain the highest accuracy they exhibit good inference capabilities with a much lesser number of trainable parameters (size of the model). This shows that AMS models show a good balance between the inference power of the model and its overall size, furthermore the score-size tradeoff can be controlled by means of the $\alpha$ parameter, where a value closer to $\alpha=0$ makes AMS prefer networks with higher scores and a value closer to $\alpha = 1$ makes AMS prefer networks with smaller sizes.
 
 
 \subsection{CMAPSS Dataset - A regression problem}
@@ -1198,17 +1237,17 @@ Total Experiments & $E_{max} = 5$ \\
 \label{table:CMAPSS_params}
 \end{table}
 
-Once again we start by presenting the baseline for our tests. Table ... presents some of the top results obtained by MLPs in the CMAPSS dataset, the results are measured in terms of the RMSE (Root Mean Squared Error) between the real RUL and the predicted RUL.
+Once again we start by presenting the baseline for our tests. Table \ref{table:CMAPSS_results_top} presents some of the top results obtained by MLPs in the CMAPSS dataset, the results are measured in terms of the RMSE (Root Mean Squared Error) between the real RUL and the predicted RUL. 
 
 \begin{table}[!htb]
 \begin{center}
-\begin{tabular}{| c | c |}
+\begin{tabular}{| c | c | c |}
 \hline
-Method & Reported RMSE on test set \\
+Method & Test RMSE & Network size \\
 \hline
-Time Window MLP & 15.16 \\
-Time Window MLP with EA & 14.39 \\
-Deep MLP ensemble & 15.04 \\
+Time Window MLP \cite{Lim2016} & 15.16 & 6041\\
+Time Window MLP with EA \cite{Laredo2018} & 14.39 & 7161\\
+Deep MLP ensemble \cite{Zhang2016} & 15.04 &  n/a \\
 \hline
 \end{tabular}
 \end{center}
@@ -1216,7 +1255,29 @@ Deep MLP ensemble & 15.04 \\
 \label{table:CMAPSS_results_top}
 \end{table}
 
-As with MNIST dataset we start by analyzing the results obtained when $\alpha=0.8$
+As with MNIST dataset we performed experiments for $\alpha \in \{0.6, 0.8, 1\}$. The best global models (best out of the five experiments) obtained for each of the $\alpha$ values are shown in Table \ref{table:avg_rmse_cmapss} along with their scores for CMAPSS data (RMSE) and the sizes of the networks. $S^*_1$ denotes the best model for $\alpha = 0.6$, while $S^*_2$ and $S^*_3$ denote the best models for $\alpha = 0.8$ and $\alpha = 1$ respectively. The experiments for each $\alpha$ value took about 3.5 minutes in our test rig.
+
+\begin{table}[!htb]
+\begin{center}
+\begin{tabular}{| c | c | c | c |}
+\hline
+Model & 10-fold Avg. Score & Test Avg. Score & Network size\\
+\hline
+$S^*_1$ & 15.16 & 16.12 & 57809\\
+$S^*_2$ & 15.20 & 14.83 & 9177\\
+$S^*_3$ & 15.00 & 14.96 & 6817\\
+\hline
+\end{tabular}
+\end{center}
+\caption{RMSE obtained by each of the top 3 models for CMAPSS dataset.}
+\label{table:avg_rmse_cmapss}
+\end{table}
+
+The results presented in Table \ref{table:avg_rmse_cmapss} further demonstrate the impact of the $\alpha$ parameter. As can be observed the size of the networks grow as $\alpha$ is relaxed (smaller). It can also be observed that the results obtained by the three proposed models in the Cross-Validation sets are very close among each other, nevertheless it is important to point out that $S^*_1$ attained such score with a larger network as compared with $S^*_2$ and $S^*_3$ whose sizes are fairly similar. This is mainly because the CMAPSS dataset does not require very large neural networks, therefore small models are usually preferred. 
+
+The obtained models are also competitive when compared against some of the latest MLPs used with CMAPSS dataset (\ref{table:CMAPSS_results_top}). In this case we compare against the score obtained in the test set for each of the models. It is shown that two of the three models obtained by AMS obtain a better score than two (Time Window MLP and Deep MLP ensemble) of the three compared models, furthermore, the sizes of the proposed networks are as small as the sizes of the compared models. 
+
+
 
 \section{Conclusions and Future Work}
 \label{sec:conclusions}

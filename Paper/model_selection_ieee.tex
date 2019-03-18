@@ -595,11 +595,11 @@ In the recent years a number of tools have been made available for users to auto
 
 \subsection{Auto-Keras}
 
-Write a brief description of the method here
+Auto-Keras \cite{AutoKeras2018} constructs an edit-distance kernel for neural network which measures the distances between neural network architectures capable. Using this kernel makes searching the model structures in a tree-structured space (constructed for network morphism) into possible. Hence, a reasonable acquisition function can be proposed and Bayesian optimization can be used to guide the model selection. Auto-Keras combines Bayesian optimization and network morphism, and achieves good prediction accuracies. However, it is still very complicated and time consuming model. It takes several hours to converge on MNIST data set. A new model may be trained much faster as a trade of the accuracy rate. Also, the Auto-keras will not use the weighted sum of several good candidates as the final results. Hence, the results of Auto-Keras may be as robustness as the models who do so.
 
 \subsection{AutoML Vision}
 
-Write a brief description of the method here
+AutoML \cite{AutoML2017} uses evolutionary algorithms to perform image classification. Without any restriction on the search space(network depth, skip connections, etc.), the algorithm starts from a simple model without convolutions and evolves the complex network. A massively-parallel and lock-free infrastructure is designed, many computers are used to search the large space using a shared file system, which saves the population. Unlike the Auto-Keras, without any guide during the evolutionary process, AutoML requires extreme high computational power. Also, starting from the simple poor performance models may make the results not restricted to some well known structures, rather then using some warm start structures. But it will have significantly negative influence on the training time.
 
 \subsection{Auto-sklearn}
 

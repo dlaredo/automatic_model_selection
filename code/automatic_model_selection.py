@@ -3,7 +3,7 @@ import fetch_to_keras
 import random
 import logging
 
-import ray
+#import ray
 
 import numpy as np
 
@@ -313,12 +313,13 @@ def evaluate_population2(population, configuration, data_handler, tModel_scaler,
 	return best_model, worst_model, worst_index
 
 
+"""
 @ray.remote
 def partial_run(model_genotype, problem_type, input_shape, data_handler, cross_validation_ratio, run_number, epochs=20):
-	"""Function to partially run a model given its genotype and input data"""
-	"""This should be run in Ray"""
+	#Function to partially run a model given its genotype and input data
+	#This should be run in Ray
 
-	"""How to keep the data in a way such that it doesnt create too much overhead"""
+	#How to keep the data in a way such that it doesnt create too much overhead
 
 	K.clear_session()  #Clear the previous tensorflow graph
 	model = fetch_to_keras.decode_genotype(model_genotype, problem_type, input_shape, 1)
@@ -344,13 +345,8 @@ def partial_run(model_genotype, problem_type, input_shape, data_handler, cross_v
 	tModel.evaluate_model(cross_validation=True)
 	cScores = tModel.scores
 	print(cScores)
-
-	"""
-	tModel.evaluate_model(cross_validation=False)
-	cScores = tModel.scores
-	print(cScores)
-	"""
-
+"
+"""
 
 
 def partial_run(model_genotype, problem_type, input_shape, data_handler, cross_validation_ratio, run_number, epochs=20):
@@ -383,12 +379,6 @@ def partial_run(model_genotype, problem_type, input_shape, data_handler, cross_v
 	tModel.evaluate_model(cross_validation=True)
 	cScores = tModel.scores
 	print(cScores)
-
-	"""
-	tModel.evaluate_model(cross_validation=False)
-	cScores = tModel.scores
-	print(cScores)
-	"""
 
 
 def print_pop(parent_pool, logger=False):

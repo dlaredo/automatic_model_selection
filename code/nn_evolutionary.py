@@ -56,7 +56,12 @@ class Individual():
 
 		size_score = math.log10(trainable_count)
 
-		self._fitness = metric_score + size_scaler*size_score
+		metric_scaler = 1-size_scaler
+		print("metric_scaler %f"%metric_scaler)
+		print("size scaler %f"%size_scaler)
+
+		#Scalarization of multiobjective version of the fitness function
+		self._fitness = metric_scaler*metric_score + size_scaler*size_score
 
 
 	def compute_checksum_vector(self):

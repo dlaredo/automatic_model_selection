@@ -110,7 +110,7 @@ class Individual():
 	def __str__(self):
 
 		str_repr1 = "\n\nString Model\n" + str(self._stringModel) + "\n"
-		str_repr2 = "<Individual(label = '%s' fitness = '%s', raw_score = '%s', raw_size = '%s)>" % (self._individual_label, self._fitness, self._raw_score, self._raw_size)
+		str_repr2 = "<Individual(label = '%s' fitness = %.4f, raw_score = %.4f, normalized_score = %.4f, raw_size = %d)>" % (self._individual_label, self._fitness, self._raw_score, self._normalized_score,  self._raw_size)
 		str_repr3 = "\nChecksum vector: " + str(self._checksum_vector)
 
 		str_repr =  str_repr1 + str_repr2 + str_repr3

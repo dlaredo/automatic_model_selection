@@ -943,18 +943,18 @@ Let $S_i, S_j$, where $len(S_j) >= len(S_i)$, be the genotypes representing any 
 \begin{algorithmic}[0]
 %\Procedure{Basic Evolutionary Algorithm}{$a,b$}\Comment{The g.c.d. of a and b}
 \State Let $d \in \mathbb{R}$ be the distance between $S_i$ and $S_j$ models. Make $d = 0$
-\For{Each layer $i$ in $S_1$ except last layer}
-	\State{$d = d + norm_2(S_2[i]-S_1[i])$}
+\For{Each layer $i$ in $S_i$ except last layer}
+	\State{$d = d + norm_2(S_j[i]-S_i[i])$}
 \EndFor
 \For{Each remaining layer $i$ in $S_2$ except last layer}
-	\State{$d = d + norm_2(S_2[i])$}
+	\State{$d = d + norm_2(S_j[i])$}
 \EndFor
 \State Return $d$
 \end{algorithmic}
 \label{algorithm:difference_between_networks}
 \end{algorithm}
 
-This method is computationally inexpensive since the size of the population is small. Furthermore, it helps accurately establish the similarity between any two neural network models. Given two neural network models $S_i$ and $S_j$ if $d(S_j, S_i) = 0$ then $S_1 = S_2$. We say that AMS (Algorithm \ref{algorithm:nn_ea}) has reached nominal convergence if at least $m_c$ pairs of models have $d(S_i, S_j) \leq d_t$, where both $m_c$ and $d_t$ are user defined parameters.
+This method is computationally inexpensive since the size of the population is small. Furthermore, it helps accurately establish the similarity between any two neural network models. Given two neural network models $S_i$ and $S_j$ if $d(S_j, S_i) = 0$ then $S_i = S_j$. We say that AMS (Algorithm \ref{algorithm:nn_ea}) has reached nominal convergence if at least $m_c$ pairs of models have $d(S_i, S_j) \leq d_t$, where both $m_c$ and $d_t$ are user defined parameters.
 
 \subsection{Implementation}
 \label{sec:implementation}

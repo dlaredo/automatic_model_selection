@@ -595,11 +595,11 @@ In the recent years a number of tools have been made available for users to auto
 
 \subsection{Auto-Keras}
 
-Write a brief description of the method here
+Auto-Keras \cite{AutoKeras2018} constructs an edit-distance kernel for neural network which measures the distances between neural network architectures capable. Using this kernel makes searching the model structures in a tree-structured space (constructed for network morphism) into possible. Hence, a reasonable acquisition function can be proposed and Bayesian optimization can be used to guide the model selection. Auto-Keras combines Bayesian optimization and network morphism, and achieves good prediction accuracies. However, it is still very complicated and time consuming model. It takes several hours to converge on MNIST data set. A new model may be trained much faster as a trade of the accuracy rate. Also, the Auto-keras will not use the weighted sum of several good candidates as the final results. Hence, the results of Auto-Keras may be as robustness as the models who do so.
 
 \subsection{AutoML Vision}
 
-Write a brief description of the method here
+AutoML \cite{AutoML2017} uses evolutionary algorithms to perform image classification. Without any restriction on the search space(network depth, skip connections, etc.), the algorithm starts from a simple model without convolutions and evolves the complex network. A massively-parallel and lock-free infrastructure is designed, many computers are used to search the large space using a shared file system, which saves the population. Unlike the Auto-Keras, without any guide during the evolutionary process, AutoML requires extreme high computational power. Also, starting from the simple poor performance models may make the results not restricted to some well known structures, rather then using some warm start structures. But it will have significantly negative influence on the training time.
 
 \subsection{Auto-sklearn}
 
@@ -915,11 +915,11 @@ Finally, one important feature of this crossover operator is that it has the abi
 \subsection{Mutation operator}
 \label{sec:mutation}
 
-The mutation operator is used to induce small changes to some of the models generated through the crossover mechanism. In the realm of evolutionary computation these subtle changes tend to improve the exploration properties of the current population (genetic diversity) by injecting random noise to the current solutions.  Although according to \cite{Krishnakumar1989} mutation is not needed in the micro-GA, we believe some sort of mutation is needed in our application in order to get more diverse models which could potentially lead to better inference abilities, nevertheless, our mutation approach will be less disruptive in order to mitigate its effect. Following the same ideas found on the literature we developed a mutation operator to handle neural network models.
+The mutation operator is used to induce small changes to some of the models generated through the crossover mechanism. In the context of evolutionary computation these subtle changes tend to improve the exploration properties of the current population (genetic diversity) by injecting random noise to the current solutions.  Although according to \cite{Krishnakumar1989} mutation is not needed in the micro-GA, we believe some sort of mutation is needed in our application in order to get more diverse models which could potentially lead to better inference abilities, nevertheless, our mutation approach will be less aggressive in order to mitigate its effect. In the following we discuss the core ideas of our mutation mechanism.
 
-As stated above our mutation approach is less disruptive than the common mutation operators \cite{Engelbrecht2007}, this decision follows two main reasons: First, is the fact that usually micro genetic algorithms don't make use of the mutation algorithm since the crossover operator has already induce significant genetic diversity in the population. The second reason is related to the way neural networks are usually built by human experts, commonly experts try a number of models and then make subtle changes to each of them in order to try to improve the inference ability of them, such changes usually involve changing the parameters in a layer, adding or removing a layer, adding regularization or changing the activation functions. 
+As stated above our mutation approach is less aggressive than common mutation operators \cite{Engelbrecht2007}, this design follows two main reasons: First, is the fact that usually micro genetic algorithms don't make use of the mutation algorithm since the crossover operator has already induce significant genetic diversity in the population, thus we want to minimize its impact. The second reason is related to the way neural networks are usually built by human experts; commonly, experts try a number of models and then make subtle changes to each of them in order to try to improve the inference ability of them, such changes usually involve changing the parameters in a layer, adding or removing a layer, adding regularization or changing the activation functions. 
 
-Based on the principles described above, our mutation process randomly chooses one layer, using a probability $m_p$, of the model and then proceeds to make one of the following operations:
+Based on the principles described above, our mutation process randomly chooses one layer, using a probability $m_p$, of the model and then proceeds to make one of the following changes to the model:
 
 \begin{itemize}
 \item Change a parameter of the layer chosen for a value complying the values stated in Table \ref{table:neural_network_array_details}.
@@ -927,48 +927,48 @@ Based on the principles described above, our mutation process randomly chooses o
 \item Add a dropout layer if the chosen layer is compatible.\\
 \end{itemize} 
 
-This operations together provide a rich set of possibilities for performing efficient mutation while still keeping valid models after mutation is performed. 
+This operations together provide a rich set of possibilities for performing efficient mutation while still keeping valid models after mutation is performed. Furthermore, the original model is barely changed.
 
 \subsection{Determining nominal convergence}
 \label{sec:convergence}
 
-Nominal convergence is one of the criteria used for early stopping of the evolutionary procedure of our algorithm. Some literature defines the convergence in terms of the fitness of the individuals \cite{Engelbrecht2007}, while in \cite{Krishnakumar1989} the convergence is defined in terms of the genotype or phenotype of the individuals. Although convergence based on the actual fitness of the individuals may be easier to asses given that the fitness is already calculated, we believe that an assessment of convergence based on the actual genotype of the individuals suits our needs better, this follows the following reasoning.
+Nominal convergence is one of the criteria used for early stopping of our evolutionary algorithm. Some literature defines the convergence in terms of the fitness of the individuals \cite{Engelbrecht2007}, while in \cite{Krishnakumar1989} the convergence is defined in terms of the genotype or phenotype of the individuals. Although convergence based on the actual fitness of the individuals may be easier to asses given that the fitness is already calculated, we believe that an assessment of convergence based on the actual genotype of the individuals suits our needs better.
 
-Since neural networks are stochastic in nature, we expect some variations in the fitness of the individuals at every different run, furthermore since we are running the training process for only few epochs (in order to avoid a high computational burden) the performance of the networks can be quite different and would not be a reliable indicator of convergence. Instead, to assess convergence we look at the genotype and compute the similarities between the different individuals.
+Since neural networks are stochastic in nature, we expect some variations in the fitness of the individuals at every different run, furthermore since we are running the training process for only few epochs (in order to avoid a high computational burden) the final performance of the networks can be quite different and would not be a reliable indicator of convergence. Instead, to assess convergence we look at the genotype (the actual neural network architecture) and compute the layer-wise distance between the different individuals in population $\mathcal{C}$.
 
-To compute the similarities between different individuals we take the following approach. Let $S_1, S_2$ where $len(S_2) >= len(S_1)$ be the genotype representing two different models, let also $S_1 - S_2$ represent the layer-wise difference between each model and $S_i[j]$ be the array representation of the $j-th$ layer of model $i$, $S_2 - S_1$ is defined in Algorithm \ref{algorithm:difference_between_networks}. \\
+Let $S_i, S_j$, where $len(S_j) >= len(S_i)$, be the genotypes representing any two different models, also let $S_i[j]$ be the vector representation of the j-th layer of model $S_i$. The method for computing the distance, $d(S_i, S_j)$, between models $S_i$ and $S_j$ is defined in Algorithm \ref{algorithm:difference_between_networks}.\\
 
 \begin{algorithm}[!htb]
-\caption{$S_2 - S_1$ Method}
+\caption{Layer-wise distance, $d(S_i, S_j)$ between model genotypes}
 \begin{algorithmic}[0]
 %\Procedure{Basic Evolutionary Algorithm}{$a,b$}\Comment{The g.c.d. of a and b}
-\State Let $d \in \mathbb{R}$ be the distance between the two models. Make $d = 0$
-\For{Each layer $i$ in $S_1$ except last layer}
-	\State{$d = d + norm_2(S_2[i]-S_1[i])$}
+\State Let $d \in \mathbb{R}$ be the distance between $S_i$ and $S_j$ models. Make $d = 0$
+\For{Each layer $i$ in $S_i$ except last layer}
+	\State{$d = d + norm_2(S_j[i]-S_i[i])$}
 \EndFor
 \For{Each remaining layer $i$ in $S_2$ except last layer}
-	\State{$d = d + norm_2(S_2[i])$}
+	\State{$d = d + norm_2(S_j[i])$}
 \EndFor
 \State Return $d$
 \end{algorithmic}
 \label{algorithm:difference_between_networks}
 \end{algorithm}
 
-This method is computationally inexpensive since the size of the population is small. Furthermore, it helps accurately establish the similarity between any two neural networks, given two neural network models $S_1$ and $S_2$ is $S_1 = S_2$ then $S_2 - S_1 = 0$. For our purposes we stop the algorithm and launch the new experiment if the distance between any $s$ models is smaller than $c$ where both $s$ and $c$ are user defined parameters.
+This method is computationally inexpensive since the size of the population is small. Furthermore, it helps accurately establish the similarity between any two neural network models. Given two neural network models $S_i$ and $S_j$ if $d(S_j, S_i) = 0$ then $S_i = S_j$. We say that AMS (Algorithm \ref{algorithm:nn_ea}) has reached nominal convergence if at least $m_c$ pairs of models have $d(S_i, S_j) \leq d_t$, where both $m_c$ and $d_t$ are user defined parameters.
 
 \subsection{Implementation}
 \label{sec:implementation}
 
-AutoNN is implemented in about 700 lines of code in Python. The code can be found in \url{https://github.com/dlaredo/automatic_model_selection}. We took a functional programming approach for its implementation. The models $S_i$ generated by the algorithm are fetched to Keras \cite{keras2015} and then evaluated, nevertheless the models can be evaluated in any other framework such as TensorFlow or Pytorch and even using different programming languages such as C++ for performance reasons.
+AMS is implemented in about 700 lines of code in Python. The code can be found in \url{https://github.com/dlaredo/automatic_model_selection}. We took a functional programming approach for its implementation with some helper objects. The models $S_i$ generated by the algorithm are fetched to Keras \cite{keras2015} and then evaluated, nevertheless the models can be fetched and evaluated in any other framework such as TensorFlow or Pytorch and even using different programming languages such as C++ for performance reasons.
 
-In order to boost performance we make use of Ray \cite{Moritz2017} which is a distributed computing framework tailored for AI applications. In order to distribute workloads in Ray developers only have to define Remote Functions make use of Python annotations, Ray will then distribute these Remote Functions across the different nodes in the cluster. There are three different types of nodes in Ray: Drivers, Workers and Actors. A Driver is the process executing the user program, a Worker is a stateless process that executes remote functions invoked by a driver or another worker, finally, an Actor is a statefull process that executes, when invoked, the methods it exposes.
+In order to boost performance of AMS we make use of Ray \cite{Moritz2017} which is a distributed computing framework tailored for AI applications. In order to distribute workloads in Ray developers only have to define Remote Functions by making use of Python annotations, Ray will then distribute these Remote Functions across the different nodes in the cluster. There are three different types of nodes in Ray: Drivers, Workers and Actors. A Driver is the process executing the user program, a Worker is a stateless process that executes remote functions invoked by a driver or another worker, finally, an Actor is a statefull process that executes, when invoked, the methods it exposes.
 
-For our implementation we code the individual fetching to Keras and its fitness evaluation as Ray Remote Functions (Workers), while the rest of our algorithm is implemented within the Driver, therefore the partial train of each neural network within the current population is performed in a distributed way, highly increasing the performance of our algorithm. Furthermore since the only messages being sent over the cluster are arrays (the neural network representation $S_i$) and the fitness of the neural network model $f$ there is little chance that the data interchanged causes a bottleneck or increases latency in the system.
+For our implementation we code the individual fetching to Keras and its fitness evaluation as Ray Remote Functions (Workers), while the rest of our algorithm is implemented within the Driver, therefore the partial train of each neural network within the current population is performed in a distributed way, highly increasing the performance of our algorithm. Furthermore since the only messages being sent over the cluster are arrays (the neural network representation $S_i$) and the fitness $f$ of the neural network model there is little chance that the data interchanged causes a bottleneck or increases latency in the system. Nevertheless and also for performance reasons, each node in the cluster has to maintain a local copy of the dataset.
 
 \section{Evaluation}
 \label{sec:evaluation}
 
-We evaluate AutoNN with two different datasets, each of which is a different type of inference problem. Our results are compared against baseline implementations and state-of-the-art methods for automatic model selection. In particular we compare our results against AutoWeka \cite{Thornton2016}, PyBrain \cite{Schaul2010} and MLLib \cite{mlib2017}.
+We evaluate AMS with two different datasets, each of which implies a different type of inference problem. Our results are compared state-of-the-art neural network models, our results are also compared against methods for automatic model selection, in particular Google's AutoML \cite{AutoML2017} and Auto-Keras \cite{AutoKeras2018}.
 
 For the experiments in this section each model generated by AMS was trained using the following parameters:
 

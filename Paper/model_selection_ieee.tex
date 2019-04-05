@@ -1030,30 +1030,21 @@ Total Experiments & $E_{max} = 5$ \\
 We first take a look at the generated initial population. For the sake of space we will only discuss the sizes of the models, furthermore we will make a small change in our notation for describing neural network models, for the remainder of this section we denote a layer of a neural network as $(n_e, a_f)$ where $n_e$ denotes the number of neurons in case the layer is fully connected or the dropout rate in case the layer is a dropout layer and $a_f$ denotes the activation function of the later if the layer is a fully connected layer. The initial five generated individuals are presented next. Fitness, accuracy and raw size of the models in the initial population are presented in Table \ref{table:autonn_mnist_initial}
 
 \begin{align*}
-S_1 & = \left[ (280, 1), (32, 1), (0.4), (304, 1), (96, 1), \right.\\
-& \left. (0.55), (600, 1), (10, 3) \right] \\
-S_2 & = \left[ (96, 0), (0.55), (168, 0), (10, 3) \right] \\
-S_3 & = \left[ (1024, 2), (560, 2), (0.15), (360, 2), (624, 2), \right.\\
-& \left. (0.5), (144, 2), (616, 2), (504, 2), (776, 2), (0.3), \right.\\ 
-& \left. (8, 2), (200, 2), (0.2), (904, 2), (0.35), (664, 2), \right.\\ 
-& \left. (0.35), (904, 2), (0.65), (488, 2), (0.4), (448, 2), \right.\\
-& \left. (216, 2), (336, 2), (368, 2), (400, 2), (0.2), \right.\\
-& \left. (112, 2), (48, 2), (0.3), (944, 2), (584, 2), (128, 2), \right.\\
-& \left. (0.15), (376, 2), (288, 2), (816, 2), (10, 3) \right] \\
-S_4 & = \left[ (672, 0), (840, 0), (0.25), (384, 0), (400, 0), \right.\\
-& \left. (712, 0), (10, 3) \right] \\
-S_5 & = \left[ (472, 1), (968, 1), (0.4), (816, 1), (104, 1), \right.\\
-& \left. (0.5), (488, 1), (192, 1), (0.4), (256, 1), (10, 3) \right] \\
+S_1 & = \left[ (64, 0), (0.4), (10, 3) \right] \\
+S_2 & = \left[ (760, 2), (0.5), (608, 2), (0.65), (10, 3) \right] \\
+S_3 & = \left[ (864, 0), (0.15), (536, 0), (928, 0), (10, 3) \right] \\
+S_4 & = \left[ (40,0), (0.45), (912, 0), (10, 3) \right] \\
+S_5 & = \left[ (968, 1), (976, 1), (32, 1), (0.15), (808, 1), \right.\\
+& \left. (10, 3), (832, 2) \right] \\
 \end{align*}
 
 \begin{comment}
 \begin{align*}
-S_1 & = \left[ (968, 0), (688, 0), (10, 3) \right] \\
-S_2 & = \left[ (824, 2), (0.4), (168, 2), (808, 2), (528, 2), (10, 3) \right] \\
-S_3 & = \left[ (136, 1), (984, 1), (144, 1), (680, 1), (10, 3) \right] \\
-S_4 & = \left[ (712, 2), (0.3), (96, 2), (368, 2), (584, 2), (240, 2) \right. \\
-& \left. (256, 2), (0.65), (384, 2), (536, 2), (648, 2), (0.3), (88, 2), (10, 3) \right] \\
-S_5 & = \left[ (448, 0), (0.3), (888, 0), (10, 3) \right] \\
+S_1 & = \left[ (864, 1), (0.65), (264, 1), (320, 1), (10, 3) \right] \\
+S_2 & = \left[ (496, 2), (432, 2), (0.5), (40, 2), (10, 3) \right] \\
+S_3 & = \left[ (64, 0), (0.4), (10, 3) \right] \\
+S_4 & = \left[ (776, 1), (80, 1), (832, 1), (0.65), (10, 3) \right. \\
+S_5 & = \left[ (136, 2), (0.55), (728, 2), (128, 2), (832, 2), (0.45), (208, 2), (992, 2, (10, 3) \right] \\
 \end{align*}
 \end{comment}
 
@@ -1063,32 +1054,32 @@ S_5 & = \left[ (448, 0), (0.3), (888, 0), (10, 3) \right] \\
 \hline
 Model & Score (Accuracy) & Trainable Parameters & Fitness\\
 \hline
-$S_1$ & 94.6\% & 332314 & 4.9519\\
-$S_2$ & 91.5\% & 93346 & 4.1827\\
-$S_3$ & 10.5\% & 6305682 & 14.3839\\
-$S_4$ & 92.0\% & 1862426 & 5.8084\\
-$S_5$ & 95.0\% & 1901162 & 5.5140\\
+$S_1$ & 91.7\% & 50890 & 2.7688\\
+$S_2$ & 98.7\% & 1065378 & 3.0812\\
+$S_3$ & 94.6\% & 1649506 & 3.3791\\
+$S_4$ & 92.1\% & 77922 & 2.8427\\
+$S_5$ & 96.6\% & 1771642 & 3.2867\\
 \hline
 \end{tabular}
 \end{center}
-\caption{Scores for the initial population found by AutoNN for MNIST. $\alpha = 0.8$}
+\caption{Scores for the initial population found by AutoNN for MNIST. $\alpha = 0.5$}
 \label{table:autonn_mnist_initial}
 \end{table} 
 
-First thing we can observe is that the sizes of the models are widely variable, with some models having as few as 1 hidden layer and some having more than 20 hidden layers, another thing to note is the variability in terms of activation functions with some models using sigmoid, some using tanh and some using relu as activation functions.
+First thing we can observe is that the sizes of the models are widely variable, with some models having as few as 1 hidden layer and some having more than 5 hidden layers, another thing to note is the variability in terms of activation functions with some models using sigmoid, some using tanh and some using relu as activation functions.
 
-The next thing to notice is the fitness of each of the initial individuals with the worst individual in the population ($S_3$) being extremely unfit due to the large size of the network (more than 6 million trainable parameters) and the low accuracy of the model (about $10\%$). The rest of the individuals display a decent accuracy (about $90\%$ of accuracy) but they exhibit a large number of trainable parameters. Since MNIST is a simple dataset to infer for modern neural networks it is observable that most of the neural networks at the initial population already attain acceptable accuracy, nevertheless in this specific case, the size of the network can be greatly improved. In the next sections we will show how AMS optimizes the accuracy along with the size of the models for more complex datasets.
+The next thing to notice is the results display a decent accuracy (about $90\%$ of accuracy) but they exhibit a large number of trainable parameters. Since MNIST is a simple dataset to infer for modern neural networks it is observable that most of the neural networks at the initial population already attain acceptable accuracy, nevertheless in this specific case, the size of the network can be greatly improved. In the next sections we will show how AMS optimizes the accuracy along with the size of the models for more complex datasets.
 
-For this test, after the 10 generations, the algorithm converged to $S^*_1 = \left[ (96, 1), (10, 3) \right]$, where * denotes the best individual in the population and the subindex denotes the experiment number.
+For this test, after the 10 generations, the algorithm converged to $S^*_1 = \left[ (120, 2), (10, 3) \right]$, where * denotes the best individual in the population and the subindex denotes the experiment number.
 
-We now run the same experiment four more times for a total of five different experiments with the same parameter settings for AMS. The obtained models are presented next, the fitness, accuracy and raw size of the models are presented in Table \ref{table:autonn_mnist_1}. The best overall model is $S^* = S^*_2$.
+We now run the same experiment four more times for a total of five different experiments with the same parameter settings for AMS. The obtained models are presented next, the fitness, accuracy and raw size of the models are presented in Table \ref{table:autonn_mnist_1}. The best overall model is $S^+_{0.5} = S^*_2$.
 
 \begin{align*}
-S^*_1 & = \left[ (96, 1), (10, 3) \right] \\
-S^*_2 & = \left[ (48, 2), (48, 2), (10, 3) \right] \\
-S^*_3 & = \left[ (408, 2), (10, 3) \right] \\
-S^*_4 & = \left[ (296, 1),  (10, 3) \right] \\
-S^*_5 & = \left[ (128, 1), (128, 1), (0.3),  (10, 3) \right] \\
+S^*_1 & = \left[ (120, 2), (10, 3) \right] \\
+S^*_2 & = \left[ (48, 2), (10, 3) \right] \\
+S^*_3 & = \left[ (64, 0), (10, 3) \right] \\
+S^*_4 & = \left[ (56, 2), (56, 2),  (10, 3) \right] \\
+S^*_5 & = \left[ (64, 2), (10, 3) \right] \\
 \end{align*}
 
 \begin{table}[!htb]
@@ -1097,28 +1088,28 @@ S^*_5 & = \left[ (128, 1), (128, 1), (0.3),  (10, 3) \right] \\
 \hline
 Model & Score (Accuracy) & Trainable Parameters & Fitness\\
 \hline
-$S^*_1$ & 94.4\% & 76330 & 4.4638\\
-$S^*_2$ & 95.0\% & 40522 & 4.1827\\
-$S^*_3$ & 96.8\% & 224370 & 4.7226\\
-$S^*_4$ & 95.1\% & 235330 & 4.7843\\
-$S^*_5$ & 95.5\% & 118282 & 4.5016\\
+$S^*_1$ & 96.6\% & 95410 & 2.6559\\
+$S^+_{0.5} = S^*_2$ & 95.1\% & 38170 & 2.5345\\
+$S^*_3$ & 89.9\% & 14298 & 2.5797\\
+$S^*_4$ & 96.3\% & 47722 & 2.5244\\
+$S^*_5$ & 95.8\% & 50890 & 2.5646\\
 \hline
 \end{tabular}
 \end{center}
-\caption{Scores for the best models found by AutoNN for MNIST. $\alpha = 0.8$}
+\caption{Scores for the best models found by AutoNN for MNIST. $\alpha = 0.5$}
 \label{table:autonn_mnist_1}
 \end{table}
 
-As can be observed in Table \ref{table:autonn_mnist_1} small models are preferred, furthermore there seems to be a preference for tanh activation functions. The fact that small models are preferred over larger models, despite the fact that larger models may yield better performance, is due to the value of the weighting factor $\alpha = 0.8$ which highly penalizes the overall size (number of trainable parameters) of the neural network.  Let us further illustrate this behavior by running the algorithm with $\alpha = 1$ and $\alpha = 0.6$.
+As can be observed in Table \ref{table:autonn_mnist_1} small models are preferred, furthermore there seems to be a preference for tanh activation functions. The fact that small models are preferred over larger models, despite the fact that larger models may yield better performance, is due to the value of the weighting factor $\alpha = 0.5$ which highly penalizes the overall size (number of trainable parameters) of the neural network.  Let us further illustrate this behavior by running the algorithm with $\alpha = 0.7$ and $\alpha = 0.3$.
 
-The best models for each experiment with $\alpha = 0.6$, are listed next, the fitness and raw size of the models are described in Table \ref{table:autonn_mnist_2}. The best overall model is $S^* = S^*_5$.
+The best models for each experiment with $\alpha = 0.3$, are listed next, the fitness and raw size of the models are described in Table \ref{table:autonn_mnist_2}. The best overall model is $S^+_{0.3} = S^*_3$.
 
 \begin{align*}
-S^*_1 & = \left[ (312, 2), (10, 3) \right] \\
-S^*_2 & = \left[ (368, 2), (0.15), (10, 3) \right] \\
-S^*_3 & = \left[ (200, 1), (10, 3) \right] \\
-S^*_4 & = \left[ (224, 2),  (10, 3) \right] \\
-S^*_5 & = \left[ (88, 2), (88, 2), (10, 3) \right] \\
+S^*_1 & = \left[ (32, 0), (10, 3) \right] \\
+S^*_2 & = \left[ (32, 1), (32, 1), (10, 3) \right] \\
+S^*_3 & = \left[ (64, 1), (64, 1), (64, 1), (64, 1), (10, 3) \right] \\
+S^*_4 & = \left[ (56, 1),  (10, 3) \right] \\
+S^*_5 & = \left[ (40, 1), (10, 3) \right] \\
 \end{align*}
 
 \begin{table}[!htb]
@@ -1127,28 +1118,28 @@ S^*_5 & = \left[ (88, 2), (88, 2), (10, 3) \right] \\
 \hline
 Model & Score (Accuracy) & Trainable Parameters & Fitness\\
 \hline
-$S^*_1$ & 96.7\% & 248050 & 3.5575\\
-$S^*_2$ & 96.8\% & 292570 & 3.5976\\
-$S^*_3$ & 96.3\% & 159010 & 3.4891\\
-$S^*_4$ & 96.3\% & 178090 & 3.5169\\
-$S^*_5$ & 95.2\% & 77802 & 3.4094\\
+$S^*_1$ & 91.5\% & 25450 & 1.9126\\
+$S^*_2$ & 95.2\% & 26506 & 1.6677\\
+$S^+_{0.3} = S^*_3$ & 97.2\% & 63370 & 1.6358\\
+$S^*_4$ & 94.7\% & 44530 & 1.7640\\
+$S^*_5$ & 94.4\% & 31810 & 1.7412\\
 \hline
 \end{tabular}
 \end{center}
-\caption{Scores for the best models found by AutoNN for MNIST, $\alpha = 0.6$.}
+\caption{Scores for the best models found by AutoNN for MNIST, $\alpha = 0.3$.}
 \label{table:autonn_mnist_2}
 \end{table}
 
-The results in Table \ref{table:autonn_mnist_2} display larger models with respect to those displayed in Table \ref{table:autonn_mnist_1}. This is due to the relaxation on the $\alpha$ parameter which takes more into account the accuracy of the model rather than the size of the network itself. Nevertheless, it can be observed that the accuracy of the obtained models when $\alpha=0.6$ is just slightly better than the results obtained with $\alpha=0.8$, this is likely due to the fact that MNIST dataset is usually easy to classify using neural networks. We will further analyze this behavior using other datasets in the next sections.
+The results in Table \ref{table:autonn_mnist_2} display larger models with respect to those displayed in Table \ref{table:autonn_mnist_1}. This is due to the relaxation on the $\alpha$ parameter which takes more into account the accuracy of the model rather than the size of the network itself. Nevertheless, it can be observed that the accuracy of the obtained models when $\alpha=0.3$ is just slightly better than the results obtained with $\alpha=0.5$, this is likely due to the fact that MNIST dataset is usually easy to classify using neural networks. We will further analyze this behavior using other datasets in the next sections.
 
-Next we repeat the experiment with $\alpha = 1$, again the obtained models are listed next and their fitness and raw size of the models are described in Table \ref{table:autonn_mnist_3}. The best overall model is $S^* = S^*_2$.
+Next we repeat the experiment with $\alpha = 0.7$, again the obtained models are listed next and their fitness and raw size of the models are described in Table \ref{table:autonn_mnist_3}. The best overall model is $S^+_{0.7} = S^*_4$.
 
 \begin{align*}
-S^*_1 & = \left[ (136, 2), (136, 2), (0.35), (10, 3) \right] \\
-S^*_2 & = \left[ (32, 1), (32, 1), (10, 3) \right] \\
-S^*_3 & = \left[ (56, 2), (0.1), (10, 3) \right] \\
-S^*_4 & = \left[ (152, 1), (152, 1), (10, 3) \right] \\
-S^*_5 & = \left[ (64, 2),  (10, 3) \right] \\
+S^*_1 & = \left[ (176, 0), (10, 3) \right] \\
+S^*_2 & = \left[ (384, 2), (8, 2), (64, 2), (0.55), (10, 3) \right] \\
+S^*_3 & = \left[ (56, 2), (10, 3) \right] \\
+S^*_4 & = \left[ (32, 1), (32, 1), (10, 3) \right] \\
+S^*_5 & = \left[ (80, 2),  (10, 3) \right] \\
 \end{align*}
 
 \begin{table}[!htb]
@@ -1157,15 +1148,15 @@ S^*_5 & = \left[ (64, 2),  (10, 3) \right] \\
 \hline
 Model & Score (Accuracy) & Trainable Parameters & Fitness\\
 \hline
-$S^*_1$ & 96.5\% & 126762 & 5.4529\\
-$S^*_2$ & 93.9\% & 26506 & 5.0388\\
-$S^*_3$ & 94.1\% & 44530 & 5.2348\\
-$S^*_4$ & 96.0\% & 144106 & 5.5550\\
-$S^*_5$ & 94.6\% & 50890 & 5.2475\\
+$S^*_1$ & 96.0\% & 139930 & 3.7220\\
+$S^*_2$ & 97.8\% & 305746 & 3.9048\\
+$S^*_3$ & 95.0\% & 44530 & 3.4087\\
+$S^+_{0.7} = S^*_4$ & 95.0\% & 26506 & 3.2527\\
+$S^*_5$ & 96.1\% & 63610 & 3.4826\\
 \hline
 \end{tabular}
 \end{center}
-\caption{Scores for the best models found by AutoNN for MNIST, $\alpha = 1$.}
+\caption{Scores for the best models found by AutoNN for MNIST, $\alpha = 0.7$.}
 \label{table:autonn_mnist_3}
 \end{table}
 
@@ -1174,7 +1165,7 @@ The results in Table \ref{table:autonn_mnist_3} show that when the number of tra
 
 Note that the change in fitness among the three experiments is due to the fact that the size of the neural network was scaled (See equation \ref{eq:fitness_function_scaled}) and thus there is no fair way of comparing the fitness of the models shown Tables \ref{table:autonn_mnist_1}, \ref{table:autonn_mnist_2} and \ref{table:autonn_mnist_3} against each other.
 
-Finally, we compare the best models for each value of $\alpha$ against each other. A 10-fold cross-validation process, with a training of 50 epochs per fold, was carried out for each one of the best models in order to obtain the mean accuracy for each model. We denote $ S^*_1$ as the best model corresponding to $\alpha = 0.6$, $S^*_2$ is the model corresponding to $\alpha = 0.8$ and $S^*_3$ is the model corresponding to $\alpha = 1$. We also measure the accuracy of each of the models using a test set that was never used during the training or tuning processes of the models. The accuracy averages and size of the networks are summarized in Table \ref{table:avg_accuracies_mnist}. The experiments for each $\alpha$ value took about 8.5 minutes in our test rig.
+Finally, we compare the best models for each value of $\alpha$ against each other. A 10-fold cross-validation process, with a training of 50 epochs per fold, was carried out for each one of the best models in order to obtain the mean accuracy for each model. We denote $ S^*_2$ as the best model corresponding to $\alpha = 0.5$, $S^*_3$ is the model corresponding to $\alpha = 0.3$ and $S^*_4$ is the model corresponding to $\alpha = 0.7$. We also measure the accuracy of each of the models using a test set that was never used during the training or tuning processes of the models. The accuracy averages and size of the networks are summarized in Table \ref{table:avg_accuracies_mnist}. The experiments for each $\alpha$ value took about 8.5 minutes in our test rig.
 
 \begin{table}[!htb]
 \begin{center}
@@ -1182,9 +1173,9 @@ Finally, we compare the best models for each value of $\alpha$ against each othe
 \hline
 Model & 10-fold Avg. Score & Test Avg. Score & Network size\\
 \hline
-$S^*_1$ & 97.6\% & 97.7\% & 93346\\
-$S^*_2$ & 97.0\% & 97.2\% & 77802\\
-$S^*_3$ & 96.1\% & 96.4\% & 26506\\
+$S^+_{0.3}$ & 97.3\% & 97.4\% & 63370\\
+$S^+_{0.5}$ & 97.1\% & 97.3\% & 47722\\
+$S^+_{0.7}$ & 96.0\% & 96.3\% & 26506\\
 \hline
 \end{tabular}
 \end{center}
@@ -1192,7 +1183,7 @@ $S^*_3$ & 96.1\% & 96.4\% & 26506\\
 \label{table:avg_accuracies_mnist}
 \end{table}
 
-As expected, model $S^*_3$ yields a smaller neural network (about 3 times smaller) than the rest of the proposed models, nevertheless its accuracy is the worst of the three models (though by a small margin). On the contrary model $S^*_1$ gets the best performance (again marginal) in terms of accuracy but with a larger neural network as compared to model $S^*_3$. Finally, model $S^*_2$ as expected, attains a performance in between $S^*_1$ and $S^*_3$ with a number of trainable parameters also in between $S^*_1$ and $S^*_3$. It is important to note though that the accuracy of each of the models presented for this dataset is acceptable as compared against some modern methods. Table \ref{table:MNIST_results_top} shows the top models along with their obtained accuracy for the MNIST dataset, it can be observed that the accuracy obtained by AMS is close to that obtained by fine tuned models. A thorough comparison between the obtained models and some other modern models using this dataset is out of the scope of this work mainly fue to the fact that the models obtained by AMS are not fine tuned as the models with higher accuracy.
+As expected, model $S^+_{0.7}$ yields a smaller neural network (about 3 times smaller) than the rest of the proposed models, nevertheless its accuracy is the worst of the three models (though by a small margin). On the contrary model $S^+_{0.3}$ gets the best performance (again marginal) in terms of accuracy but with a larger neural network as compared to model $S^+_{0.7}$. Finally, model $S^+_{0.5}$ as expected, attains a performance in between $S^+_{0.3}$ and $S^+_{0.7}$ with a number of trainable parameters also in between $S^+_{0.3}$ and $S^+_{0.7}$. It is important to note though that the accuracy of each of the models presented for this dataset is acceptable as compared against some modern methods. Table \ref{table:MNIST_results_top} shows the top models along with their obtained accuracy for the MNIST dataset, it can be observed that the accuracy obtained by AMS is close to that obtained by fine tuned models. A thorough comparison between the obtained models and some other modern models using this dataset is out of the scope of this work mainly fue to the fact that the models obtained by AMS are not fine tuned as the models with higher accuracy.
 
 \begin{table}[!htb]
 \begin{center}

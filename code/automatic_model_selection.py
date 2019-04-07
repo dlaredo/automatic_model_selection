@@ -9,6 +9,12 @@ import numpy as np
 
 from keras import backend as K
 
+layer_limits = {"max_neuron_multiplier": 1024 // 8,
+				"max_filter_size_multiplier": 512 // 8,
+				"max_kernel_size_multiplier": 128 // 8,
+				"max_filter_stride": 3,
+				"max_pooling_exponent": 6,
+				"max_dropout": 0.7}
 
 class Configuration():
 
@@ -400,6 +406,19 @@ def run_experiment(configuration, data_handler, experiment_number, unroll=False,
 	#parent_pop = []
 	elite_archive = []  #Archive to store the best individuals in each generation
 
+	#Set maximum limits for each layer of the model based on the data characteristics
+	print("Generating layer limits according to dataset")
+	logging.info("Generating layer limits according to dataset")
+
+	# Explore data to define the limit of the layers
+	print(configuration.input_shape)
+	data_handler.load_data(unroll=unroll, verbose=1)
+	data_shape = data_handler.X_train.shape[1]
+	output_shape = data_handler.y_train.shape[1]
+	print(data_shape)
+	layer_limits["max_kernel_size_multiplier"] = data_shape // 2
+
+
 	#Log the information of this experiment
 	logging.info("Starting model optimization: Problem type {}, Architecture type {}".format(configuration.problem_type, configuration.architecture_type))
 	logging.info("Parameters:")
@@ -408,10 +427,11 @@ def run_experiment(configuration, data_handler, experiment_number, unroll=False,
 		configuration.tournament_size, configuration.binary_selection, configuration.mutation_ratio, configuration.size_scaler))
 
 
-	population = nn_evolutionary.initial_population(configuration.pop_size, configuration.problem_type, configuration.architecture_type, number_classes=configuration.output_shape,
-		more_layers_prob=configuration.more_layers_prob)
+	population = nn_evolutionary.initial_population(configuration.pop_size, configuration.problem_type, configuration.architecture_type, layer_limits,
+													number_classes=configuration.output_shape, more_layers_prob=configuration.more_layers_prob)
 
 
+	"""
 	while launch_new_generation == True and generation_count < configuration.max_generations:
 		
 		count = 0
@@ -437,14 +457,14 @@ def run_experiment(configuration, data_handler, experiment_number, unroll=False,
 		print("gen similar")
 		print(generation_similar)
 
+		logging.info("\nPopulation at generation " + str(generation_count + 1))
+		print_pop(population, logger=True)
+
 		#Assess the fitness of the inidividuals in the population
 		best_model, worst_model, worst_index = evaluate_population(population, configuration, data_handler, tModel_scaler,
 																   unroll, learningRate_scheduler)
 
 		#Save worst and best models. Also append best model to elite archive
-		logging.info("\nPopulation at generation " + str(generation_count+1))
-		print_pop(population, logger=True)
-
 		logging.info("\nGeneration Best model")
 		logging.info(best_model)
 
@@ -526,6 +546,8 @@ def run_experiment(configuration, data_handler, experiment_number, unroll=False,
 	print("Experiment {} finished".format(experiment_number))
 	logging.info("Experiment {} finished".format(experiment_number))
 	return experiment_best
+	"""
+	return population[0]
 
 
 def print_best(best_list):

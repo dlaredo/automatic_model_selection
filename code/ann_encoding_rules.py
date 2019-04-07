@@ -2,12 +2,23 @@ import random
 
 from enum import Enum
 
+"""
+layer_limits_global = {"max_neuron_multiplier":1024/8,
+				"max_filter_size_multiplier":512/8,
+				"max_kernel_size_multiplier":6,
+				"max_filter_stride":3,
+				"max_pooling_exponent":6,
+				"max_dropout":0.7}
+"""
+
+"""
 max_neuron_multiplier = 1024/8
 max_filter_size_multiplier = 512/8
-max_filter_size_exponent = 6
+max_kernel_size_exponent = 6
 max_filter_stride = 6
 max_pooling_exponent = 6
 max_dropout = 0.7
+"""
 
 
 class Layers(Enum):
@@ -111,7 +122,7 @@ def generate_characteristic(layer, characteristic):
 	return value
 
 
-def generate_layer(layer_type, used_activations={}):
+def generate_layer(layer_type, layer_limits, previous_layer=None, used_activations={}):
 	"""Given a layer type, return the layer params
 
 	0: Type of layer
@@ -122,9 +133,33 @@ def generate_layer(layer_type, used_activations={}):
 	5: CNN stride
 	6: Pooling size
 	7: Dropout rate
+	8: Layer output size
 	"""
 
-	layer = [layer_type, 0, 0, 0, 0, 0, 0, 0]
+	print("Previous layer")
+	print(previous_layer)
+
+	"""Set the upper limits for the layers"""
+	max_neuron_multiplier = layer_limits["max_neuron_multiplier"]
+	max_pooling_exponent = layer_limits["max_pooling_exponent"]
+	max_dropout = layer_limits["max_dropout"]
+
+	layer = [layer_type, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+	#If layer is convolutional try to generate it first, if its not possible then replace by fully connected
+	if layer_type == Layers.Convolutional:
+		convLayer = generate_convolutional_layer(previous_layer, layer_limits)
+
+		if convLayer != None:
+			print("Conv layer generated")
+			layer[3] = convLayer[0]
+			layer[4] = convLayer[1]
+			layer[5] = convLayer[2]
+		else:
+			print("Impossible to generate conv layer, generating fully connected instead")
+			layer_type = Layers.FullyConnected
+			layer[0] = layer_type
+
 
 	if layer_type == Layers.FullyConnected or layer_type == Layers.Recurrent:
 		layer[1] = 8*random.randint(1, max_neuron_multiplier) #Generate a random number of neurons which is a multiple of 8 up to 1024 neurons
@@ -137,11 +172,14 @@ def generate_layer(layer_type, used_activations={}):
 			layer[2] = random.randint(0,2) if layer_type != Layers.Recurrent else 1  #Exclude softmax since that only goes till the end
 			used_activations[layer_type] = layer[2]
 
-
+	"""
 	if layer_type == Layers.Convolutional:
 		layer[3] = 8*random.randint(1, max_filter_size_multiplier)
-		layer[4] = 3**random.randint(1, max_filter_size_exponent)
+
+		#Next layer uses smaller filter size
+		layer[4] = 3**random.randint(1, max_kernel_size_multiplier)
 		layer[5] = random.randint(1, max_filter_stride)
+	"""
 
 	if layer_type == Layers.Pooling:
 		layer[6] = 2**random.randint(1, max_pooling_exponent)
@@ -156,7 +194,49 @@ def generate_layer(layer_type, used_activations={}):
 	return layer
 
 
+def generate_convolutional_layer(previous_layer, layer_limits):
+	""""""
 
+	convLayer = None
 
+	print("Layer limits")
+	print(layer_limits)
 
+	print("Previous Layer")
+	print(previous_layer)
+
+	print("generating convolutional layer")
+
+	max_filter_size_multiplier = layer_limits["max_filter_size_multiplier"]
+	max_kernel_size_multiplier = layer_limits["max_kernel_size_multiplier"]
+	max_filter_stride = layer_limits["max_filter_stride"]
+
+	filter_size = 8*random.randint(1, max_filter_size_multiplier)
+	print("filter size %d"%filter_size)
+
+	if previous_layer != None:
+		previous_size = previous_layer[8]
+	else:
+		previous_size = max_kernel_size_multiplier
+
+	print("previous size %d" % previous_size)
+	max_kernel_size = previous_size // 2
+	#max_kernel_size_multiplier = max_kernel_size // 3
+	max_kernel_size_multiplier = max_kernel_size
+	print("max kernel size %d " % max_kernel_size)
+	print("max kernel size multiplier %d " % max_kernel_size_multiplier)
+
+	# Can insert another conv layer
+	if max_kernel_size_multiplier != 1:
+
+		kernel_size = random.randint(1, max_kernel_size_multiplier) + 2 * random.randint(0, 1)
+
+		if kernel_size / 2 == 0:
+			kernel_size - 1
+
+		stride = random.randint(1, max_filter_stride)
+
+		convLayer = [filter_size, kernel_size, stride]
+
+	return convLayer
 

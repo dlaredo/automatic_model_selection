@@ -10,6 +10,75 @@ from keras import backend as K
 import ann_encoding_rules
 from ann_encoding_rules import Layers, LayerCharacteristics, ann_building_rules, activations
 
+"""
+class LayerLimits():
+
+	def __init__(self, data_handler, unroll):
+
+		#Explore data to define the limit of the layers
+		data_handler.load_data(unroll=unroll, verbose=1)
+		data_shape = data_handler.X_train.shape[1]
+		output_shape = data_handler.y_train.shape[1]
+
+		self._max_neuron_multiplier = 1024/8
+		self._max_filter_size_multiplier = 512/8
+		self._max_kernel_size_multiplier = (data_shape//4)//3
+		self._max_filter_stride = 3
+		self._max_pooling_exponent = 4
+		self._max_dropout = 1
+
+
+	# property definition
+
+	@property
+	def max_neuron_multiplier(self):
+		return self._max_neuron_multiplier
+
+	@max_neuron_multiplier.setter
+	def max_neuron_multiplier(self, max_neuron_multiplier):
+		self._max_neuron_multiplier = max_neuron_multiplier
+
+	@property
+	def max_filter_size_multiplier(self):
+		return self._max_filter_size_multiplier
+
+	@max_filter_size_multiplier.setter
+	def max_filter_size_multiplier(self, max_filter_size_multiplier):
+		self._max_filter_size_multiplier = max_filter_size_multiplier
+
+	@property
+	def max_kernel_size(self):
+		return self._max_kernel_size
+
+	@max_kernel_size.setter
+	def max_kernel_size(self, max_kernel_size):
+		self._max_kernel_size = max_kernel_size
+
+	@property
+	def max_filter_stride(self):
+		return self._max_filter_stride
+
+	@max_filter_stride.setter
+	def max_filter_stride(self, max_filter_stride):
+		self._max_filter_stride = max_filter_stride
+
+	@property
+	def max_pooling_exponent(self):
+		return self._max_pooling_exponent
+
+	@max_pooling_exponent.setter
+	def max_pooling_exponent(self, max_pooling_exponent):
+		self._max_pooling_exponent = max_pooling_exponent
+
+	@property
+	def max_dropout(self):
+		return self._max_dropout
+
+	@max_dropout.setter
+	def max_dropout(self, max_dropout):
+		self._max_dropout = max_dropout
+
+"""
 
 class Individual():
 
@@ -200,7 +269,7 @@ class Individual():
 		self._checksum_vector = checksum_vector
 
 
-def generate_model(model=None, prev_component=Layers.Empty, next_component=Layers.Empty, max_layers=64, more_layers_prob=0.7, used_activations = {}):
+def generate_model(layer_limits, model=None, prev_component=Layers.Empty, next_component=Layers.Empty, max_layers=64, more_layers_prob=0.7, used_activations = {}):
 	"""Iteratively and randomly generate a model"""
 
 	layer_count = 0
@@ -228,9 +297,9 @@ def generate_model(model=None, prev_component=Layers.Empty, next_component=Layer
 		if more_layers == False:
 			#Is this layer good for ending?
 			if next_component == Layers.Empty or next_component in ann_building_rules[curr_component]:
-				layer = ann_encoding_rules.generate_layer(curr_component, used_activations)
+				layer = ann_encoding_rules.generate_layer(curr_component, layer_limits, used_activations)
 				model.append(layer)
-				prev_component = curr_component
+				prev_component = layer[0]
 				success = True
 				break
 
@@ -242,14 +311,14 @@ def generate_model(model=None, prev_component=Layers.Empty, next_component=Layer
 				model = []
 				break
 		else:
-			layer = ann_encoding_rules.generate_layer(curr_component, used_activations)
+			layer = ann_encoding_rules.generate_layer(curr_component,layer_limits, used_activations)
 			model.append(layer)
-			prev_component = curr_component
+			prev_component = layer[0]
 
 	return model, success
 
 
-def initial_population(pop_size, problem_type, architecture_type, number_classes=2, more_layers_prob=0.7):
+def initial_population(pop_size, problem_type, architecture_type, layer_limits, number_classes=2, more_layers_prob=0.7):
 
 	population = []
 
@@ -257,10 +326,13 @@ def initial_population(pop_size, problem_type, architecture_type, number_classes
 
 		used_activations = {}
 
-		model_genotype, success = generate_model(more_layers_prob=more_layers_prob, prev_component=architecture_type, used_activations=used_activations)
-
 		#Generate first layer
-		layer_first = ann_encoding_rules.generate_layer(architecture_type, used_activations)
+		print(used_activations)
+		layer_first = ann_encoding_rules.generate_layer(architecture_type, layer_limits, used_activations=used_activations)
+		print(layer_first)
+		print(used_activations)
+
+		model_genotype, success = generate_model(layer_limits, more_layers_prob=more_layers_prob, prev_component=layer_first[0], used_activations=used_activations)
 
 		#Last layer is always FC
 		if problem_type == 1:
@@ -269,7 +341,7 @@ def initial_population(pop_size, problem_type, architecture_type, number_classes
 			layer_last = [Layers.FullyConnected, number_classes, 3, 0, 0, 0, 0, 0]
 
 		model_genotype.append(layer_last)
-		model_genotype = [layer_first] + model_genotype
+		#model_genotype = [layer_first] + model_genotype
 
 		individual = Individual(i, problem_type, model_genotype, used_activations)
 

@@ -1160,7 +1160,6 @@ $S^*_5$ & 96.1\% & 63610 & 3.4826\\
 \label{table:autonn_mnist_3}
 \end{table}
 
-
 The results in Table \ref{table:autonn_mnist_3} show that when the number of trainable parameters has a large impact on the overall fitness of the individuals, the algorithm tends to prefer smaller networks, this is specially useful for cases where the computational power is limited, such as embedded systems. This brings an obvious drawback, namely that neural networks that exhibit a lower performance as compared to larger neural networks may be preferred. Nevertheless, this tradeoff can be controlled by the user by varying the $\alpha$ parameter. 
 
 Note that the change in fitness among the three experiments is due to the fact that the size of the neural network was scaled (See equation \ref{eq:fitness_function_scaled}) and thus there is no fair way of comparing the fitness of the models shown Tables \ref{table:autonn_mnist_1}, \ref{table:autonn_mnist_2} and \ref{table:autonn_mnist_3} against each other.
@@ -1182,6 +1181,14 @@ $S^+_{0.7}$ & 96.0\% & 96.3\% & 26506\\
 \caption{Accuracy obtained by each of the top 3 models for MNIST dataset.}
 \label{table:avg_accuracies_mnist}
 \end{table}
+\begin{figure}[H]
+	\begin{center}
+		\centering
+		\includegraphics[scale=0.55]{mnist_scatter.png}
+		\caption{The Relationship of Model Size and Error}
+		\label{fig:mnist_scatter}
+	\end{center}
+\end{figure}
 
 As expected, model $S^+_{0.7}$ yields a smaller neural network (about 3 times smaller) than the rest of the proposed models, nevertheless its accuracy is the worst of the three models (though by a small margin). On the contrary model $S^+_{0.3}$ gets the best performance (again marginal) in terms of accuracy but with a larger neural network as compared to model $S^+_{0.7}$. Finally, model $S^+_{0.5}$ as expected, attains a performance in between $S^+_{0.3}$ and $S^+_{0.7}$ with a number of trainable parameters also in between $S^+_{0.3}$ and $S^+_{0.7}$. It is important to note though that the accuracy of each of the models presented for this dataset is acceptable as compared against some modern methods. Table \ref{table:MNIST_results_top} shows the top models along with their obtained accuracy for the MNIST dataset, it can be observed that the accuracy obtained by AMS is close to that obtained by fine tuned models. A thorough comparison between the obtained models and some other modern models using this dataset is out of the scope of this work mainly fue to the fact that the models obtained by AMS are not fine tuned as the models with higher accuracy.
 

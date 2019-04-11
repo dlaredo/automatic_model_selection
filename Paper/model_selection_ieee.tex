@@ -1285,7 +1285,7 @@ Deep MLP ensemble \cite{Zhang2016} & 15.04 &  n/a \\
 \label{table:CMAPSS_results_top}
 \end{table}
 
-As with MNIST dataset we performed experiments for $\alpha \in \{0.6, 0.8, 1\}$. The best global models (best out of the five experiments) obtained for each of the $\alpha$ values are shown in Table \ref{table:avg_rmse_cmapss} along with their scores for CMAPSS data (RMSE) and the sizes of the networks. $S^*_1$ denotes the best model for $\alpha = 0.6$, while $S^*_2$ and $S^*_3$ denote the best models for $\alpha = 0.8$ and $\alpha = 1$ respectively. The experiments for each $\alpha$ value took about 3.5 minutes in our test rig.
+As with MNIST dataset we performed experiments for $\alpha \in \{0.3, 0.5, 0.7\}$. The best global models (best out of the five experiments) obtained for each of the $\alpha$ values are shown in Table \ref{table:avg_rmse_cmapss} along with their scores for CMAPSS data (RMSE) and the sizes of the networks. $S^*_1$ denotes the best model for $\alpha = 0.3$, while $S^*_2$ and $S^*_3$ denote the best models for $\alpha = 0.5$ and $\alpha = 0.7$ respectively. The experiments for each $\alpha$ value took about 3.5 minutes in our test rig.
 
 \begin{table}[!htb]
 \begin{center}
@@ -1293,15 +1293,23 @@ As with MNIST dataset we performed experiments for $\alpha \in \{0.6, 0.8, 1\}$.
 \hline
 Model & 10-fold Avg. Score & Test Avg. Score & Network size\\
 \hline
-$S^*_1$ & 15.16 & 16.12 & 57809\\
-$S^*_2$ & 15.20 & 14.83 & 9177\\
-$S^*_3$ & 15.00 & 14.96 & 6817\\
+$S^*_1$ & 14.82 & 15.34 & 123217\\
+$S^*_2$ & 14.96 & 15.82 & 316369\\
+$S^*_3$ & 15.07 & 16.12 & 46073\\
 \hline
 \end{tabular}
 \end{center}
 \caption{RMSE obtained by each of the top 3 models for CMAPSS dataset.}
 \label{table:avg_rmse_cmapss}
 \end{table}
+\begin{figure}[H]
+	\begin{center}
+		\centering
+		\includegraphics[scale=0.55]{cmapss_scatter.png}
+		\caption{The Relationship of Model Size and Error}
+		\label{fig:cmapss_scatter}
+	\end{center}
+\end{figure}
 
 The results presented in Table \ref{table:avg_rmse_cmapss} further demonstrate the impact of the $\alpha$ parameter. As can be observed the size of the networks grow as $\alpha$ is relaxed (smaller). It can also be observed that the results obtained by the three proposed models in the Cross-Validation sets are very close among each other, nevertheless it is important to point out that $S^*_1$ attained such score with a larger network as compared with $S^*_2$ and $S^*_3$ whose sizes are fairly similar. This is mainly because the CMAPSS dataset does not require very large neural networks, therefore small models are usually preferred. 
 

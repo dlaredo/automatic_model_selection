@@ -1132,17 +1132,15 @@ $S^*_5$ & 94.4\% & 31810 & 1.7412\\
 
 The models presented in Table \ref{table:autonn_mnist_2} exhibit, in general, better performance than those depicted in Table \ref{table:autonn_mnist_1}. This is due to the fact that $\alpha = 0.3$ prioritizes model accuracy over model size, surprisingly, the sizes of the models obtained when $\alpha = 0.3$ are on the same order of magnitude as those obtained when $\alpha = 0.5$, a discussion on this behavior is provided later in this section.
 
-We repeat the experiment with $\alpha = 0.7$, the obtained models are listed next and their fitness, raw size and accuracy are depicted in Table \ref{table:autonn_mnist_3}. The best overall model is $S^+_{0.7} = S^*_4$.
+We repeat the experiment with $\alpha = 0.7$, the obtained models are listed next and their fitness, raw size and accuracy are depicted in Table \ref{table:autonn_mnist_3}.
 
-\begin{comment}
 \begin{align*}
 S^*_1 & = \left[ (24, 2), (10, 3) \right] \\
 S^*_2 & = \left[ (104, 2), (0.2), (10, 3) \right] \\
-S^*_3 & = \left[ (16, 2), (24, 2), (10, 3) \right] \\
+S^+_3 & = \left[ (16, 2), (24, 2), (10, 3) \right] \\
 S^*_4 & = \left[ (56, 2), (10, 3) \right] \\
 S^*_5 & = \left[ (208, 2),  (10, 3) \right] \\
 \end{align*}
-\end{comment}
 
 \begin{table}[!htb]
 \begin{center}

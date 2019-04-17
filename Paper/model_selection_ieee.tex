@@ -521,7 +521,7 @@ p = Per(f(D_t); D_v),
 \label{eq:nn_cost}
 \end{equation}
 
-where $Perf(.)$ can be any standard or custom cost metric, e.g. accuracy, precision, mean squared error, etc.  Commonly used performance indicators can be found in Table \ref{table:performance_metrics}. 
+where $Perf(.)$ is a measurement of the error attained by the learning algorithm. Common error indicators are: accuracy error, precision error and mean squared error, their definitions along with some other common error indicators are presented in Table \ref{table:performance_metrics}. 
 
 Finding a neural network $f^* \in \mathcal{F}$ that achieves a good performance has been explored in \cite{Jin2018, Real2018} among others. While this task alone is challenging, usually the efficiency of $f^*$ is not measured. Indeed, it turns out that there can be several candidate models that can attain similar performance with improved efficiency. By efficiency we mean, in practical terms, how fast is to train $f^*$ as compared to other possible solutions. 
 
@@ -1164,9 +1164,7 @@ The results in Table \ref{table:autonn_mnist_3} show that when the number of tra
 
 As a side note please notice that the difference in the fitness exhibited among the models of the three different experiments is due to the fact that the size of the neural network was scaled (See section \ref{sec:fitness_function}) and thus there is no fair way of comparing the fitness of the models shown in Tables \ref{table:autonn_mnist_1}, \ref{table:autonn_mnist_2} and \ref{table:autonn_mnist_3} against each other.
 
-Figure ... compares the 15 models. Each model was trained for 100 epochs and evaluated using a cross-validation set. Test and cross-validation sets were the same for all of the models. As mentioned earlier, the sizes of the models obtained when $\alpha = 0.5$ and $\alpha = 0.3$ lie within the same order of magnitude. There are two possible explanations for this behavior; intuitively it can be thought that MNIST exhibits better performance when small networks are used, therefore by trying to improve the performance of the model the algorithm implicitly chooses compact networks, on the other hand the scaling done to the network size (see Equation  \ref{eq:fitness_function_scaled}) is likely contributing to this behavior, since we are using a logaritmic scale to measure the size of the networks a few thousands of weights are unlikely to make a big difference in the fitness of a model. The fact that the accuracy of the obtained models when $\alpha=0.3$ is just slightly better than the results obtained with $\alpha=0.5$, is likely due to the fact that MNIST dataset is usually easy to classify using neural networks. We will further analyze this behavior using other datasets in the next sections.
-
-Figure goes here....
+Figure \ref{fig:alpha_mnist_cluster_cvset} shows the results obtained by all of the found models for $\alpha \in \left\lbrace 0.3, 0.5, 0.7  \right\rbrace$, which were trained for 100 epochs using 5-fold cross-validation to assess their accuracy. It is observed that models cluster around a model size less than 50000 and an error less than 0.15. As expected, models obtained with $\alpha = 0.7$ yield, in general, the smallest sizes. Outliers are mostly due to the fact that for such experiments the algorithm was unable to find a smaller model, this is likely due to a bad initial population for such experiments, nevertheless it could also be attributable to the scaling done to the network size (see Equation  \ref{eq:fitness_function_scaled}). Since AMS uses a logaritmic scale to measure the size of the networks a few thousands of weights are unlikely to make a big difference in the fitness of a model. 
 
 Finally, we compare the best models for each value of $\alpha$ against each other. A 10-fold cross-validation process, with a training of 50 epochs per fold, was carried out for each one of the best models in order to obtain the mean accuracy for each model. The three models were feed the same training data and validated using the same folds for the cross-validation data. We also measure the accuracy of each of the models using a test set that was never used during the training or hyper-parameter tuning processes of the models. The accuracy averages and size of the networks are summarized in Table \ref{table:avg_accuracies_mnist}. 
 
@@ -1174,7 +1172,7 @@ Finally, we compare the best models for each value of $\alpha$ against each othe
 \begin{center}
 \begin{tabular}{| c | c | c | c |}
 \hline
-Model & 5-fold Avg. Score & Test Avg. Score & Network size\\
+Model & 5-fold Avg. Score & Test Accuracy & Network size\\
 \hline
 $S^+_{0.3}$ & 97.3\% & 97.4\% & 63370\\
 $S^+_{0.5}$ & 96.8\% & 97.0\% & 40522\\
@@ -1272,17 +1270,23 @@ Total Experiments & $E_{max} = 5$ \\
 \label{table:CMAPSS_params}
 \end{table}
 
-As with MNIST dataset we performed experiments for $\alpha \in \left\lbrace 0.3, \cdots, 0.7 \right\rbrace$ with $\Delta_\alpha = 0.1$. For the sake of space we only discuss in the detail the results obtained when $\alpha \in \left\lbrace 0.3, 0.5, 0.7 \right\rbrace$. The best models (best out of the five experiments) obtained for each of the $\alpha$ values by AMS are shown in Table \ref{table:avg_rmse_cmapss} along with their scores (RMSE) and the sizes. As with MNIST dataset, AMS partially evaluated at most 50 different models for each $\alpha$ value. The experiments for each $\alpha$ took about 2 minutes in our test rig.
+As with MNIST dataset we performed experiments for $\alpha \in \left\lbrace 0.3, \cdots, 0.7 \right\rbrace$ with $\Delta_\alpha = 0.1$. For the sake of space we only discuss in the detail the results obtained when $\alpha \in \left\lbrace 0.4, 0.5, 0.6 \right\rbrace$ (which were the $\alpha$ values that yielded the best results). The best models (best out of the five experiments) obtained for each of the $\alpha$ values by AMS are shown in Table \ref{table:avg_rmse_cmapss} along with their scores (RMSE) and sizes. As with MNIST dataset, AMS partially evaluated at most 50 different models for each $\alpha$ value. The experiments for each $\alpha$ took about 2 minutes in our test rig.
+
+\begin{align*}
+S^+_{0.4} & = \left[ (104, 1), (824, 1), (1, 4) \right] \\
+S^+_{0.5} & = \left[ (264, 2), (1, 4) \right] \\
+S^+_{0.6} & = \left[ (80, 1), (80, 1), (1, 4) \right] \\
+\end{align*}
 
 \begin{table}[!htb]
 \begin{center}
 \begin{tabular}{| c | c | c | c |}
 \hline
-Model & 5-fold Avg. Score & Test Avg. Score & Network size\\
+Model & 5-fold Avg. Score & Test RMSE & Network size\\
 \hline
-$S^+_{0.3}$ & 14.82 & 15.34 & 123217\\
-$S^+_{0.5}$ & 14.96 & 15.82 & 316369\\
-$S^+_{0.7}$ & 15.07 & 16.12 & 46073\\
+$S^+_{0.4}$ & 14.87 & 14.99 & 122393\\
+$S^+_{0.5}$ & 15.27 & 15.90 & 89233\\
+$S^+_{0.6}$ & 14.78 & 15.74 & 33521\\
 \hline
 \end{tabular}
 \end{center}
@@ -1290,9 +1294,25 @@ $S^+_{0.7}$ & 15.07 & 16.12 & 46073\\
 \label{table:avg_rmse_cmapss}
 \end{table}
 
-Figure \ref{fig:alpha_cmapss} shows ....
+\begin{comment}
+\begin{table}[!htb]
+\begin{center}
+\begin{tabular}{| c | c | c | c |}
+\hline
+Model & 5-fold Avg. Score & Test Avg. Score & Network size\\
+\hline
+$S^+_{0.4}$ & 14.82 & 15.34 & 123217\\
+$S^+_{0.5}$ & 14.96 & 15.82 & 316369\\
+$S^+_{0.6}$ & 15.07 & 16.12 & 46073\\
+\hline
+\end{tabular}
+\end{center}
+\caption{RMSE obtained by each of the top 3 models for CMAPSS dataset.}
+\label{table:avg_rmse_cmapss}
+\end{table}
+\end{comment}
 
-The results presented in Table \ref{table:avg_rmse_cmapss} further demonstrate the impact of the $\alpha$ parameter. As can be observed the size of the networks grow as $\alpha$ is relaxed (smaller). It can also be observed that the results obtained by the three proposed models in the Cross-Validation sets are very close among each other, nevertheless it is important to point out that $S^*_1$ attained such score with a larger network as compared with $S^*_2$ and $S^*_3$ whose sizes are fairly similar. This is mainly because the CMAPSS dataset does not require very large neural networks, therefore small models are usually preferred. 
+The results presented in Table \ref{table:avg_rmse_cmapss} further demonstrate the impact of the $\alpha$ parameter. As can be observed the size of the networks grow as $\alpha$ is relaxed (smaller). It can also be observed that the results obtained by the three proposed models in the Cross-Validation sets are very close to each other. Again, small networks are usually preferred.
 
 Table \ref{table:CMAPSS_results_top} presents some of the top results obtained by hand-crafted MLPs in the CMAPSS dataset, this time the performance of the models is measured in terms of the RMSE (Root Mean Squared Error) between the real RUL and the predicted RUL. 
 
@@ -1312,16 +1332,24 @@ Deep MLP ensemble \cite{Zhang2016} & 15.04 &  n/a \\
 \label{table:CMAPSS_results_top}
 \end{table}
 
-The obtained models are also competitive when compared against some of the latest MLPs used with CMAPSS dataset (\ref{table:CMAPSS_results_top}). In this case we compare against the score obtained in the test set for each of the models. It is shown that two of the three models obtained by AMS obtain a better score than two (Time Window MLP and Deep MLP ensemble) of the three compared models, furthermore, the sizes of the proposed networks are as small as the sizes of the compared models. 
+The obtained models are also competitive when compared against some of the latest MLPs used with CMAPSS dataset (\ref{table:CMAPSS_results_top}). In this case we compare against the score obtained in the test set for each of the models. It is shown that one of the three models obtained by AMS obtain a better score than two (Time Window MLP and Deep MLP ensemble) of the three compared models. Although the sizes of the neural networks obtained by AMS are one order of magnitude bigger than the hand-crafted models we can observe that AMS delivered compact models (having few layers with few neurons in each layer).
+
+Finally, Figure \ref{fig:alpha_cmapss} shows that all of the obtained models have a small model size (few hundred thousand parameters) while all of them attained a very good performance for this dataset (See \cite{Laredo2018} and \cite{Li2018} for further models and their scores). Once again, it can be observed that the model size decreases with larger $\alpha$ values. One important observation is that, for CMAPSS dataset, there doesnt seem to be a correlation between the model size and its performance. Indeed, the model size is just one simple indicator of a networks architecture, nevertheless, trying to characterize a network only by its size may leave out valuable information about it, information that could be used in the search of new individuals with better traits for the dataset. We leave out further analysis of this behavior for future work.
 
 
 
 \section{Conclusions and Future Work}
 \label{sec:conclusions}
 
-In this paper we presented AutoNN, a new evolutionary algorithm for efficiently finding suitable neural network models for both classification and regression problems. Making use of efficient mutation and crossover operators the AutoNN is able to generate valid and efficient neural networks, in terms of both the size of the network and its performance. Furthermore, AutoNN is intrinsically distributable, exploiting this feature with the use of Ray \cite{Moritz2017} we were able to find efficient models for the MNIST dataset \cite{Lecun2010}.
+In this paper we presented AMS, a new evolutionary algorithm for efficiently finding suitable neural network models for classification and regression problems. Making use of efficient mutation and crossover operators AMS is able to generate valid and efficient neural networks, in terms of both the size of the network and its performance. Furthermore, AMS' design is highly parallelizable and distributable, exploiting this feature with the use of frameworks such as Ray \cite{Moritz2017} or Spark \cite{Zaharia2010} the performance of the algorithm can be greatly boosted.
 
-Future work will consider more complex neural network architecturs such as LSTM and CNNs, techniques for assembling entire neural network pipelines will also be explored in future as well as the inclusion of more hyperparameters in the tuning process. Finally a better way of measuring distance between two neural network architectures will be explored, since this last element is of high importance for applications such as visualization and evolutionary computation.
+By allowing the user to control the trade-off between the total size of the network and its performance AMS is capable of finding small neural networks when necessary (applications with limited memory, mobiles or embedded systems may have constraints on the size of the models they can handle) or prioritize the model's performance. Although not every model found by AMS is a Pareto point, the found models yield a good balance between performance and size.
+
+Furthermore, AMS is computationally efficient since it only needs to evaluate a few tenths of models to find suitable ones. As was demonstrated in this paper, even a medium tier computing rig (consisting of a modern, medium-range processor and a modern general purpose GPU) can find good models in less than 5 minutes (depending on the dataset). This is achieved mainly to the partial train strategy, which demonstrated to be an efficient method for assesing the fitness of a given model.
+
+Overall, AMS provides an easy to use, efficient and robust algorithm for finding suitable neural network models given a dataset. We believe that the method can be easily used by somebody who has a basic knowledge of programming, making it possible for non-experts machine learning practitioners to obtain out-of-the-box solutions.
+
+Future work will consider more complex neural network architecturs such as LSTM and CNNs, techniques for assembling entire neural network pipelines will also be explored in future as well as the inclusion of more hyperparameters in the tuning process. An analysis of what information can be used to better characterize a neural network (and not just the model size) is also left for future work. Finally a better way of measuring distance between two neural network architectures will be explored, since this last element is of high importance for applications such as visualization and evolutionary computation.
 
 
 \begin{comment}
@@ -1404,15 +1432,15 @@ The authors would like to thank...
 \onecolumn%
 \begin{table}[!htb]
 \begin{center}
-\begin{tabular}{| c | c |}
+\begin{tabular}{| c | c | c |}
 \hline
-Metric name & Definition\\
+Inidicator name & Application & Definition\\
 \hline
-Root Mean Squared Error & Regression \\
-Accuracy & Classification \\
-Precision & Classification \\
-Recall & Classification \\
-F1 & Classification \\
+Root Mean Squared Error & Regression & $x = y$\\
+Accuracy & Classification & $x = y$ \\
+Precision & Classification & $x = y$ \\
+Recall & Classification & $x = y$\\
+F1 & Classification & $x = y$\\
 \hline
 \end{tabular}
 \end{center}
@@ -1468,6 +1496,8 @@ Index & Activation function \\
 0 & Sigmoid \\
 1 & Hyperbolic tangent \\
 2 & ReLU \\
+3 & Softmax \\
+4 & Linear \\
 \hline
 \end{tabular}
 \end{center}
@@ -1541,6 +1571,13 @@ Fully Connected & 10 & Softmax & n/a\\
 \subfigure[Obtained models on test set]{\label{fig:alpha_mnist_testset}\includegraphics[scale=0.5]{img/alpha_ams_mnist_testset.png}}
 \caption{Influence of $\alpha$ on the model's size and error on MNIST dataset}
 \label{fig:alpha_mnist}
+\end{figure}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.7]{img/alpha_mnist_cvset.png}
+\caption{Cluster formed by the found models for different $\alpha$ values for MNIST cross-validation set.}
+\label{fig:alpha_mnist_cluster_cvset}
 \end{figure}
 
 \begin{figure}[!h]

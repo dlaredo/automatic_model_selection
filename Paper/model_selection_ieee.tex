@@ -497,9 +497,9 @@ artificial neural networks, model selection, hyperparameter tuning, distributed 
 % and "HIS" in caps to complete the first word.
 \IEEEPARstart{M}{achine} learning studies algorithms that improve themselves through experience. Given the large amounts of data currently available in many fields such as engineering, biomedical, finance, etc, and the increasingly computing power available machine learning is now practiced by people with very diverse backgrounds. Increasingly, users of machine learning tools are non-experts who require off-the-shelf solutions. Automated Machine Learning (AutoML) is the field of machine learning devoted to developing algorithms and solutions to enable people with limited machine learning background knowledge to use use machine learning models easily. Tools like WEKA \cite{Hall2009}, PyBrain \cite{Schaul2010} or MLLib \cite{mlib2017} follow this paradigm. Nevertheless, the user still needs to make some choices, which may not be obvious or intuitive (selecting a learning algorithm, hyperparameters, features, etc) and thus leads to the selection of non optimal models.
 
-Recently, deep learning models (CNN, RNN, Deep NN) have gained a lot of attention due to their improved efficiency on complex learning problems and their flexibility and generality for solving a large number of problems such as: regression, classification, natural language processing, recommendation systems, etc. Furthermore, there are a lot software libraries which makes their implementation easier. TensorFlow \cite{TensorFlow2015}, Keras \cite{keras2015}, Caffe \cite{caffe2014} and CNTK \cite{cntk2016} are some examples of such libraries. Despite the availability of such libraries and tools, the tasks of picking the right neural network model  and its hyperparameters are usually complex and iterative in nature specially among non-computer scientists.
+Recently, deep learning models (CNN, RNN, Deep NN) have gained a lot of attention due to their improved efficiency on complex learning problems and their flexibility and generality for solving a large number of problems such as: regression, classification, natural language processing, recommendation systems, etc. Furthermore, there are a lot software libraries which makes their implementation easier. TensorFlow \cite{TensorFlow2015}, Keras \cite{keras2015}, Caffe \cite{caffe2014} and CNTK \cite{cntk2016} are some examples of such libraries. Despite the availability of such libraries and tools, the tasks of picking the right neural network model  and its hyperparameters are usually complex and iterative in nature, specially among non-computer scientists.
 
-Usually, the process of selecting a suitable machine learning model for a particular problem is done in an iterative manner. First, an input dataset must be transformed from a domain specific format to features which are predictive of the field of interests. Once the features have been engineered, users must pick a learning setting which is appropriate to their problem, e.g. regression, classification or recommendation. Next, users must pick an appropriate model, such as support vector machines (SVM), logistic regression or any flavor of neural networks (NNs). Each model family has a number of hyperparameters, such as regularization degree, learning rate, number of neurons, etc, and each of these must be tuned to achieve optimal results. Finally, users must pick a software package that can train their model, configure one or more machines to execute the training and evaluate the model's quality. It can be challenging to make the right choice when facing so many degrees of freedom, leading many users to select a model based on intuition or randomness and/or leave hyperparameters set to default. This approach will usually yield suboptimal results.
+Usually, the process of selecting a suitable machine learning model for a particular problem is done in an iterative manner. First, an input dataset must be transformed from a domain specific format to features which are predictive of the field of interest. Once the features have been engineered, users must pick a learning setting which is appropriate to their problem, e.g. regression, classification or recommendation. Next, users must pick an appropriate model, such as support vector machines (SVM), logistic regression or any flavor of neural networks (NNs). Each model family has a number of hyperparameters, such as regularization degree, learning rate, number of neurons, etc, and each of these must be tuned to achieve optimal results. Finally, users must pick a software package that can train their model, configure one or more machines to execute the training and evaluate the model's quality. It can be challenging to make the right choice when facing so many degrees of freedom, leading many users to select a model based on intuition or randomness and/or leave hyperparameters set to default. This approach will usually yield suboptimal results.
 
 This suggests a natural challenge for machine learning: given a dataset, to automatically and simultaneously chose a learning algorithm and set its hyperparameters to optimize performance. As mentioned in \cite{Hall2009} the combined space of learning algorithm and hyperparemeters is very challenging to search: the response function is noisy and the space is high dimensional involving both, categorical and continuous choices and containing hierarchical dependencies (e.g. hyperparameters of the algorithm are only meaningful if that algorithm is chosen). Thus, identifying a high quality model is typically costly (in the sense that entails a lot of computational effort) and time consuming.
 
@@ -527,7 +527,7 @@ Finding a neural network $f^* \in \mathcal{F}$ that achieves a good performance 
 
 In this paper we aim at achieving neural network models $f^*$ that not only exhibit good performance in $\mathcal{D}$ as measured by $p$, but also achieve such performance by using a simple structure, which directly translates to improved efficiency of the model. To measure the complexity of the architecture, we make use of the number of trainable parameters $w(f)$ of the neural network. We will also refer to $w(f)$ as the ``size'' of the neural network.
 
-The problem of finding an neural network $f$ that achieves both a good performance on the dataset $\mathcal{D}$ with a simple model can be mathematically stated as the following multiobjective optimization problem:
+The problem of finding a neural network $f$ that achieves both a good performance on the dataset $\mathcal{D}$ with a simple model can be mathematically stated as the following multiobjective optimization problem:
 
 \begin{equation}
 	\begin{aligned}
@@ -586,13 +586,13 @@ For our particular application we consider $\mathcal{A}$ as the set of all possi
 
 Automated machine learning has been of research interest since the uprising of deep learning. This is no surprise since selecting an effective combination of algorithm and hyperparameter values is currently a challenging task requiring both deep machine learning knowledge and repeated trials. This is not only beyond the capability of layman users with limited computing expertise, but also often a non-trivial task even for machine learning experts \cite{sparks2015}. 
 
-Until recently most, state-of-the-art image classifier architectures have been manually designed by human experts. To make the process easier and faster, researchers have looked into automated methods. These methods' goal is to find, within a pre-specified resource limit (usually specified in terms of time, number of algorithms and/or combinations of hyperparameter values), an effective algorithm and/or combination of hyperparameter values that maximize the accuracy measure on the given machine learning problem and data set. Using an automated machine learning, the machine learning practitioner can skip the manual and iterative process of selecting and efficient combination of hyperparameter values and neural network model, which is labor intensive and requires a high skill set in machine learning.
+Until recently most state-of-the-art neural network architectures have been manually designed by human experts. To make the process easier and faster, researchers have looked into automated methods. These methods' goal is to find, within a pre-specified resource limit (usually specified in terms of time, number of algorithms and/or combinations of hyperparameter values), an effective algorithm and/or combination of hyperparameter values that maximize the accuracy measure on the given machine learning problem and data set. Using an automated machine learning, the machine learning practitioner can skip the manual and iterative process of selecting and efficient combination of hyperparameter values and neural network model, which is labor intensive and requires a high skill set in machine learning.
 
-In the context of deep learning , neural architecture search (NAS), which aims at searching for the best neural network architecture for the given learning task and dataset, has become an effective computational tool in AutoML. Unfortunately, existing NAS algorithms are usually computationally expensive where its time complexity can easily scale to $O(nt)$ where $n$ is the number of neural architectures evaluated, and $t$ is the average time consumption for each of the $n$ neural networks. Many NAS approaches such as deep reinforcement learning  \cite{Zoph2016, Baker2016, Zhong2017} and evolutionary algorithms \cite{Liu2018, Liang2017, Angeline1994, Suganuma2017} require a large $n$ to reach good performance. Other approaches, including Bayesian Optimization \cite{Thornton2016, Brochu2010} and Sequential Model Based Optimization (SMBO) \cite{Hutter2011, Feurer2015}, nevertheless, often times these approaches are as expensive as NAS while being more limited to what kind of models they can explore.
+In the context of deep learning , neural architecture search (NAS), which aims at searching for the best neural network architecture for the given learning task and dataset, has become an effective computational tool in AutoML. Unfortunately, existing NAS algorithms are usually computationally expensive where its time complexity can easily scale to $O(nt)$ where $n$ is the number of neural architectures evaluated, and $t$ is the average time consumption for each of the $n$ neural networks. Many NAS approaches such as deep reinforcement learning  \cite{Zoph2016, Baker2016, Zhong2017} and evolutionary algorithms \cite{Liu2018, Liang2017, Angeline1994, Suganuma2017} require a large $n$ to reach good performance. Other approaches, including Bayesian Optimization \cite{Thornton2016, Brochu2010} and Sequential Model Based Optimization (SMBO) \cite{Hutter2011, Feurer2015}, are often times are as expensive as NAS while being more limited to what kind of models they can explore.
 
 %\cite{Jin2018, Real2018}
 
-In the recent years, a number of tools have been made available for users to automate the model selection and/or hyperparameter tuning. In the following, we present a brief description of some of them, which share similarities with our method and will serve as comparisons.
+In the recent years, a number of tools have been made available for users to automate the model selection and/or hyperparameter tuning. In the following, we present a brief description of some of them.
 
 \subsection{Auto-Keras}
 
@@ -658,7 +658,7 @@ The basic template for an evolutionary algorithm is the following:
 \label{algorithm:generic_ea}
 \end{algorithm}
 
-One of the major drawbacks of EAs is the time penalty involved in evaluating the fitness function. If the computation of the fitness function is computationally expensive, as in this case, then using any flavor of EA may be very computationally expensive and in some instances unfeasible. Micro-genetic algorithms \cite{Krishnakumar1989} are one variant of GAs whose main advantage is the use of small populations (less than 10 individuals per population) in contrast to some other EAs like the genetic algorithms (GAs), evolutionary strategies (ES) and genetic programming (GP) \cite{Engelbrecht2007}. Since computational efficiency is one of our main concerns for this work we will follow the general principles of micro-GA in order to reduce the computational burden of our method. 
+One of the major drawbacks of EAs is the time penalty involved in evaluating the fitness function. If the computation of the fitness function is computationally expensive, as in this case, then using any flavor of EA may be very computationally expensive and in some instances unfeasible. Micro-genetic algorithms \cite{Krishnakumar1989} are one variant of GAs whose main advantage is the use of small populations (less than 10 individuals per population) in contrast to some other EAs like the genetic algorithms (GAs), evolutionary strategies (ES) and genetic programming (GP) \cite{Engelbrecht2007}. Since computational efficiency is one of our main concerns for this work, we will follow the general principles of micro-GA in order to reduce the computational burden of our method. 
 
 The pseudocode for our proposed method is described in Algorithm \ref{algorithm:nn_ea}. Let $C_p$ and $M_p$ be the crossover and mutation probabilities respectively, let also $G$ be the maximum number of allowed generations and $E$ the maximum number of repetitions for the micro-GA, finally let $\mathcal{B}$ be an archive for storing the best architectures found at every run of the micro-GA. Our algorithm, which we call Automatic Model Selection (AMS), is as follows:
 
@@ -696,7 +696,7 @@ In the following sections we describe in detail each one of the major components
 \subsection{The fitness function}
 \label{sec:fitness_function}
 
-To establish a ranking between the different tested architectures a suitable cost (fitness) function is required. While equation \ref{eq:model_selection_eq} can be used as the cost function, using it would give rise to a multi-objective optimization problem (MOP). We leave this approach for a future revision of this work and instead make use of scalarization to transform the MOP into a single- objective optimization problem (SOP). The scalarization approach taken here is the well known weighted sum method \cite{Hillermeier2001}, thus equation \ref{eq:model_selection_eq} is restated as: 
+To establish a ranking between the different tested architectures, a suitable cost (fitness) function is required. While equation \ref{eq:model_selection_eq} can be used as the cost function, using it would give rise to a multi-objective optimization problem (MOP). We leave this approach for a future revision of this work and instead make use of scalarization to transform the MOP into a single- objective optimization problem (SOP). The scalarization approach taken here is the well known weighted sum method \cite{Hillermeier2001}, thus equation \ref{eq:model_selection_eq} is restated as: 
 
 \begin{equation}
 \begin{aligned}
@@ -719,7 +719,7 @@ where $\alpha \in \left[0,1\right]$ is a scaling factor biasing the total cost t
 The algorithm's goals are to generate a neural network architecture with good inference performance for the class of problem at hand while keeping the complexity of the network as low as possible. Measuring the inference power of the network is straightforward; having a valid neural network we can assess its inference power by training it on the set $\mathcal{D}_{t}$ and then evaluating the predictions using the set $\mathcal{D}_{v}$. A more robust approach would be performing a $k$-fold cross-validation which splits the data into $k$ equal sized partitions $ \mathcal{D}^{1}_{v}, \ldots,  \mathcal{D}^{k}_{v}$ and sets $ \mathcal{D}^{i}_{t} =  D \backslash D^{i}_{v}$ for $i = 1, \ldots, k$. 
 \end{comment}
 
-Note that making an accurate assessment of the inference performance, $p(f)$, of a neural network involves training $f$ for a large number of epochs. Since the training process usually involves thousands of computations training every candidate solution and then assessing its performance becomes unfeasible. Instead we relax the training process for each of the candidate models by using a \textit{partial train} which, in short, is training the model for a very small number of epochs (only a few tenths of them). This approach has been successfully tested in \cite{Laredo2018} since even though the models are just partially trained, a clear trend in terms of whether a model is promising or not can be clearly observed.
+Note that making an accurate assessment of the inference performance, $p(f)$, of a neural network involves training $f$ for a large number of epochs. Since the training process usually involves thousands of computations training every candidate solution and then assessing its performance becomes unfeasible. Instead, we relax the training process for each of the candidate models by using a \textit{partial train} which, in short, is training the model for a very small number of epochs (only a few tenths of them). This approach has been successfully tested in \cite{Laredo2018} since even though the models are just partially trained, a clear trend in terms of whether a model is promising or not can be clearly observed.
 
 Computing the fitness of individuals using the current definitions of $p(f)$ and $w(f)$ posses a big problem, namely that the performance indicator $p(f)$ and the number of trainable weights $w(f)$ are on entirely different scales. While $w(f)$ can range from a few hundreds up to several millions, the range of $p(f)$ depends on the type of scoring function used, Table \ref{table:neural_network_common_ranges} presents some common ranges for $p(f)$. 
 
@@ -916,11 +916,11 @@ Finally, one important feature of this crossover operator is that it has the abi
 \subsection{Mutation operator}
 \label{sec:mutation}
 
-The mutation operator is used to induce small changes to some of the models generated through the crossover mechanism. In the context of evolutionary computation these subtle changes tend to improve the exploration properties of the current population (genetic diversity) by injecting random noise to the current solutions.  Although according to \cite{Krishnakumar1989} mutation is not needed in the micro-GA, we believe some sort of mutation is needed in our application in order to get more diverse models which could potentially lead to better inference abilities, nevertheless, our mutation approach will be less aggressive in order to mitigate its effect. In the following we discuss the core ideas of our mutation mechanism.
+The mutation operator is used to induce small changes to some of the models generated through the crossover mechanism. In the context of evolutionary computation, these subtle changes tend to improve the exploration properties of the current population (genetic diversity) by injecting random noise to the current solutions.  Although according to \cite{Krishnakumar1989} mutation is not needed in the micro-GA, we believe some sort of mutation is needed in our application in order to get more diverse models which could potentially lead to better inference abilities, nevertheless, our mutation approach will be less aggressive in order to mitigate its effect. In the following we discuss the core ideas of our mutation mechanism.
 
-As stated above our mutation approach is less aggressive than common mutation operators \cite{Engelbrecht2007}, this design follows two main reasons: First, is the fact that usually micro genetic algorithms don't make use of the mutation algorithm since the crossover operator has already induce significant genetic diversity in the population, thus we want to minimize its impact. The second reason is related to the way neural networks are usually built by human experts; commonly, experts try a number of models and then make subtle changes to each of them in order to try to improve the inference ability of them, such changes usually involve changing the parameters in a layer, adding or removing a layer, adding regularization or changing the activation functions. 
+As stated above, our mutation approach is less aggressive than common mutation operators \cite{Engelbrecht2007}. Our design follows two main reasons: First, the fact that usually micro genetic algorithms don't make use of the mutation operator since the crossover operator has already induced significant genetic diversity in the population, thus we want to minimize its impact. The second reason is related to the way neural networks are usually built by human experts; commonly, experts try a number of models and then make subtle changes to each of them in order to try to improve their inference ability. Such changes usually involve changing the parameters in a layer, adding or removing a layer, adding regularization or changing the activation functions. 
 
-Based on the principles described above, our mutation process randomly chooses one layer, using a probability $m_p$, of the model and then proceeds to make one of the following changes to the model:
+Based on the principles described above, our mutation process randomly chooses one layer of the model, using a probability $m_p$,  and then proceeds to make one of the following changes it:
 
 \begin{itemize}
 \item Change a parameter of the layer chosen for a value complying the values stated in Table \ref{table:neural_network_array_details}.
@@ -928,12 +928,12 @@ Based on the principles described above, our mutation process randomly chooses o
 \item Add a dropout layer if the chosen layer is compatible.\\
 \end{itemize} 
 
-This operations together provide a rich set of possibilities for performing efficient mutation while still keeping valid models after mutation is performed. Furthermore, the original model is barely changed.
+These operations altogether provide a rich set of possibilities for performing efficient mutation while still generating valid models after mutation is performed. Furthermore, the original model is barely changed.
 
 \subsection{Determining nominal convergence}
 \label{sec:convergence}
 
-Nominal convergence is one of the criteria used for early stopping of our evolutionary algorithm. Some literature defines the convergence in terms of the fitness of the individuals \cite{Engelbrecht2007}, while in \cite{Krishnakumar1989} the convergence is defined in terms of the genotype or phenotype of the individuals. Although convergence based on the actual fitness of the individuals may be easier to asses given that the fitness is already calculated, we believe that an assessment of convergence based on the actual genotype of the individuals suits our needs better.
+Nominal convergence is one of the criteria used for early stopping of our evolutionary algorithm. Some literature defines the convergence in terms of the fitness of the individuals \cite{Engelbrecht2007}, while in \cite{Krishnakumar1989} the convergence is defined in terms of the genotype or phenotype of the individuals. Although convergence based on the actual fitness of the individuals may be easier to assess (given that the fitness is already calculated), we believe that an assessment of convergence based on the actual genotype of the individuals suits our needs better.
 
 Since neural networks are stochastic in nature, we expect some variations in the fitness of the individuals at every different run, furthermore since we are running the training process for only few epochs (in order to avoid a high computational burden) the final performance of the networks can be quite different and would not be a reliable indicator of convergence. Instead, to assess convergence we look at the genotype (the actual neural network architecture) and compute the layer-wise distance between the different individuals in population $\mathcal{C}$.
 
@@ -960,11 +960,11 @@ This method is computationally inexpensive since the size of the population is s
 \subsection{Implementation}
 \label{sec:implementation}
 
-AMS is implemented in about 700 lines of code in Python. The code can be found in \url{https://github.com/dlaredo/automatic_model_selection}. We took a functional programming approach for its implementation with some helper objects. The models $S_i$ generated by the algorithm are fetched to Keras \cite{keras2015} and then evaluated, nevertheless the models can be fetched and evaluated in any other framework such as TensorFlow or Pytorch and even using different programming languages such as C++ for performance reasons.
+AMS is implemented in about 700 lines of code in Python. The code can be found in \url{https://github.com/dlaredo/automatic_model_selection}. We took an object oriented programming approach for its implementation. The models $S_i$ generated by the algorithm are fetched to Keras \cite{keras2015} and then evaluated, nevertheless the models can be fetched and evaluated in any other framework such as TensorFlow or Pytorch and even other programming languages such as C++.
 
 In order to boost performance of AMS we make use of Ray \cite{Moritz2017} which is a distributed computing framework tailored for AI applications. In order to distribute workloads in Ray developers only have to define Remote Functions by making use of Python annotations, Ray will then distribute these Remote Functions across the different nodes in the cluster. There are three different types of nodes in Ray: Drivers, Workers and Actors. A Driver is the process executing the user program, a Worker is a stateless process that executes remote functions invoked by a driver or another worker, finally, an Actor is a statefull process that executes, when invoked, the methods it exposes.
 
-For our implementation we code the individual fetching to Keras and its fitness evaluation as Ray Remote Functions (Workers), while the rest of our algorithm is implemented within the Driver, therefore the partial train of each neural network within the current population is performed in a distributed way, highly increasing the performance of our algorithm. Furthermore since the only messages being sent over the cluster are arrays (the neural network representation $S_i$) and the fitness $f$ of the neural network model there is little chance that the data interchanged causes a bottleneck or increases latency in the system. Nevertheless and also for performance reasons, each node in the cluster has to maintain a local copy of the dataset.
+For our implementation, we code the individual fetching to Keras and its fitness evaluation as Ray Remote Functions (Workers), while the rest of our algorithm is implemented within the Driver. Partial train of each neural network within the current population can therefore be performed in a distributed way, highly increasing the performance of our algorithm. Furthermore, since the only messages being sent over the cluster are arrays (the neural network representation $S_i$) and the fitness $f$ of the neural network model, there is little chance that the interchange of data causes a bottleneck or increases latency in the system. Nevertheless, each node in the cluster has to maintain a local copy of the dataset.
 
 \section{Evaluation}
 \label{sec:evaluation}
@@ -997,15 +997,15 @@ For CMAPSS dataset we used a larger learning rate since we are evaluating the mo
 
 We first test our algorithm on the MNIST Dataset \cite{Lecun2010}. The MNIST Dataset of handwritten digits is one of the most commonly used datasets for evaluating the performance of neural networks. It has a training set of 60,000 examples and a test set of 10,000 examples. The digits have been size-normalized and centered in a fixed-size image, while the size of each image is of 28x28 pixels. As a part of the data pre-processing step, we normalized all the pixels in each image to be in the range of $[0,1]$ and unrolled the 28x28 image into a vector with 784 components.
 
-We use MNIST dataset as a baseline for measuring the performance of our approach. Furthermore, we use MNIST to analyze each one of the major components of AutoNN. Given the popularity of MNIST, several neural networks with varying degrees of accuracy have been proposed. Therefore, it is easy to find good models to compare with. 
+We use MNIST dataset as a baseline for measuring the performance of our approach. Furthermore, we use MNIST to analyze each one of the major components of AMS. Given the popularity of MNIST, several neural networks with varying degrees of accuracy have been proposed. Therefore, it is easy to find good models to compare with. 
 
-We start by running AutoNN to find a suitable FullyConnected model for classification for the MNIST dataset. The details for the parameters used in this test are described in Table \ref{table:MNIST_params}. Each of the experiments carried out by AMS took about 4 minutes in our test rig.
+We start by running AMS to find a suitable FullyConnected model for classification for the MNIST dataset. The details for the parameters used in this test are described in Table \ref{table:MNIST_params}. Each of the experiments carried out by AMS took about 4 minutes in our test rig.
 
 \begin{table}[!htb]
 \begin{center}
 \begin{tabular}{| c | c |}
 \hline
-Parameter & AutoNN Value \\
+Parameter & AMS Value \\
 \hline
 Problem Type & 1 \\
 Architecture Type & FullyConnected \\
@@ -1027,7 +1027,7 @@ Total Experiments & $E_{max} = 5$ \\
 \label{table:MNIST_params}
 \end{table}
 
-We first take a look at the generated initial population. For the sake of space we will only discuss the sizes of the models, furthermore we make a small change in our notation for describing neural network models. For the remainder of this section we denote a layer of a neural network as $(n_e, a_f)$ where $n_e$ denotes the number of neurons in case the layer is fully connected or the dropout rate in case the layer is a dropout layer and $a_f$ denotes the activation function of the later if the layer is a fully connected layer. The initial five generated individuals are presented next. Fitness, accuracy and raw size of the models in the initial population are presented in Table \ref{table:autonn_mnist_initial}.
+We first take a look at the generated initial population. For the sake of space we will only discuss the sizes of the models, furthermore we make a small change in our notation for describing neural network models. For the remainder of this section we denote a layer of a neural network as $(n_e, a_f)$ where $n_e$ denotes the number of neurons in case the layer is fully connected or the dropout rate in case the layer is a dropout layer and $a_f$ denotes the activation function of the later if the layer is a fully connected layer. The initial five generated individuals are presented next. Fitness, accuracy and raw size of the models in the initial population are presented in Table \ref{table:ams_mnist_initial}.
 
 \begin{align*}
 S_1 & = \left[ (64, 0), (0.4), (10, 3) \right] \\
@@ -1063,7 +1063,7 @@ $S_5$ & 96.6\% & 1771642 & 3.2867\\
 \end{tabular}
 \end{center}
 \caption{Scores for the initial population found by AMS for MNIST. $\alpha = 0.5$}
-\label{table:autonn_mnist_initial}
+\label{table:ams_mnist_initial}
 \end{table} 
 
 Observe that the sizes of the models in the initial population are diverse with some models having as few as 1 hidden layer and some having more than 5 hidden layers. The number of layers of the models in the initial population is defined by the parameter $n_r$, we set this value to be small on purpose, since MNIST is a dataset that is easy even for simple neural network models. Also note that the initial population exhibits models with different activation functions (with some models using sigmoid, some using tanh and some using relu), this is beneficial to the search process as some activation functions may yield better results than others.
@@ -1080,7 +1080,7 @@ S^+_4& = \left[ (48, 2), (48, 2),  (10, 3) \right] \\
 S^*_5 & = \left[ (312, 2), (10, 3) \right] \\
 \end{align*}
 
-The fitness, accuracy and raw size of the models are presented in Table \ref{table:autonn_mnist_1}.
+The fitness, accuracy and raw size of the models are presented in Table \ref{table:ams_mnist_1}.
 
 \begin{table}[!htb]
 \begin{center}
@@ -1097,12 +1097,12 @@ $S^*_5$ & 95.0\% & 248050 & 2.9431\\
 \end{tabular}
 \end{center}
 \caption{Scores for the best models found by AMS for MNIST. $\alpha = 0.5$}
-\label{table:autonn_mnist_1}
+\label{table:ams_mnist_1}
 \end{table}
 
-Table \ref{table:autonn_mnist_1} shows a clear preference for small models, furthermore there seems to be a preference for tanh activation functions.It can also be observed that for $\alpha = 0.5$, a good balance between size of the network and performance is obtained. In the following we perform tests with $\alpha = 0.7$ and $\alpha = 0.3$ to further analyze the behavior of the algorithm with respect to the preference of the user. A smaller $\alpha$ value will prioritize a better performing network while a larger value of $\alpha$ instructs AMS to focus on light-weight models.
+Table \ref{table:ams_mnist_1} shows a clear preference for small models, furthermore there seems to be a preference for ReLU activation functions.It can also be observed that for $\alpha = 0.5$, a good balance between size of the network and performance is obtained. In the following we perform tests with $\alpha = 0.7$ and $\alpha = 0.3$ to further analyze the behavior of the algorithm with respect to the preference of the user. A smaller $\alpha$ value will prioritize a better performing network while a larger value of $\alpha$ instructs AMS to focus on light-weight models.
 
-The best models for each experiment with $\alpha = 0.3$, are listed next, the fitness and raw size of the models are described in Table \ref{table:autonn_mnist_2}. 
+The best models for each experiment with $\alpha = 0.3$, are listed next, the fitness and raw size of the models are described in Table \ref{table:ams_mnist_2}. 
 
 \begin{align*}
 S^*_1 & = \left[ (32, 0), (10, 3) \right] \\
@@ -1126,13 +1126,13 @@ $S^*_5$ & 94.4\% & 31810 & 1.7412\\
 \hline
 \end{tabular}
 \end{center}
-\caption{Scores for the best models found by AutoNN for MNIST, $\alpha = 0.3$.}
-\label{table:autonn_mnist_2}
+\caption{Scores for the best models found by AMS for MNIST, $\alpha = 0.3$.}
+\label{table:ams_mnist_2}
 \end{table}
 
-The models presented in Table \ref{table:autonn_mnist_2} exhibit, in general, better performance than those depicted in Table \ref{table:autonn_mnist_1}. This is due to the fact that $\alpha = 0.3$ prioritizes model accuracy over model size, surprisingly, the sizes of the models obtained when $\alpha = 0.3$ are on the same order of magnitude as those obtained when $\alpha = 0.5$, a discussion on this behavior is provided later in this section.
+The models presented in Table \ref{table:ams_mnist_2} exhibit, in general, better performance than those depicted in Table \ref{table:ams_mnist_1}. This is due to the fact that $\alpha = 0.3$ prioritizes model accuracy over model size, surprisingly, the sizes of the models obtained when $\alpha = 0.3$ are on the same order of magnitude as those obtained when $\alpha = 0.5$, a discussion on this behavior is provided later in this section.
 
-We repeat the experiment with $\alpha = 0.7$, the obtained models are listed next and their fitness, raw size and accuracy are depicted in Table \ref{table:autonn_mnist_3}.
+We repeat the experiment with $\alpha = 0.7$, the obtained models are listed next and their fitness, raw size and accuracy are depicted in Table \ref{table:ams_mnist_3}.
 
 \begin{align*}
 S^*_1 & = \left[ (24, 2), (10, 3) \right] \\
@@ -1156,15 +1156,15 @@ $S^*_5$ & 95.8\% & 165370 & 3.7762\\
 \hline
 \end{tabular}
 \end{center}
-\caption{Scores for the best models found by AutoNN for MNIST, $\alpha = 0.7$.}
-\label{table:autonn_mnist_3}
+\caption{Scores for the best models found by AMS for MNIST, $\alpha = 0.7$.}
+\label{table:ams_mnist_3}
 \end{table}
 
-The results in Table \ref{table:autonn_mnist_3} show that when the number of trainable parameters has a large impact on the overall fitness of the individuals, and the algorithm tends to prefer smaller networks, which is specially useful for cases where the computational power is limited, such as embedded systems. This brings an obvious drawback, namely that neural networks that exhibit a lower performance as compared to larger neural networks may be preferred. Nevertheless, this tradeoff can be controlled by the user by varying the $\alpha$ parameter. 
+The results in Table \ref{table:ams_mnist_3} show that when the number of trainable parameters has a large impact on the overall fitness of the individuals, and the algorithm tends to prefer smaller networks, which is specially useful for cases where the computational power is limited, such as embedded systems. This brings an obvious drawback, namely that neural networks that exhibit a lower performance as compared to larger neural networks may be preferred. Nevertheless, this tradeoff can be controlled by the user by varying the $\alpha$ parameter. 
 
-As a side note please notice that the difference in the fitness exhibited among the models of the three different experiments is due to the fact that the size of the neural network was scaled (See section \ref{sec:fitness_function}) and thus there is no fair way of comparing the fitness of the models shown in Tables \ref{table:autonn_mnist_1}, \ref{table:autonn_mnist_2} and \ref{table:autonn_mnist_3} against each other.
+As a side note please notice that the difference in the fitness exhibited among the models of the three different experiments is due to the fact that the size of the neural network was scaled (See section \ref{sec:fitness_function}) and thus there is no fair way of comparing the fitness of the models shown in Tables \ref{table:ams_mnist_1}, \ref{table:ams_mnist_2} and \ref{table:ams_mnist_3} against each other.
 
-Figure \ref{fig:alpha_mnist_cluster_cvset} shows the results obtained by all of the found models for $\alpha \in \left\lbrace 0.3, 0.5, 0.7  \right\rbrace$, which were trained for 100 epochs using 5-fold cross-validation to assess their accuracy. It is observed that models cluster around a model size less than 50000 and an error less than 0.15. As expected, models obtained with $\alpha = 0.7$ yield, in general, the smallest sizes. Outliers are mostly due to the fact that for such experiments the algorithm was unable to find a smaller model, which is likely due to a bad initial population for such experiments, nevertheless it could also be attributable to the scaling done to the network size (see Equation  \ref{eq:fitness_function_scaled}). Since AMS uses a logarithmic scale to measure the size of the networks a few thousands of weights are unlikely to make a big difference in the fitness of a model. 
+Figure \ref{fig:alpha_mnist_cluster_cvset} shows the results obtained by all of the obtained models for $\alpha \in \left\lbrace 0.3, 0.5, 0.7  \right\rbrace$, which were trained for 100 epochs using 5-fold cross-validation to assess their accuracy. It is observed that models cluster around a model size less than 50000 and an error less than 0.15. As expected, models obtained with $\alpha = 0.7$ yield, in general, the smallest sizes. Outliers are mostly due to the fact that for such experiments the algorithm was unable to find a smaller model, which is likely due to a bad initial population for such experiments, nevertheless it could also be attributable to the scaling done to the network size (see Equation  \ref{eq:fitness_function_scaled}). Since AMS uses a logarithmic scale to measure the size of the networks a few thousands of weights are unlikely to make a big difference in the fitness of a model. 
 
 Finally, we compare the best models for each value of $\alpha$ against each other. A 10-fold cross-validation process, with a training of 50 epochs per fold, was carried out for each one of the best models in order to obtain the mean accuracy for each model. The three models were feed the same training data and validated using the same folds for the cross-validation data. We also measure the accuracy of each models by using a test set that was never used during the training or hyper-parameter tuning processes of the models. The accuracy averages and size of the networks are summarized in Table \ref{table:avg_accuracies_mnist}. 
 
@@ -1245,7 +1245,7 @@ We run AMS to find a suitable MLP for regression using the CMAPSS dataset, the p
 \begin{center}
 \begin{tabular}{| c | c |}
 \hline
-Parameter & AutoNN Value \\
+Parameter & AMS Value \\
 \hline
 Problem Type & 1 \\
 Architecture Type & FullyConnected \\
@@ -1564,17 +1564,17 @@ Fully Connected & 10 & Softmax & n/a\\
 
 \begin{figure}[!h]
 \centering
-\subfigure[Obtained models on cv set]{\label{fig:alpha_mnist_cvset}\includegraphics[scale=0.5]{img/alpha_ams_mnist_cvset.png}}
-\subfigure[Obtained models on test set]{\label{fig:alpha_mnist_testset}\includegraphics[scale=0.5]{img/alpha_ams_mnist_testset.png}}
-\caption{Influence of $\alpha$ on the model's size and error on MNIST dataset}
-\label{fig:alpha_mnist}
+\includegraphics[scale=0.7]{img/alpha_mnist_cvset.png}
+\caption{Cluster formed by the found models for different $\alpha$ values for MNIST cross-validation set.}
+\label{fig:alpha_mnist_cluster_cvset}
 \end{figure}
 
 \begin{figure}[!h]
 \centering
-\includegraphics[scale=0.7]{img/alpha_mnist_cvset.png}
-\caption{Cluster formed by the found models for different $\alpha$ values for MNIST cross-validation set.}
-\label{fig:alpha_mnist_cluster_cvset}
+\subfigure[Obtained models on cv set]{\label{fig:alpha_mnist_cvset}\includegraphics[scale=0.5]{img/alpha_ams_mnist_cvset.png}}
+\subfigure[Obtained models on test set]{\label{fig:alpha_mnist_testset}\includegraphics[scale=0.5]{img/alpha_ams_mnist_testset.png}}
+\caption{Influence of $\alpha$ on the model's size and error on MNIST dataset}
+\label{fig:alpha_mnist}
 \end{figure}
 
 \begin{figure}[!h]

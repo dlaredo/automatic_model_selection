@@ -2,7 +2,7 @@
 
 @Article{Hall2009,
   author  = {Hall, M. and Frank, E. and Holmes, G. and Pfahringer, B. and Reutemann, P.and Witten, I.},
-  title   = {The WEKA data mining software: an update},
+  title   = {The {WEKA} data mining software: an update},
   journal = {ACM SIGKDD Explorations Newsletter},
   year    = {2009},
   volume  = {11},
@@ -13,7 +13,7 @@
 @Article{Schaul2010,
   author  = {Schaul, T. and Bayer, J. and Wierstra, D. and Sun, Y. and Felder, M. and Sehnke, F. and Rucksties, T. and Schmidhuber, J.},
   title   = {PyBrain},
-  journal = {JMLR},
+  journal = {Journal of Machine Learning Research},
   year    = {2010},
   volume  = {11},
   pages   = {743-746},
@@ -27,46 +27,65 @@
   pages     = {368-380},
 }
 
-@Conference{Feurer2015,
-  author    = {Feurer, M. and Klein, A. and Eggensperger, K. and Springenberg, J. and Blum, M. and Hutter, F.},
-  title     = {Efficient and Robust Automated Machine Learning},
-  booktitle = {NIPS},
-  year      = {2015},
-  volume    = {17},
-  pages     = {1-5},
-  journal   = {NIPS},
+
+@incollection{Feurer2015,
+title = {Efficient and Robust Automated Machine Learning},
+author = {Feurer, Matthias and Klein, Aaron and Eggensperger, Katharina and Springenberg, Jost and Blum, Manuel and Hutter, Frank},
+booktitle = {Advances in Neural Information Processing Systems 28},
+editor = {C. Cortes and N. D. Lawrence and D. D. Lee and M. Sugiyama and R. Garnett},
+pages = {2962--2970},
+year = {2015},
+publisher = {Curran Associates, Inc.},
+url = {http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf}
 }
 
-@InProceedings{Bergstra2011,
-  author    = {Bergstra, J. and Bardenet, R. and Bengio, Y. and Kegl, B.},
-  title     = {Algorithms for hyper-parameter optimization},
-  booktitle = {NIPS},
-  year      = {2011},
+
+@incollection{Bergstra2011,
+title = {Algorithms for Hyper-Parameter Optimization},
+author = {James S. Bergstra and Bardenet, R\'{e}mi and Bengio, Yoshua and Bal\'{a}zs K\'{e}gl},
+booktitle = {Advances in Neural Information Processing Systems 24},
+editor = {J. Shawe-Taylor and R. S. Zemel and P. L. Bartlett and F. Pereira and K. Q. Weinberger},
+pages = {2546--2554},
+year = {2011},
+publisher = {Curran Associates, Inc.},
+url = {http://papers.nips.cc/paper/4443-algorithms-for-hyper-parameter-optimization.pdf}
 }
+
 
 @Article{Hutter2009,
   author  = {Hutter, F. and Hoos, H. and Leyton-Brown, K. and Stutzle, T.},
-  title   = {ParamILS: and automatic algorithm configuration framework},
-  journal = {JAIR},
+  title   = {{ParamILS}: and automatic algorithm configuration framework},
+  journal = {Journal of Artificial Intelligence Research},
   year    = {2009},
   volume  = {36},
   number  = {1},
   pages   = {267-306},
 }
 
-@InProceedings{Thornton2013,
-  author    = {Thornton, C. and Hutter, F. and Hoos, H. and Leyton-Brown, K.},
-  title     = {Auto-WEKA: Combined Selection and Hyperparameter Optimization of Classification Algorithms},
-  booktitle = {KDD},
-  year      = {2013},
+
+@article{Thornton2013,
+  author    = {Chris Thornton and
+               Frank Hutter and
+               Holger H. Hoos and
+               Kevin Leyton{-}Brown},
+  title     = {{Auto-WEKA}: Automated Selection and Hyper-Parameter Optimization of
+               Classification Algorithms},
+  journal   = {CoRR},
+  volume    = {abs/1208.3719},
+  year      = {2012},
+  url       = {http://arxiv.org/abs/1208.3719},
+  archivePrefix = {arXiv},
+  eprint    = {1208.3719},
+  timestamp = {Mon, 13 Aug 2018 16:46:53 +0200},
+  biburl    = {https://dblp.org/rec/bib/journals/corr/abs-1208-3719},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
 }
 
 @Article{Thornton2016,
   author    = {Thornton, C. and Hutter, F. and Hoos, H. and Leyton-Brown, K. and Kotthoff, L.},
-  title     = {Auto-WEKA 2.0: Automatic model selection and hyperparameter optimization in WEKA},
-  journal   = {JMLR},
-  year      = {2016},
-  booktitle = {JMLR},
+  title     = {{Auto-WEKA 2.0}: Automatic model selection and hyperparameter optimization in {WEKA}},
+  journal   = {Journal of Machine Learning Research},
+  year      = {2016}
 }
 
 @Article{Moritz2017,
@@ -83,22 +102,15 @@
   url           = {http://arxiv.org/abs/1712.05889},
 }
 
-@Article{Lecun2010,
-  author       = {LeCun, Y. and Cortes, C.},
-  title        = {{MNIST} handwritten digit database},
-  journal      = {-},
-  year         = {2010},
-  added-at     = {2010-06-28T21:16:30.000+0200},
-  biburl       = {https://www.bibsonomy.org/bibtex/2935bad99fa1f65e03c25b315aa3c1032/mhwombat},
-  groups       = {public},
-  howpublished = {http://yann.lecun.com/exdb/mnist/},
-  interhash    = {21b9d0558bd66279df9452562df6e6f3},
-  intrahash    = {935bad99fa1f65e03c25b315aa3c1032},
-  keywords     = {MSc _checked character_recognition mnist network neural},
-  lastchecked  = {2016-01-14 14:24:11},
-  timestamp    = {2016-07-12T19:25:30.000+0200},
-  url          = {http://yann.lecun.com/exdb/mnist/},
-  username     = {mhwombat},
+@Article{Lecun1998,
+  author  = {Y. {Lecun} and L. {Bottou} and Y. {Bengio} and P. {Haffner}},
+  title   = {Gradient-based learning applied to document recognition},
+  journal = {Proceedings of the IEEE},
+  year    = {1998},
+  volume  = {86},
+  number  = {11},
+  pages   = {2278-2324},
+  month   = {Nov},
 }
 
 @Book{Engelbrecht2007,
@@ -109,11 +121,12 @@
 }
 
 @InProceedings{imagenet_cvpr09,
-  author    = {Deng, J. and Dong, W. and Socher, R. and Li, L.-J. and Li, K. and Fei-Fei, L.},
-  title     = {{ImageNet: A Large-Scale Hierarchical Image Database}},
-  booktitle = {CVPR09},
+  author    = {J. {Deng} and W. {Dong} and R. {Socher} and L. {Li} and and},
+  title     = {Image{N}et: A large-scale hierarchical image database},
+  booktitle = {2009 IEEE Conference on Computer Vision and Pattern Recognition},
   year      = {2009},
-  bibsource = {http://www.image-net.org/papers/imagenet_cvpr09.bib},
+  pages     = {248-255},
+  month     = {June},
 }
 
 @Article{dblp_lipton_2015,
@@ -147,13 +160,13 @@
 
 @Article{mlib2017,
   author  = {Meng, X. and Bradley, J. and Yavuz, B. and Sparks, B. and Venkataraman, S. and Liu, D. and Freeman, J. and Tsai, D. and Amde, M. and Owen, S. and Xin, D. and Xin, R. and Franklin, m. and Zadeh, R. and Zaharia, M. and Talwalkar, A.},
-  title   = {MLlib: Machine Learning in Apache Spark},
+  title   = {{MLlib}: Machine Learning in Apache Spark},
   journal = {Journal of Machine Learning Research},
   year    = {2016},
   volume  = {17},
   number  = {34},
   pages   = {1-7},
-  url     = {http://jmlr.org/papers/v17/15-237.html},
+  url     = {http://Journal of Machine Learning Research.org/papers/v17/15-237.html},
 }
 
 @Misc{tensorflow2015,
@@ -182,7 +195,7 @@
 @InProceedings{cntk2016,
   author    = {Seide, F. and Agarwal, A.},
   title     = {CNTK: Microsoft's Open-Source Deep-Learning Toolkit},
-  booktitle = {Proceedings of the 22Nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining},
+  booktitle = {Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining},
   year      = {2016},
   series    = {KDD '16},
   pages     = {2135--2135},
@@ -263,10 +276,13 @@
   howpublished = {[Online] Available at: https://ti.arc.nasa.gov/tech/dash/groups/pcoe/prognostic-data-repository/},
 }
 
-@Unpublished{Laredo2018,
-  author = {Laredo, D. and Chen, Z. and Schuetze, O. and Sun, JQ.},
-  title  = {A Neural Network-Evolutionary Computational Framework for Remaining Useful Life Estimation of Mechanical Systems},
-  note   = {Submitted to Neural Networks},
+@Article{Laredo2018,
+  author  = {Laredo, D. and Chen, Z. and Schuetze, O. and Sun, JQ.},
+  title   = {A Neural Network-Evolutionary Computational Framework for Remaining Useful Life Estimation of Mechanical Systems},
+  journal = {Neural Networks},
+  year    = {2019},
+  volume  = {In press},
+  doi     = {https://doi.org/10.1016/j.neunet.2019.04.016},
 }
 
 @Article{Li2018,
@@ -283,7 +299,7 @@
   title     = {Damage propagation modeling for aircraft engine Run-to-Failure simulation},
   booktitle = {International Conference On Prognostics and Health Management},
   year      = {2008},
-  editor    = {IEEE},
+  publisher    = {IEEE},
   pages     = {1-9},
 }
 
@@ -304,9 +320,9 @@
 @InProceedings{Simard2003,
   author    = {Simard, P. and Steinkraus, D. and Platt, J.},
   title     = {Best Practices for Convolutional Neural Networks Applied to Visual Document Analysis},
-  booktitle = {7th International Conference on Document Analysis and Recognition {(ICDAR} 2003), 2-Volume Set, 3-6 August 2003, Edinburgh, Scotland, {UK}},
+  booktitle = {the 7th International Conference on Document Analysis and Recognition {(ICDAR} 2003), 2-Volume Set, 3-6 August 2003, Edinburgh, Scotland, {UK}},
   year      = {2003},
-  pages     = {958--962},
+  pages     = {958-962},
 }
 
 @Conference{Lim2016,

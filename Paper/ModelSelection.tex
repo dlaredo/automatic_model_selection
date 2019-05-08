@@ -220,6 +220,9 @@ Computing the fitness of individuals using the current definitions of $p(f)$ and
 
 \begin{table}[!htb]
 \begin{center}
+\caption{Common ranges for some neural network performance indicators.}
+\label{table:neural_network_common_ranges}
+\vspace{12pt}
 \scalebox{1}{
 \begin{tabular}{| c | c | c |}
 \hline
@@ -234,8 +237,7 @@ RMSE & $\left[ 0, +\infty \right]$ & $\left[ 0, 10^2 \right]$\\
 \end{tabular}
 }
 \end{center}
-\caption{Common ranges for some neural network performance indicators.}
-\label{table:neural_network_common_ranges}
+
 \end{table}
 
 For the present application, it is necessary that the range of $p(f)$ is consistent independent of the type of score ${Perf}(.)$. Thus, we normalize the values of $p(f)$ to be within the range $[ 0,1]$. The normalization is done as follows. Assume that a population $\mathcal{C}$ has $n$ individuals. Let $\mathcal{P} = \left[ p_0(f), p_1(f), \ldots, p_n(f) \right]$ be the vector whose components are the scores $p_i$ for the $i^{th}$ element in the population. Then $\mathcal{P}^* = \mathcal{P}/norm_2(\mathcal{P})$ is the vector with the normalized values of $\mathcal{P}$, hence $p^*_i \in \left[ 0, 1 \right]$ for any score ${Perf}(.)$.
@@ -277,6 +279,9 @@ S_e = \left[ \left[1, 264, 2, 0, 0, 0, 0, 0 \right], \left[5, 0, 0, 0, 0, 0, 0, 
 
 \begin{table}[!htb]
 \begin{center}
+\caption{Neural network model.}
+\label{table:neural_network_model}
+\vspace{12pt}
 \begin{tabular}{| c | c | c | c |}
 \hline
 Layer Type & Neurons & Activation Function & Dropout Ratio \\
@@ -290,8 +295,6 @@ Fully Connected & 10 & Softmax & n/a\\
 \hline
 \end{tabular}
 \end{center}
-\caption{Neural network model.}
-\label{table:neural_network_model}
 \end{table}
 
 Encoding the neural network as a list of arrays has two advantages. First, the number of layers that can be stacked is, in principle, arbitrary. Second, the validity of an architecture can be verified every time a new layer is to be stacked to the model. This is due to the fact that in order to stack a layer to the model, one only needs to check the compatibility between the previous and next layers. The ability of stacking layers dynamically and verifying its correctness when a new layer is stacked allows for a powerful representation. We can build several kinds of neural networks such as fully connected, convolutional and recursive. The rules for stacking layers together are described in Table \ref{table:neural_network_building_rules}.
@@ -401,7 +404,7 @@ Nominal convergence is one of the criteria used for early stopping of the propos
 
 Since neural networks are stochastic in nature, we expect some variations in the fitness of the individuals at every different run. Furthermore since we are running the training process for only few epochs, the final performance of the networks can be quite different and would not be a reliable indicator of convergence. Instead, to assess the convergence we, look at the genotype of the actual neural network architecture and compute the layer-wise distance between the different individuals in population $\mathcal{C}$.
 
-Let $S_i$ and $S_j$ be the genotypes representing any two different models such that  where $len(S_j) >= len(S_i)$. Let $S_i[j]$ be the vector representation of the $j^{th}$ layer of model $S_i$. The method for computing the distance $d(S_i, S_j)$ between models $S_i$ and $S_j$ is defined in Algorithm \ref{algorithm:difference_between_networks}.
+Let $S_i$ and $S_j$ be the genotypes representing any two different models such that  where $len(S_j) \ge len(S_i)$. Let $S_i[j]$ be the vector representation of the $j^{th}$ layer of model $S_i$. The method for computing the distance $d(S_i, S_j)$ between models $S_i$ and $S_j$ is defined in Algorithm \ref{algorithm:difference_between_networks}.
 
 \begin{algorithm}[!htb]
 \caption{Layer-wise distance $d(S_i, S_j)$ between model genotypes}
@@ -437,6 +440,9 @@ We evaluate AMS with two different datasets, each of which represents a differen
 
 \begin{table}[!htb]
 \begin{center}
+\caption{Training parameters for each of the used datasets.}
+\label{table:training_params}
+\vspace{12pt}
 \scalebox{1}{
 \begin{tabular}{| c | c | c | c | c | c |}
 \hline
@@ -449,8 +455,6 @@ CMAPSS & 5 & 0.01 & Adam & MSE & MSE\\
 \end{tabular}
 }
 \end{center}
-\caption{Training parameters for each of the used datasets.}
-\label{table:training_params}
 \end{table}
 
 For the CMAPSS dataset, we use a larger learning rate since we intend to evaluate the model using very few epochs for this complex problem. In order to get a clear idea of which individuals within the population may be promising, we make the learning process more aggressive during the first iterations of the algorithm. 
@@ -468,6 +472,9 @@ We start by running AMS to find a suitable fully connected model for classificat
 
 \begin{table}[!htb]
 \begin{center}
+\caption{AMS Parameters for MNIST dataset.}
+\label{table:MNIST_params}
+\vspace{12pt}
 \begin{tabular}{| c | c |}
 \hline
 Parameter & AMS Value \\
@@ -488,8 +495,6 @@ Total Experiments & $E_{max} = 5$ \\
 \hline
 \end{tabular}
 \end{center}
-\caption{AMS Parameters for MNIST dataset.}
-\label{table:MNIST_params}
 \end{table}
 
 We first take a look at the generated initial population. For the sake of space, we will only discuss the sizes of the models. Furthermore, we make a small change in our notation for describing neural network models. For the remainder of this section, we denote a layer of a neural network as $(n_e, a_f)$ where $n_e$ denotes the number of neurons for fully connected layer or the dropout rate for a dropout layer, and $a_f$ denotes the activation function of the fully connected layer. The initial five generated individuals are presented below. Fitness, accuracy and raw size of the models in the initial population are presented in Table \ref{table:ams_mnist_initial}.
@@ -499,12 +504,14 @@ S_1 & = \left[ (64, 0), (0.4), (10, 3) \right] \\
 S_2 & = \left[ (760, 2), (0.5), (608, 2), (0.65), (10, 3) \right] \\
 S_3 & = \left[ (864, 0), (0.15), (536, 0), (928, 0), (10, 3) \right] \\
 S_4 & = \left[ (40,0), (0.45), (912, 0), (10, 3) \right] \\
-S_5 & = \left[ (968, 1), (976, 1), (32, 1), (0.15), (808, 1), \right.\\
-& \left. (10, 3), (832, 2) \right] \\
+S_5 & = \left[ (968, 1), (976, 1), (32, 1), (0.15), (808, 1), (10, 3), (832, 2) \right] \\
 \end{align*}
 
 \begin{table}[!htb]
 \begin{center}
+\caption{Scores for the initial population found by AMS for MNIST. $\alpha = 0.5$}
+\label{table:ams_mnist_initial}
+\vspace{12pt}
 \begin{tabular}{| c | c | c | c |}
 \hline
 Model & Score (Accuracy) & Trainable Parameters & Fitness\\
@@ -517,8 +524,6 @@ $S_5$ & 96.6\% & 1771642 & 3.2867\\
 \hline
 \end{tabular}
 \end{center}
-\caption{Scores for the initial population found by AMS for MNIST. $\alpha = 0.5$}
-\label{table:ams_mnist_initial}
 \end{table} 
 
 Observe that the sizes of the models in the initial population are diverse with some models having as few as 1 hidden layer and some having more than 5 hidden layers. The number of layers of the models in the initial population is defined by the parameter $n_r$. We set this value to be small on purpose, since MNIST is a dataset that is easy even for simple neural network models. Also note that the initial population has models with different activation functions. The Sigmoid, Tanh and ReLU are all used by some models. This is beneficial to the search process as some activation functions may yield better results than others.
@@ -539,6 +544,9 @@ S^*_5 & = \left[ (312, 2), (10, 3) \right] \\
 
 \begin{table}[!htb]
 \begin{center}
+\caption{Scores for the best models found by AMS for MNIST. $\alpha = 0.5$}
+\label{table:ams_mnist_1}
+\vspace{12pt}
 \begin{tabular}{| c | c | c | c |}
 \hline
 Model & Score (Accuracy) & Trainable Parameters & Fitness\\
@@ -551,8 +559,6 @@ $S^*_5$ & 95.0\% & 248050 & 2.9431\\
 \hline
 \end{tabular}
 \end{center}
-\caption{Scores for the best models found by AMS for MNIST. $\alpha = 0.5$}
-\label{table:ams_mnist_1}
 \end{table}
 
 Table \ref{table:ams_mnist_1} shows a clear preference for small models. Furthermore, there seems to be a preference for ReLU activation functions. It can also be observed that for $\alpha = 0.5$, a good balance between size of the network and its performance is obtained. In the following, we perform tests with $\alpha = 0.3$ and $\alpha = 0.7$ to further analyze the behavior of the algorithm with respect to the preference of the network size scaling factor. A smaller $\alpha$ value will prioritize a better performing network while a larger value of $\alpha$ instructs AMS to focus on light-weight models.
@@ -569,6 +575,9 @@ S^*_5 & = \left[ (40, 1), (10, 3) \right] \\
 
 \begin{table}[!htb]
 \begin{center}
+\caption{Scores for the best models found by AMS for MNIST, $\alpha = 0.3$.}
+\label{table:ams_mnist_2}
+\vspace{12pt}
 \begin{tabular}{| c | c | c | c |}
 \hline
 Model & Score (Accuracy) & Trainable Parameters & Fitness\\
@@ -581,8 +590,6 @@ $S^*_5$ & 94.4\% & 31810 & 1.7412\\
 \hline
 \end{tabular}
 \end{center}
-\caption{Scores for the best models found by AMS for MNIST, $\alpha = 0.3$.}
-\label{table:ams_mnist_2}
 \end{table}
 
 The models presented in Table \ref{table:ams_mnist_2} exhibit, in general, better performance than those depicted in Table \ref{table:ams_mnist_1}. This is due to the fact that $\alpha = 0.3$ prioritizes the model accuracy over model size. Surprisingly, the sizes of the models obtained when $\alpha = 0.3$ are on the same order of magnitude as those obtained when $\alpha = 0.5$. A discussion on this behavior is provided later in this section.
@@ -599,6 +606,9 @@ S^*_5 & = \left[ (208, 2),  (10, 3) \right] \\
 
 \begin{table}[!htb]
 \begin{center}
+\caption{Scores for the best models found by AMS for MNIST, $\alpha = 0.7$.}
+\label{table:ams_mnist_3}
+\vspace{12pt}
 \begin{tabular}{| c | c | c | c |}
 \hline
 Model & Score (Accuracy) & Trainable Parameters & Fitness\\
@@ -611,8 +621,6 @@ $S^*_5$ & 95.8\% & 165370 & 3.7762\\
 \hline
 \end{tabular}
 \end{center}
-\caption{Scores for the best models found by AMS for MNIST, $\alpha = 0.7$.}
-\label{table:ams_mnist_3}
 \end{table}
 
 The results in Table \ref{table:ams_mnist_3} show that when the number of trainable parameters has a large impact on the overall fitness of the individuals, and the algorithm tends to prefer smaller networks, which is specially useful for cases where the computational power is limited, such as embedded systems. This brings a dilemma, namely that neural networks that exhibit a lower performance as compared to larger neural networks may be preferred. Nevertheless, this tradeoff can be controlled by the user by varying the $\alpha$ parameter. 
@@ -625,6 +633,9 @@ Finally, we compare the best models for each value of $\alpha$ against each othe
 
 \begin{table}[!htb]
 \begin{center}
+\caption{Accuracy obtained by each of the top 3 models for MNIST dataset.}
+\label{table:avg_accuracies_mnist}
+\vspace{12pt}
 \begin{tabular}{| c | c | c | c |}
 \hline
 Model & 5-fold Avg. Score & Test Accuracy & Network size\\
@@ -635,8 +646,6 @@ $S^+_{0.7}$ & 95.0\% & 95.4\% & 13218\\
 \hline
 \end{tabular}
 \end{center}
-\caption{Accuracy obtained by each of the top 3 models for MNIST dataset.}
-\label{table:avg_accuracies_mnist}
 \end{table}
 
 As expected, the model obtained for $\alpha = 0.7$ yields the smallest neural network, about 4 times smaller than the model obtained when $\alpha = 0.3$. Nevertheless, its accuracy is the worst of the three models, though only by a small margin. On the opposite, the resulting model for $\alpha = 0.3$ gets the best performance in terms of accuracy, but also attains the largest neural network model of the three. Finally, when $\alpha = 0.5$ AMS yields a model with a good balance between the model size and performance. It is important to highlight that to obtain the models presented in Table \ref{table:avg_accuracies_mnist}, at most 50 different models are tried. Nevertheless, since each model is trained for only 5 epochs, the total time spent by the algorithm to find the models in Table \ref{table:avg_accuracies_mnist} is less than 4 minutes in our test computer. 
@@ -647,6 +656,9 @@ Table \ref{table:MNIST_results_top} shows three of the top hand-crafted models a
 
 \begin{table}[!htb]
 \begin{center}
+\caption{Top results for MNIST dataset.}
+\label{table:MNIST_results_top}
+\vspace{12pt}
 \begin{tabular}{| c | c | c |}
 \hline
 Method & Test accuracy & Size\\
@@ -657,8 +669,6 @@ Method & Test accuracy & Size\\
 \hline
 \end{tabular}
 \end{center}
-\caption{Top results for MNIST dataset.}
-\label{table:MNIST_results_top}
 \end{table}
 
 By comparing the models obtained by AMS in Table \ref{table:avg_accuracies_mnist} against the models in Table \ref{table:MNIST_results_top} we can observe that, even though AMS models don't attain the highest accuracy, they exhibit good inference capabilities with a much lesser number of trainable parameters, at least one order of magnitude smaller. This shows that AMS models have a good balance between the inference power of the model and its size. Furthermore, the score-size tradeoff can be controlled by means of the parameter $\alpha$, where a value closer to $\alpha=0$ makes AMS prefer networks with higher accuracy and a value closer to $\alpha = 1$ makes AMS prefer networks with smaller sizes.
@@ -672,6 +682,9 @@ The data is arranged in an $n\times26$ matrix where $n$ is the number of data po
 
 \begin{table}[!htb]
 \begin{center}
+\caption{CMAPSS dataset details.}
+\label{table:dataset_cmaps_params}
+\vspace{12pt}
 \scalebox{1}{
 \begin{tabular}{| c | c | c | c |}
 \hline
@@ -682,8 +695,6 @@ Train trajectories & Test trajectories & Operating conditions & Fault modes \\
 \end{tabular}
 }
 \end{center}
-\caption{CMAPSS dataset details.}
-\label{table:dataset_cmaps_params}
 \end{table}
 
 Each trajectory within the training and test sets represents the life cycles of the engine. Each engine is simulated with different initial healthy conditions, i.e. no initial faults. For each trajectory of an engine, the last data entry corresponds to the cycle at which the engine is found faulty. On the other hand, when the trajectories of the test sets terminate at some point prior to failure, the need to predict the remaining useful life (RUL) arises. The aim of the MLP model is to predict the RUL of each engine in the test set via regression. The actual RUL values of test trajectories are also included in the dataset for verification. Further discussions of the dataset and details on how the data is generated can be found in \cite{Saxena2008}.
@@ -694,6 +705,9 @@ We run AMS to find a suitable MLP for regression using the CMAPSS dataset. The p
 
 \begin{table}[!htb]
 \begin{center}
+\caption{Parameters for the CMAPSS dataset.}
+\label{table:CMAPSS_params}
+\vspace{12pt}
 \begin{tabular}{| c | c |}
 \hline
 Parameter & AMS Value \\
@@ -714,8 +728,6 @@ Total Experiments & $E_{max} = 5$ \\
 \hline
 \end{tabular}
 \end{center}
-\caption{Parameters for the CMAPSS dataset.}
-\label{table:CMAPSS_params}
 \end{table}
 
 We perform experiments for $\alpha \in \left\lbrace 0.3, \cdots, 0.7 \right\rbrace$ with an increment $\Delta_\alpha = 0.1$. For the sake of space, we only discuss the results obtained when $\alpha \in \left\lbrace 0.4, 0.5, 0.6 \right\rbrace$, which are the $\alpha$ values giving the best results. The best models out of the five experiments obtained for each of the $\alpha$ values by AMS are listed in Table \ref{table:avg_rmse_cmapss} along with their RMSE scores and sizes. As with the MNIST dataset, AMS partially evaluates at most 50 different models for each $\alpha$ value. The experiments for each $\alpha$ take about 2 minutes in our test computer.
@@ -728,6 +740,9 @@ S^+_{0.6} & = \left[ (80, 1), (80, 1), (1, 4) \right] \\
 
 \begin{table}[!htb]
 \begin{center}
+\caption{RMSE of the top 3 models for the CMAPSS dataset.}
+\label{table:avg_rmse_cmapss}
+\vspace{12pt}
 \begin{tabular}{| c | c | c | c |}
 \hline
 Model & 5-fold Avg. Score & Test RMSE & Network Size\\
@@ -738,8 +753,6 @@ $S^+_{0.6}$ & 14.78 & 15.74 & 33521\\
 \hline
 \end{tabular}
 \end{center}
-\caption{RMSE of the top 3 models for the CMAPSS dataset.}
-\label{table:avg_rmse_cmapss}
 \end{table}
 
 The results presented in Table \ref{table:avg_rmse_cmapss} further demonstrate the impact of the $\alpha$ parameter. As can be observed, the size of the networks grows as $\alpha$ is smaller. It can also be observed that the results obtained by the three proposed models in the cross-validation sets are very close to each other. Again, small networks are usually preferred.
@@ -747,6 +760,9 @@ Table \ref{table:CMAPSS_results_top} presents some of the top results obtained b
 
 \begin{table}[!htb]
 \begin{center}
+\caption{Top results for the CMAPSS dataset.}
+\label{table:CMAPSS_results_top}
+\vspace{12pt}
 \begin{tabular}{| c | c | c |}
 \hline
 Method & Test RMSE & Network Size \\
@@ -757,8 +773,6 @@ Deep MLP Ensemble \cite{Zhang2016} & 15.04 &  n/a \\
 \hline
 \end{tabular}
 \end{center}
-\caption{Top results for the CMAPSS dataset.}
-\label{table:CMAPSS_results_top}
 \end{table}
 
 The obtained models are also competitive when compared against some of the latest MLPs designed for the CMAPSS dataset as shown in Table \ref{table:CMAPSS_results_top}. We compare the score obtained in the test set for all the models. It is shown that one of the three models obtained by AMS produces a better score than the two of the three compared models, i.e. Time Window MLP and Deep MLP ensemble. Although the sizes of the neural networks obtained by AMS are one order of magnitude bigger than the hand-crafted models, we can observe that AMS delivered compact models (having few layers with few neurons in each layer).
@@ -782,8 +796,6 @@ Future work will consider more complex neural network architectures such as LSTM
 \section*{Acknowledgement}
 The authors acknowledge the funding from Conacyt Project No. 285599 and a grant (11572215) from the National Natural Science Foundation of China.
 
-\section*{References}
-
 \bibliographystyle{elsart-num}
 \bibliography{reference_model_selection}
 
@@ -793,6 +805,9 @@ The authors acknowledge the funding from Conacyt Project No. 285599 and a grant 
 
 \begin{table}[!htb]
 \begin{center}
+\caption{Common performance metrics for neural networks. $\mathbf{\hat{y}}$ represents the predicted value of the model for a sample $\mathbf{x}$. $tp$ stands for true positives count. $tn$ stands for true negatives count. $fp$ stands for false positives count. $fn$ stands for false negatives count.}
+\label{table:performance_metrics}
+\vspace{12pt}
 \begin{tabular}{| c | c | c |}
 \hline
 Inidicator name & Application & Definition\\
@@ -805,12 +820,13 @@ F1 & Classification & $F_{1} = 2 \frac{E_{P} E_{R}}{E_{P} + E_{R}}$\\
 \hline
 \end{tabular}
 \end{center}
-\caption{Common performance metrics for neural networks. $\mathbf{\hat{y}}$ represents the predicted value of the model for a sample $\mathbf{x}$. $tp$ stands for true positives count. $tn$ stands for true negatives count. $fp$ stands for false positives count. $fn$ stands for false negatives count.}
-\label{table:performance_metrics}
 \end{table}
 
 \begin{table}[!htb]
 \begin{center}
+\caption{Details of the representation of a neural network layer as an array.}
+\label{table:neural_network_array_details}
+\vspace{12pt}
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{| c | c | c | c | c |}
 \hline
@@ -827,12 +843,13 @@ Dropout rate & Float & Dropout rate applied to the layer & MLP/RNN/CNN & $x \in 
 \hline
 \end{tabular}}
 \end{center}
-\caption{Details of the representation of a neural network layer as an array.}
-\label{table:neural_network_array_details}
 \end{table}
 
 \begin{table}[!htb]
 \begin{center}
+\caption{Neural network stacking/building rules.}
+\label{table:neural_network_building_rules}
+\vspace{12pt}
 \begin{tabular}{| c | c | c |}
 \hline
 Layer type & Layer name & Can be followed by \\
@@ -845,12 +862,13 @@ Layer type & Layer name & Can be followed by \\
 \hline
 \end{tabular}
 \end{center}
-\caption{Neural network stacking/building rules.}
-\label{table:neural_network_building_rules}
 \end{table}
 
 \begin{table}[!htb]
 \begin{center}
+\caption{Available activation functions.}
+\label{table:index_to_activation_functions}
+\vspace{12pt}
 \begin{tabular}{| c | c |}
 \hline
 Index & Activation function \\
@@ -863,12 +881,13 @@ Index & Activation function \\
 \hline
 \end{tabular}
 \end{center}
-\caption{Available activation functions.}
-\label{table:index_to_activation_functions}
 \end{table}
 
 \begin{table}[!htb]
 \begin{center}
+\caption{Neural network model corresponding to $S_1$.}
+\label{table:neural_network_model_S1}
+\vspace{12pt}
 \begin{tabular}{| c | c | c | c |}
 \hline
 Layer type & Neurons & Activation Function & Dropout Ratio \\
@@ -882,12 +901,14 @@ Fully Connected & 10 & Softmax & n/a\\
 \hline
 \end{tabular}
 \end{center}
-\caption{Neural network model corresponding to $S_1$.}
-\label{table:neural_network_model_S1}
+
 \end{table}
 
 \begin{table}[!htb]
 \begin{center}
+\caption{Neural network model corresponding to $S_2$.}
+\label{table:neural_network_model_S2}
+\vspace{12pt}
 \begin{tabular}{| c | c | c | c |}
 \hline
 Layer type & Neurons & Activation Function & Dropout Ratio \\
@@ -902,12 +923,14 @@ Fully Connected & 10 & Softmax & n/a\\
 \hline
 \end{tabular}
 \end{center}
-\caption{Neural network model corresponding to $S_2$.}
-\label{table:neural_network_model_S2}
+
 \end{table}
 
 \begin{table}[!htb]
 \begin{center}
+\caption{Neural network model corresponding to $S_3$.}
+\label{table:neural_network_model_S3}
+\vspace{12pt}
 \begin{tabular}{| c | c | c | c |}
 \hline
 Layer type & Neurons & Activation Function & Dropout Ratio \\
@@ -921,8 +944,6 @@ Fully Connected & 10 & Softmax & n/a\\
 \hline
 \end{tabular}
 \end{center}
-\caption{Neural network model corresponding to $S_3$.}
-\label{table:neural_network_model_S3}
 \end{table}
 
 \pagebreak

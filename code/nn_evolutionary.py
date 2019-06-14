@@ -44,8 +44,12 @@ class Individual():
 
 		#Round up to the first 3 digits before computing log
 		rounding_scaler = 10**round_up_to
-		trainable_count = round(self._raw_size/rounding_scaler)*rounding_scaler
 
+		if self._raw_size > rounding_scaler:
+			trainable_count = round(self._raw_size/rounding_scaler)*rounding_scaler
+		else:
+			trainable_count = self._raw_size
+		
 		scaled_score = self.normalized_score
 		
 		#For classification estimate the error which is between 0 and 1
